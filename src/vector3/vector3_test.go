@@ -1,4 +1,4 @@
-package main
+package vector3
 
 import (
     "testing"
