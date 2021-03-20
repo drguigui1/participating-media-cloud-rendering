@@ -61,6 +61,14 @@ func SubVector3(v1, v2 Vector3) Vector3 {
     return InitVector3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z)
 }
 
+func MulVector3(v Vector3, val float64) Vector3 {
+    return Vector3{
+        x: v.x * val,
+        y: v.y * val,
+        z: v.z * val,
+    }
+}
+
 func DivVector3(v Vector3, val float64) Vector3 {
     return Vector3{
         x: v.x / val,
