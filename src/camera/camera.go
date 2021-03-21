@@ -4,6 +4,7 @@ import (
     "math"
 
     "volumetric-cloud/vector3"
+    "volumetric-cloud/ray"
 )
 
 type Camera struct {
@@ -67,4 +68,23 @@ func InitCamera(aspectRatio,
         RotationY: rotationY,
         RotationZ: rotationZ,
     }
+}
+
+func (c Camera) CreateRay(i, j int) ray.Ray {
+    // position on the point in the 3D world
+    var px float64 = (2.0 * (float64(i) + 0.5) / float64(c.ImgWidth) - 1.0) * math.Tan(c.FieldOfView * 0.5)
+    var py float64 = (1.0 - 2.0 * (float64(j) + 0.5) / float64(c.ImgHeight)) * math.Tan(c.FieldOfView * 0.5) * 1.0 / c.AspectRatio
+    var pz float64 = -1.0
+
+    // create the ray direction
+    rayDir := vector3.InitVector3(px, py, pz)
+    rayDir = vector3.UnitVector(rayDir)
+
+    // apply rotation to the ray
+    // simulate the camera to be anywhere
+    rayDir = vector3.MultMatVec3(c.RotationX, rayDir)
+    rayDir = vector3.MultMatVec3(c.RotationY, rayDir)
+    rayDir = vector3.MultMatVec3(c.RotationZ, rayDir)
+
+    return ray.InitRay(c.Origin, rayDir)
 }
