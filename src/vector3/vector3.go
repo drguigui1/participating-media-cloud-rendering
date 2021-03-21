@@ -5,75 +5,75 @@ import (
 )
 
 type Vector3 struct {
-    x float64
-    y float64
-    z float64
+    X float64
+    Y float64
+    Z float64
 }
 
 func InitVector3(x, y, z float64) Vector3 {
     return Vector3{
-        x: x,
-        y: y,
-        z: z,
+        X: x,
+        Y: y,
+        Z: z,
     }
 }
 
 func (v *Vector3) Add(val float64) {
-    v.x += val
-    v.y += val
-    v.z += val
+    v.X += val
+    v.Y += val
+    v.Z += val
 }
 
 func (v *Vector3) Sub(val float64) {
-    v.x -= val
-    v.y -= val
-    v.z -= val
+    v.X -= val
+    v.Y -= val
+    v.Z -= val
 }
 
 func (v *Vector3) Neg() {
-    v.x = -v.x
-    v.y = -v.y
-    v.z = -v.z
+    v.X = -v.X
+    v.Y = -v.Y
+    v.Z = -v.Z
 }
 
 func (v *Vector3) Mul(val float64) {
-    v.x *= val
-    v.y *= val
-    v.z *= val
+    v.X *= val
+    v.Y *= val
+    v.Z *= val
 }
 
 func (v *Vector3) Div(val float64) {
     // TODO (Check if val == 0)
-    v.x /= val
-    v.y /= val
-    v.z /= val
+    v.X /= val
+    v.Y /= val
+    v.Z /= val
 }
 
 func (v Vector3) Length() float64 {
-    return math.Sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
+    return math.Sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z)
 }
 
 func AddVector3(v1, v2 Vector3) Vector3 {
-    return InitVector3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z)
+    return InitVector3(v1.X + v2.X, v1.Y + v2.Y, v1.Z + v2.Z)
 }
 
 func SubVector3(v1, v2 Vector3) Vector3 {
-    return InitVector3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z)
+    return InitVector3(v1.X - v2.X, v1.Y - v2.Y, v1.Z - v2.Z)
 }
 
 func MulVector3(v Vector3, val float64) Vector3 {
     return Vector3{
-        x: v.x * val,
-        y: v.y * val,
-        z: v.z * val,
+        X: v.X * val,
+        Y: v.Y * val,
+        Z: v.Z * val,
     }
 }
 
 func DivVector3(v Vector3, val float64) Vector3 {
     return Vector3{
-        x: v.x / val,
-        y: v.y / val,
-        z: v.z / val,
+        X: v.X / val,
+        Y: v.Y / val,
+        Z: v.Z / val,
     }
 }
 
@@ -82,20 +82,20 @@ func UnitVector(v Vector3) Vector3 {
 }
 
 func DotProduct(v1, v2 Vector3) float64 {
-    return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
+    return v1.X * v2.X + v1.Y * v2.Y + v1.Z * v2.Z
 }
 
 func CrossProduct(v1, v2 Vector3) Vector3 {
-    return InitVector3(v1.y * v2.z - v1.z * v2.y,
-                       v1.z * v2.x - v1.x * v2.z,
-                       v1.x * v2.y - v1.y * v2.x)
+    return InitVector3(v1.Y * v2.Z - v1.Z * v2.Y,
+                       v1.Z * v2.X - v1.X * v2.Z,
+                       v1.X * v2.Y - v1.Y * v2.X)
 }
 
 // m: size 9 (3x3)
 func MultMatVec3(m []float64, v Vector3) Vector3 {
     return InitVector3(
-        m[0] * v.x + m[1] * v.y + m[2] * v.z,
-        m[3] * v.x + m[4] * v.y + m[5] * v.z,
-        m[6] * v.x + m[7] * v.y + m[8] * v.z,
+        m[0] * v.X + m[1] * v.Y + m[2] * v.Z,
+        m[3] * v.X + m[4] * v.Y + m[5] * v.Z,
+        m[6] * v.X + m[7] * v.Y + m[8] * v.Z,
     )
 }

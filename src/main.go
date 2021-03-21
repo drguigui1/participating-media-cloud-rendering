@@ -14,9 +14,11 @@ func main() {
     fmt.Println(ray)
     fmt.Println(vector3.InitVector3(1.0 / 14.0, 2.0 / 14.0, 3.0 / 14.0).Length())
 
-    image := img.Img{0, 0, []vector3.Vector3{}}
-    fmt.Println(image)
+    res := img.InitImg(256, 256)
+    for i := 0; i < 256 * 256; i += 1 {
+        res.Pixels[i] = vector3.InitVector3(1.0, 0.2, 0.2)
+    }
 
-    res := img.InitImg(10, 10)
-    fmt.Println(res)
+    res.SavePPM("tmp.ppm")
+
 }
