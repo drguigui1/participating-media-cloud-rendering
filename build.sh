@@ -8,7 +8,7 @@ if [ -f "go.sum" ]; then
     rm go.sum
 fi
 
-cd src/ && go mod init volumetrical-cloud && go build
+cd src/ && go mod init volumetric-cloud && go build
 
 if [ -f "go.sum" ]; then
     mv go.sum ../
@@ -18,4 +18,4 @@ if [ -f "go.mod" ]; then
     mv go.mod ../
 fi
 
-mv volumetrical-cloud ../
+mv volumetric-cloud ../
