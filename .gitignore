@@ -16,3 +16,6 @@
 
 # vim tmp files
 *.swp
+
+# binary file
+volumetric-cloud

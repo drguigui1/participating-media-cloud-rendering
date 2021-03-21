@@ -2,10 +2,12 @@ package main
 
 import (
     "fmt"
+    "math"
 
-    "volumetrical-cloud/vector3"
-    "volumetrical-cloud/ray"
-    "volumetrical-cloud/img"
+    "volumetric-cloud/vector3"
+    "volumetric-cloud/ray"
+    "volumetric-cloud/img"
+    "volumetric-cloud/camera"
 )
 
 func main() {
@@ -15,4 +17,24 @@ func main() {
 
     img := img.Img{0, 0, []vector3.Vector3{}}
     fmt.Println(img)
+
+    fmt.Println("----------")
+
+    var imgW int = 600
+    var imgH int = 500
+    aspectRatio := float64(imgW) / float64(imgH)
+    fieldOfView := math.Pi / 2.0
+    origin := vector3.InitVector3(0.0, 2.0, 0.0)
+    newCamera := camera.InitCamera(
+        aspectRatio,
+        fieldOfView,
+        imgW,
+        imgH,
+        origin,
+        -math.Pi / 4.0,
+        0.0,
+        0.0,
+    )
+
+    fmt.Println(newCamera)
 }

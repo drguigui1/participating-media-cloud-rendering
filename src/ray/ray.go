@@ -1,7 +1,7 @@
 package ray
 
 import (
-    "volumetrical-cloud/vector3"
+    "volumetric-cloud/vector3"
 )
 
 type Ray struct {

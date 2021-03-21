@@ -94,3 +94,21 @@ func TestVector3CrossProduct(t *testing.T) {
         t.Errorf("ref: %v\n", ref)
     }
 }
+
+func TestMultMatVec3(t *testing.T) {
+    v := InitVector3(1.0, 2.0, 3.0)
+    m := []float64{1.0, 4.0, 2.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0}
+
+    ref := InitVector3(15.0, 3.0, 2.0)
+    res := MultMatVec3(m, v)
+
+    if !reflect.DeepEqual(ref, res) {
+        t.Errorf("Error 'MultMatVec3'\n")
+        t.Errorf("res: %v\n", res)
+        t.Errorf("ref: %v\n", ref)
+    }
+}
+
+
+
+

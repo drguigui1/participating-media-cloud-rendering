@@ -90,3 +90,12 @@ func CrossProduct(v1, v2 Vector3) Vector3 {
                        v1.z * v2.x - v1.x * v2.z,
                        v1.x * v2.y - v1.y * v2.x)
 }
+
+// m: size 9 (3x3)
+func MultMatVec3(m []float64, v Vector3) Vector3 {
+    return InitVector3(
+        m[0] * v.x + m[1] * v.y + m[2] * v.z,
+        m[3] * v.x + m[4] * v.y + m[5] * v.z,
+        m[6] * v.x + m[7] * v.y + m[8] * v.z,
+    )
+}

@@ -4,7 +4,7 @@ import (
     "testing"
     "reflect"
 
-    "volumetrical-cloud/vector3"
+    "volumetric-cloud/vector3"
 )
 
 func TestRayAt(t *testing.T) {
