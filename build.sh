@@ -10,7 +10,7 @@ fi
 
 cd src/ && go mod init volumetric-cloud
 
-if [ $1 = "release" ]; then
+if [ "$1" = "release" ]; then
     go build -ldflags "-s -w"
 else
     go build

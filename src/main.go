@@ -5,14 +5,16 @@ import (
 
     //"volumetric-cloud/vector3"
     //"volumetric-cloud/ray"
-    "volumetric-cloud/render"
-    //"volumetric-cloud/camera"
+    "volumetric-cloud/voxel_grid"
+    "volumetric-cloud/scene"
+    "volumetric-cloud/camera"
 )
 
 func main() {
     imgSizeX := 256
     imgSizeY := 256
-    image := render.Render(imgSizeY, imgSizeX)
+    s := scene.InitScene(voxel_grid.VoxelGrid{}, camera.Camera{});
+    image := s.Render(imgSizeY, imgSizeX)
     image.SavePPM("tmp.ppm")
 
 }

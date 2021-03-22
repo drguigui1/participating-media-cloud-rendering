@@ -19,12 +19,15 @@ type Voxel struct {
 /*
 ** 3D grid of voxels
 ** 'VoxelSize': size of one voxel (one cube)
+** 'NbVoxelX': Number of lattice for the x axis: (NbVoxelsX - 1) = NbCubesX
+** 'Origin': Point shifted from the origin
 */
 type VoxelGrid struct {
     VoxelSize float64
-    nbVoxelX int
-    nbVoxelY int
-    nbVoxelZ int
+    NbVoxelX int
+    NbVoxelY int
+    NbVoxelZ int
+    Origin vector3.Vector3
 
     Voxels []Voxel
 }
@@ -37,7 +40,27 @@ func InitVoxel(density, transmitivity float64, color vector3.Vector3) Voxel {
     }
 }
 
-func InitVoxelGrid() VoxelGrid {
-    // TODO
-    return VoxelGrid{}
+func InitVoxelGrid(voxelSize float64,
+                   nbVoxelX,
+                   nbVoxelY,
+                   nbVoxelZ int,
+                   origin vector3.Vector3) VoxelGrid {
+
+    nbVoxels := nbVoxelX * nbVoxelY * nbVoxelZ
+    voxels := make([]Voxel, nbVoxels)
+
+    for i := 0; i < nbVoxels; i += 1 {
+        voxels[i] = InitVoxel(0.0, 0.0, vector3.InitVector3(200.0 / 255.0,
+                                                            100.0 / 255.0,
+                                                            20.0 / 255.0))
+    }
+
+    return VoxelGrid{
+        VoxelSize: voxelSize, // size of one voxel
+        NbVoxelX: nbVoxelX,
+        NbVoxelY: nbVoxelY,
+        NbVoxelZ: nbVoxelZ,
+        Origin: origin,
+        Voxels: voxels,
+    }
 }
