@@ -39,4 +39,5 @@ func InitVoxel(density, transmitivity float64, color vector3.Vector3) Voxel {
 
 func InitVoxelGrid() VoxelGrid {
     // TODO
+    return VoxelGrid{}
 }

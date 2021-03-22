@@ -3,30 +3,39 @@ package img
 import (
     "os"
     "fmt"
-
-    "volumetric-cloud/vector3"
+    "errors"
 )
 
 type Img struct {
     NbRows int
     NbCols int
-    Pixels []vector3.Vector3
+    Pixels []byte
 }
 
 func InitImg(nbRows, nbCols int) Img {
     return Img{
         NbRows: nbRows,
         NbCols: nbCols,
-        Pixels: make([]vector3.Vector3, nbRows * nbCols),
+        Pixels: make([]byte, nbRows * nbCols * 3),
     }
 }
 
-func (img *Img) SetPixel(i, j int, color vector3.Vector3) {
-    img.Pixels[i * img.NbCols + j] = color
+func (img *Img) SetPixel(i, j int, r, g, b byte) {
+    img.Pixels[i * img.NbCols * 3 + j * 3] = r
+    img.Pixels[i * img.NbCols * 3 + j * 3 + 1] = g
+    img.Pixels[i * img.NbCols * 3 + j * 3 + 2] = b
 }
 
-func (img Img) GetPixel(i, j int) vector3.Vector3 {
-    return img.Pixels[i * img.NbCols + j]
+func (img Img) GetPixel(i, j int) (byte, byte, byte, error) {
+    if i < 0 || i > img.NbRows ||
+       j < 0 || j > img.NbCols {
+           return 0, 0, 0, errors.New("ERROR: Wrong i or j")
+    }
+    r := img.Pixels[i * img.NbCols * 3 + j * 3]
+    g := img.Pixels[i * img.NbCols * 3 + j * 3 + 1]
+    b := img.Pixels[i * img.NbCols * 3 + j * 3 + 2]
+
+    return r, g, b, nil
 }
 
 func (img Img) SavePPM(path string) error {
@@ -46,17 +55,7 @@ func (img Img) SavePPM(path string) error {
     }
 
     // write the content
-    content := make([]byte, len(img.Pixels) * 3)
-    j := 0
-    for i := 0; i < len(img.Pixels); i += 1 {
-        v := vector3.MulVector3(img.Pixels[i], 255.0)
-        content[j] = byte(v.X)
-        content[j + 1] = byte(v.Y)
-        content[j + 2] = byte(v.Z)
-        j += 3
-    }
-
-    _, err = file.Write(content)
+    _, err = file.Write(img.Pixels)
     if err != nil {
         return err
     }
