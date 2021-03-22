@@ -1,23 +1,30 @@
 package render
 
 import (
-    "volumetric-cloud/vector3"
+    //"volumetric-cloud/vector3"
+    "volumetric-cloud/img"
+
+    "sync"
 )
 
-// data to pass through the chan
-type  PixelInfo struct {
-    I int
-    J int
-    Color vector3.Vector3
+func Render(imgSizeY, imgSizeX int) img.Img {
+    image := img.InitImg(imgSizeY, imgSizeX)
+
+    // create the wait group
+    wg := sync.WaitGroup{}
+    wg.Add(imgSizeY * imgSizeX)
+
+    for i := 0; i < imgSizeY; i += 1 {
+        for j := 0; j < imgSizeX; j += 1 {
+            go renderPixel(image, i, j, &wg)
+            //image.SetPixel(i, j, 200, 100, 20)
+        }
+    }
+
+    return image
 }
 
-// Return the color of the pixel to render
-func RenderPixel(i, j int, c chan PixelInfo, wg *sync.WaitGroup) {
-    data := PixelInfo{
-        I: i,
-        J: j,
-        Color: vector3.InitVector3(1.0, 0.2, 0.2),
-    }
-    c <- data
+func renderPixel(image img.Img, i, j int, wg *sync.WaitGroup) {
+    image.SetPixel(i, j, 200, 100, 20)
     wg.Done()
 }
