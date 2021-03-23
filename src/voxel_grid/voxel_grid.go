@@ -2,6 +2,7 @@ package voxel_grid
 
 import (
     "volumetric-cloud/vector3"
+    "volumetric-cloud/ray"
 )
 
 /*
@@ -88,8 +89,14 @@ func (vGrid VoxelGrid) IsInsideVoxelGrid(p vector3.Vector3) bool {
 
 /*
 ** Get the first point that intersect the VoxelGrid
+** Get the min_t between each planes
 */
-func (vGrid VoxelGrid) IntersectFaces() float64 {
-    // TODO
-    return 0.0
+func (vGrid VoxelGrid) IntersectFaces(ray ray.Ray) float64 {
+    minT := 0.0
+    for i := 0; i < 6; i += 1 {
+        // intersect a face
+        // update the min
+    }
+
+    return minT
 }
