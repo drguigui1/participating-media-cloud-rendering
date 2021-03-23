@@ -49,6 +49,10 @@ func (v *Vector3) Div(val float64) {
     v.Z /= val
 }
 
+func (v *Vector3) Copy() Vector3 {
+    return InitVector3(v.X, v.Y, v.Z)
+}
+
 func (v Vector3) Length() float64 {
     return math.Sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z)
 }

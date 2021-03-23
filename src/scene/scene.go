@@ -40,11 +40,21 @@ func (s Scene) Render(imgSizeY, imgSizeX int) img.Img {
 }
 
 func (s Scene) renderPixel(image img.Img, i, j int, wg *sync.WaitGroup) {
-    image.SetPixel(i, j, 200, 100, 20)
 
     // create the ray
-    // raymarch
+    ray := s.Camera.CreateRay(i, j)
+
+    // Check intersect with Voxel Grid
+    _, hasHit, color := s.VoxelGrid.IntersectFaces(ray)
+
+    // raymarch TODO
+
     // set pixel
+    if hasHit {
+        image.SetPixel(i, j, byte(color.X), byte(color.Y), byte(color.Z))
+    } else {
+        image.SetPixel(i, j, 255, 255, 255)
+    }
 
     wg.Done()
 }
