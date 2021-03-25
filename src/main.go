@@ -16,8 +16,8 @@ func main() {
 
     // Camera
     aspectRatio := float64(imgSizeX) / float64(imgSizeY)
-    fieldOfView := math.Pi / 1.5
-    origin := vector3.InitVector3(-6.0, 5.0, -5.0)
+    fieldOfView := math.Pi / 2
+    origin := vector3.InitVector3(2.0, 3.0, 3.0)
     camera := camera.InitCamera(
        aspectRatio,
        fieldOfView,
@@ -25,13 +25,13 @@ func main() {
        imgSizeY,
        origin,
        -math.Pi / 8.0,
-       -math.Pi / 1.2,
+       0.0,
        0.0,
     )
 
     // Voxel Grid
     shift := vector3.InitVector3(-1.0, 0.0, -2.0)
-    oppositeCorner := vector3.InitVector3(1.0, 2.0, -4.0)
+    oppositeCorner := vector3.InitVector3(0.6, 2.0, -6.0)
     voxelGrid := voxel_grid.InitVoxelGrid(1.0, shift, oppositeCorner)
 
     // Spheres

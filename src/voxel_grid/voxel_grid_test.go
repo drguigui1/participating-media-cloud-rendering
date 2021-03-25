@@ -157,3 +157,18 @@ func TestHit2(t *testing.T) {
         t.Errorf("Ref t: %v\n", 2.0)
     }
 }
+
+func TestIsInsideVoxelGrid3(t *testing.T) {
+    shift := vector3.InitVector3(0.0, 0.0, -4.0)
+    oppositeCorner := vector3.InitVector3(5.0, 4.0, -1.0)
+
+    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner)
+
+    p1 := vector3.InitVector3(2.5, 2.0, 0.0)
+    res := newVoxelGrid.IsInsideVoxelGrid(p1)
+    if res != false {
+        t.Errorf("Error 'TestIsInsideVoxelGrid2'")
+        t.Errorf("Res: %v\n", res)
+        t.Errorf("Ref: %v\n", false)
+    }
+}
