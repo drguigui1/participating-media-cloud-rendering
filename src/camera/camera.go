@@ -86,7 +86,5 @@ func (c Camera) CreateRay(i, j int) ray.Ray {
     rayDir = vector3.MultMatVec3(c.RotationY, rayDir)
     rayDir = vector3.MultMatVec3(c.RotationZ, rayDir)
 
-    rayDir.Display()
-
     return ray.InitRay(c.Origin, rayDir)
 }
