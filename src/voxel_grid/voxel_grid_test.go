@@ -2,7 +2,10 @@ package voxel_grid
 
 import (
     "testing"
+    "math"
+
     "volumetric-cloud/vector3"
+    "volumetric-cloud/ray"
 )
 
 func TestInitVoxelGrid1(t *testing.T) {
@@ -116,5 +119,41 @@ func TestIsInsideVoxelGrid2(t *testing.T) {
             t.Errorf("Res: %v\n", res)
             t.Errorf("Ref: %v\n", ref[idx])
         }
+    }
+}
+
+func TestHit1(t *testing.T) {
+    o := vector3.InitVector3(0.5, 0.5, 0.0)
+    d := vector3.InitVector3(0.0, 0.0, -1.0)
+    ray := ray.InitRay(o, d)
+
+    shift := vector3.InitVector3(0.0, 0.0, -2.0)
+    oppositePoint := vector3.InitVector3(1.0, 1.0, -4.0)
+    voxelGrid := InitVoxelGrid(0.5, shift, oppositePoint)
+
+    res, hasHit, _ := voxelGrid.Hit(ray)
+
+    if math.Round(res) != 2.0 || !hasHit {
+        t.Errorf("Error 'TestHit1'")
+        t.Errorf("Res t: %v\n", res)
+        t.Errorf("Ref t: %v\n", 2.0)
+    }
+}
+
+func TestHit2(t *testing.T) {
+    o := vector3.InitVector3(3.0, 0.5, -2.5)
+    d := vector3.InitVector3(-1.0, 0.0, 0.0)
+    ray := ray.InitRay(o, d)
+
+    shift := vector3.InitVector3(0.0, 0.0, -2.0)
+    oppositePoint := vector3.InitVector3(1.0, 1.0, -4.0)
+    voxelGrid := InitVoxelGrid(0.5, shift, oppositePoint)
+
+    res, hasHit, _ := voxelGrid.Hit(ray)
+
+    if math.Round(res) != 2.0 || !hasHit {
+        t.Errorf("Error 'TestHit2'")
+        t.Errorf("Res t: %v\n", res)
+        t.Errorf("Ref t: %v\n", 2.0)
     }
 }

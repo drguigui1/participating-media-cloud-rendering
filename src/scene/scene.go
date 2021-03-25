@@ -47,39 +47,39 @@ func (s Scene) renderPixelNoGoroutine(image img.Img, i, j int) {
 
     // create the ray
     // need first column index (j) and then row index (i)
-    ray := s.Camera.CreateRay(j, i)
+    //ray := s.Camera.CreateRay(j, i)
 
     // Check intersect with Voxel Grid
-    _, hasHit, color := s.VoxelGrid.IntersectFaces(ray, i, j)
-    //_, _, hasHit := s.Sphere.Hit(ray)
+    //_, hasHit, color := s.VoxelGrid.IntersectFaces(ray, i, j)
+    ////_, _, hasHit := s.Sphere.Hit(ray)
 
-    // raymarch TODO
+    //// raymarch TODO
 
-    // set pixel
-    if hasHit {
-        //image.SetPixel(i, j, 255, 111, 0)
-        image.SetPixel(i, j, byte(color.X), byte(color.Y), byte(color.Z))
-    } else {
-        image.SetPixel(i, j, 255, 255, 255)
-    }
+    //// set pixel
+    //if hasHit {
+    //    //image.SetPixel(i, j, 255, 111, 0)
+    //    image.SetPixel(i, j, byte(color.X), byte(color.Y), byte(color.Z))
+    //} else {
+    //    image.SetPixel(i, j, 255, 255, 255)
+    //}
 }
 
 func (s Scene) renderPixel(image img.Img, i, j int, wg *sync.WaitGroup) {
 
     // create the ray
-    ray := s.Camera.CreateRay(i, j)
+//    ray := s.Camera.CreateRay(i, j)
 
     // Check intersect with Voxel Grid
-    _, hasHit, color := s.VoxelGrid.IntersectFaces(ray, i, j)
+    //_, hasHit, color := s.VoxelGrid.IntersectFaces(ray, i, j)
 
     // raymarch TODO
 
     // set pixel
-    if hasHit {
-        image.SetPixel(i, j, byte(color.X), byte(color.Y), byte(color.Z))
-    } else {
-        image.SetPixel(i, j, 255, 255, 255)
-    }
-
-    wg.Done()
+//    if hasHit {
+//        image.SetPixel(i, j, byte(color.X), byte(color.Y), byte(color.Z))
+//    } else {
+//        image.SetPixel(i, j, 255, 255, 255)
+//    }
+//
+//    wg.Done()
 }

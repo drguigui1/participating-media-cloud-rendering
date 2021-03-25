@@ -1,13 +1,10 @@
 package voxel_grid
 
 import (
-//    "fmt"
-//    "os"
     "math"
 
     "volumetric-cloud/vector3"
     "volumetric-cloud/ray"
-    "volumetric-cloud/plane"
 )
 
 /*
@@ -102,91 +99,167 @@ func (vGrid VoxelGrid) IsInsideVoxelGrid(p vector3.Vector3) bool {
     return true
 }
 
+// AABB cube intersection
+func (vGrid VoxelGrid) Hit(ray ray.Ray) (float64, bool, vector3.Vector3) {
+    // compute tmin and tmax for x component
+    // check where the plane intersect planes made by x component of both points
+    // tmin: intersection with the clothest x plane (between both point)
+
+    tmin := (vGrid.Shift.X - ray.Origin.X) / ray.Direction.X
+    tmax := (vGrid.OppositeCorner.X - ray.Origin.X) / ray.Direction.X
+
+    if tmin > tmax {
+        tmin, tmax = tmax, tmin // swap values
+    }
+
+    tymin := (vGrid.Shift.Y - ray.Origin.Y) / ray.Direction.Y
+    tymax := (vGrid.OppositeCorner.Y - ray.Origin.Y) / ray.Direction.Y
+
+    if tymin > tymax {
+        tymin, tymax = tymax, tymin
+    }
+
+    // the ray does not hit the cube
+    if tmin > tymax || tymin > tmax {
+        return 0.0, false, vector3.Vector3{}
+    }
+
+    if tymin > tmin {
+        tmin = tymin
+    }
+
+    if tymax < tmax {
+        tmax = tymax
+    }
+
+    tzmin := (vGrid.Shift.Z - ray.Origin.Z) / ray.Direction.Z
+    tzmax := (vGrid.OppositeCorner.Z - ray.Origin.Z) / ray.Direction.Z
+
+    if tzmin > tzmax {
+        tzmin, tzmax = tzmax, tzmin
+    }
+
+    if tmin > tzmax || tzmin > tmax {
+        return 0.0, false, vector3.Vector3{}
+    }
+
+    if tzmin > tmin {
+        tmin = tzmin
+    }
+
+    if tzmax < tmax {
+        tmax = tzmax
+    }
+
+    if tmin < 0 {
+        return 0.0, false, vector3.Vector3{}
+    }
+
+    p := ray.RayAt(tmin)
+
+    var color vector3.Vector3
+    if Round4(p.X) == vGrid.Shift.X {
+        color = vector3.InitVector3(255, 0, 0)
+    } else if Round4(p.X) == vGrid.OppositeCorner.X {
+        color = vector3.InitVector3(255, 255, 0)
+    } else if Round4(p.Y) == vGrid.Shift.Y {
+        color = vector3.InitVector3(255, 0, 255)
+    } else if Round4(p.Y) == vGrid.OppositeCorner.Y {
+        color = vector3.InitVector3(0, 0, 255)
+    } else if Round4(p.Z) == vGrid.Shift.Z {
+        color = vector3.InitVector3(0, 255, 0)
+    } else if Round4(p.Z) == vGrid.OppositeCorner.Z {
+        color = vector3.InitVector3(100, 100, 100)
+    }
+
+    return tmin, true, color
+}
+
 /*
 ** Get the first point that intersect the VoxelGrid
 */
-func (vGrid VoxelGrid) IntersectFaces(ray ray.Ray, i, j int) (float64, bool, vector3.Vector3) {
-    edgeSizeX := vGrid.VoxelSize * float64(vGrid.NbVerticeX - 1)
-    edgeSizeY := vGrid.VoxelSize * float64(vGrid.NbVerticeY - 1)
-    edgeSizeZ := vGrid.VoxelSize * float64(vGrid.NbVerticeZ - 1)
-
-    normals := []vector3.Vector3{
-        vector3.InitVector3(0.0, 0.0, -1.0),
-        vector3.InitVector3(0.0, 0.0, 1.0),
-        vector3.InitVector3(-1.0, 0.0, 0.0),
-        vector3.InitVector3(1.0, 0.0, 0.0),
-        vector3.InitVector3(0.0, 1.0, 0.0),
-        vector3.InitVector3(0.0, -1.0, 0.0),
-    }
-
-    points := [][]vector3.Vector3{
-        { // perpendicular to z
-            vGrid.Shift.Copy(),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z),
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX * 0.5, vGrid.Shift.Y + edgeSizeY * 0.5, vGrid.Shift.Z), // center
-        },
-        { // perpendicular to z
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX * 0.5, vGrid.Shift.Y + edgeSizeY * 0.5, vGrid.Shift.Z + edgeSizeZ), // center
-        },
-        { // perpendicular to x
-            vGrid.Shift.Copy(),
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY * 0.5, vGrid.Shift.Z + edgeSizeZ * 0.5), // center
-        },
-        { // perpendicular to x
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y + edgeSizeY * 0.5, vGrid.Shift.Z + edgeSizeZ * 0.5), // center
-        },
-        { // perpendicular to y
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX * 0.5, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ * 0.5), // center
-        },
-        { // perpendicular to y
-            vGrid.Shift.Copy(),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX * 0.5, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ * 0.5), // center
-        },
-    }
-
-    colors := []vector3.Vector3{
-        vector3.InitVector3(200, 100, 10), // orange
-        vector3.InitVector3(100, 200, 10), // green
-        vector3.InitVector3(100, 100, 100), // grey
-        vector3.InitVector3(10, 100, 100), // blue
-        vector3.InitVector3(0, 0, 0), // black
-        vector3.InitVector3(200, 11, 168), // purple
-    }
-
-    var t float64 = 0.0
-    var hasHit bool = false
-    var finalColor vector3.Vector3
-
-    for i := 0; i < 6; i += 1 {
-        // create plane object
-        plane := plane.InitPlane(normals[i], colors[i], points[i][0], points[i][1], points[i][2], points[i][3])
-
-        // intersect a face
-        t, hasHit = plane.Hit(ray)
-
-        if hasHit {
-            //fmt.Println(i)
-            //fmt.Println(j)
-            //os.Exit(1)
-
-            finalColor = colors[i]
-            break
-        }
-    }
-
-    return t, hasHit, finalColor
-}
+//func (vGrid VoxelGrid) IntersectFaces(ray ray.Ray, i, j int) (float64, bool, vector3.Vector3) {
+//    edgeSizeX := vGrid.VoxelSize * float64(vGrid.NbVerticeX - 1)
+//    edgeSizeY := vGrid.VoxelSize * float64(vGrid.NbVerticeY - 1)
+//    edgeSizeZ := vGrid.VoxelSize * float64(vGrid.NbVerticeZ - 1)
+//
+//    normals := []vector3.Vector3{
+//        vector3.InitVector3(0.0, 0.0, -1.0),
+//        vector3.InitVector3(0.0, 0.0, 1.0),
+//        vector3.InitVector3(-1.0, 0.0, 0.0),
+//        vector3.InitVector3(1.0, 0.0, 0.0),
+//        vector3.InitVector3(0.0, 1.0, 0.0),
+//        vector3.InitVector3(0.0, -1.0, 0.0),
+//    }
+//
+//    points := [][]vector3.Vector3{
+//        { // perpendicular to z
+//            vGrid.Shift.Copy(),
+//            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z),
+//            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
+//            vector3.InitVector3(vGrid.Shift.X + edgeSizeX * 0.5, vGrid.Shift.Y + edgeSizeY * 0.5, vGrid.Shift.Z), // center
+//        },
+//        { // perpendicular to z
+//            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
+//            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
+//            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ),
+//            vector3.InitVector3(vGrid.Shift.X + edgeSizeX * 0.5, vGrid.Shift.Y + edgeSizeY * 0.5, vGrid.Shift.Z + edgeSizeZ), // center
+//        },
+//        { // perpendicular to x
+//            vGrid.Shift.Copy(),
+//            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
+//            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
+//            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY * 0.5, vGrid.Shift.Z + edgeSizeZ * 0.5), // center
+//        },
+//        { // perpendicular to x
+//            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z),
+//            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
+//            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
+//            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y + edgeSizeY * 0.5, vGrid.Shift.Z + edgeSizeZ * 0.5), // center
+//        },
+//        { // perpendicular to y
+//            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
+//            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ),
+//            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ),
+//            vector3.InitVector3(vGrid.Shift.X + edgeSizeX * 0.5, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ * 0.5), // center
+//        },
+//        { // perpendicular to y
+//            vGrid.Shift.Copy(),
+//            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z),
+//            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
+//            vector3.InitVector3(vGrid.Shift.X + edgeSizeX * 0.5, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ * 0.5), // center
+//        },
+//    }
+//
+//    colors := []vector3.Vector3{
+//        vector3.InitVector3(200, 100, 10), // orange
+//        vector3.InitVector3(100, 200, 10), // green
+//        vector3.InitVector3(100, 100, 100), // grey
+//        vector3.InitVector3(10, 100, 100), // blue
+//        vector3.InitVector3(0, 0, 0), // black
+//        vector3.InitVector3(200, 11, 168), // purple
+//    }
+//
+//    var t float64 = 0.0
+//    var hasHit bool = false
+//    var finalColor vector3.Vector3
+//
+//    for i := 0; i < 6; i += 1 {
+//        // create plane object
+//        plane := plane.InitPlane(normals[i], colors[i], points[i][0], points[i][1], points[i][2], points[i][3])
+//
+//        // intersect a face
+//        t, hasHit = plane.Hit(ray)
+//
+//        if hasHit {
+//            //fmt.Println(i)
+//            //fmt.Println(j)
+//            //os.Exit(1)
+//
+//            finalColor = colors[i]
+//            break
+//        }
+//    }
+//
+//    return t, hasHit, finalColor
+//}
