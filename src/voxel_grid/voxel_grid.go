@@ -174,3 +174,7 @@ func (vGrid VoxelGrid) Hit(ray ray.Ray) (float64, bool, vector3.Vector3) {
 
     return tmin, true, color
 }
+
+func (voxelGrid *VoxelGrid) ComputeInsideTransmitance() {
+    // TODO
+}

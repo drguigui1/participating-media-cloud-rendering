@@ -6,6 +6,7 @@ import (
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/scene"
     "volumetric-cloud/sphere"
+    "volumetric-cloud/light"
     "volumetric-cloud/camera"
     "volumetric-cloud/vector3"
 )
@@ -37,8 +38,11 @@ func main() {
     // Spheres
     sphere := sphere.InitSphere(vector3.InitVector3(0, 0, -2), 1.0)
 
+    // Lights
+    light := light.InitLight(vector3.InitVector3(0.0, 5.0, 0.0), vector3.InitVector3(100.0 / 255.0, 100.0 / 255.0, 100.0 / 255.0))
+
     // Scene
-    s := scene.InitScene(voxelGrid, sphere, camera);
+    s := scene.InitScene(voxelGrid, sphere, camera, light);
 
     // Render
     image := s.Render(imgSizeY, imgSizeX)

@@ -6,6 +6,9 @@ import (
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/camera"
     "volumetric-cloud/sphere"
+    "volumetric-cloud/light"
+    "volumetric-cloud/ray"
+    "volumetric-cloud/vector3"
 
     "sync"
 )
@@ -15,13 +18,18 @@ type Scene struct {
     VoxelGrid voxel_grid.VoxelGrid
     Sphere sphere.Sphere
     Camera camera.Camera
+    Light light.Light
 }
 
-func InitScene(voxelGrid voxel_grid.VoxelGrid, sphere sphere.Sphere, camera camera.Camera) Scene {
+func InitScene(voxelGrid voxel_grid.VoxelGrid,
+               sphere sphere.Sphere,
+               camera camera.Camera,
+               light light.Light) Scene {
     return Scene{
         VoxelGrid: voxelGrid,
         Sphere: sphere,
         Camera: camera,
+        Light: light,
     }
 }
 
@@ -50,16 +58,18 @@ func (s Scene) renderPixelNoGoroutine(image img.Img, i, j int) {
 
     // Check intersect with Voxel Grid
     _, hasHit, color := s.VoxelGrid.Hit(ray)
-    ////_, _, hasHit := s.Sphere.Hit(ray)
+    //_, _, hasHit := s.Sphere.Hit(ray)
 
-    //// raymarch TODO
+    // raymarch TODO
 
-    //// set pixel
+    // set pixel
     if hasHit {
         //image.SetPixel(i, j, 255, 111, 0)
         image.SetPixel(i, j, byte(color.X), byte(color.Y), byte(color.Z))
     } else {
-        image.SetPixel(i, j, 255, 255, 255)
+        // gradient case
+        color := s.RenderGradient(ray)
+        image.SetPixel(i, j, byte(color.X * 255.0), byte(color.Y * 255), byte(color.Z * 255))
     }
 }
 
@@ -81,4 +91,11 @@ func (s Scene) renderPixel(image img.Img, i, j int, wg *sync.WaitGroup) {
 //    }
 //
 //    wg.Done()
+}
+
+func (s Scene) RenderGradient(ray ray.Ray) vector3.Vector3 {
+    dir := vector3.UnitVector(ray.Direction);
+    tmp := 0.5 * (dir.Y + 1.0);
+    tmp2 := 1.0 - tmp
+    return vector3.AddVector3(vector3.InitVector3(1.0 * tmp2, 1.0 * tmp2, 1.0 * tmp2), vector3.InitVector3(0.35 * tmp, 0.76 * tmp, 0.75 * tmp))
 }
