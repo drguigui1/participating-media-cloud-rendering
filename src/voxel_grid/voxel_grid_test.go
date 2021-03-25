@@ -5,10 +5,69 @@ import (
     "volumetric-cloud/vector3"
 )
 
+func TestInitVoxelGrid1(t *testing.T) {
+    voxelGrid := InitVoxelGrid(1.0,
+                  vector3.InitVector3(0.0, 0.0, -1.0),
+                  vector3.InitVector3(5.0, 4.0, -4.0))
+
+    refNbVerticesX := 6
+    refNbVerticesY := 5
+    refNbVerticesZ := 4
+
+    if voxelGrid.NbVerticeX != refNbVerticesX {
+        t.Errorf("Error 'TestInitVoxelGrid' nbVerticesX")
+        t.Errorf("Res: %v\n", voxelGrid.NbVerticeX)
+        t.Errorf("Ref: %v\n", refNbVerticesX)
+    }
+
+    if voxelGrid.NbVerticeY != refNbVerticesY {
+        t.Errorf("Error 'TestInitVoxelGrid' nbVerticesY")
+        t.Errorf("Res: %v\n", voxelGrid.NbVerticeY)
+        t.Errorf("Ref: %v\n", refNbVerticesY)
+    }
+
+    if voxelGrid.NbVerticeZ != refNbVerticesZ {
+        t.Errorf("Error 'TestInitVoxelGrid' nbVerticesZ")
+        t.Errorf("Res: %v\n", voxelGrid.NbVerticeZ)
+        t.Errorf("Ref: %v\n", refNbVerticesZ)
+    }
+}
+
+func TestInitVoxelGrid2(t *testing.T) {
+    voxelGrid := InitVoxelGrid(1.0,
+                  vector3.InitVector3(0.0, 0.0, -1.0),
+                  vector3.InitVector3(-5.0, 4.0, -4.0))
+
+    refNbVerticesX := 6
+    refNbVerticesY := 5
+    refNbVerticesZ := 4
+
+    if voxelGrid.NbVerticeX != refNbVerticesX {
+        t.Errorf("Error 'TestInitVoxelGrid' nbVerticesX")
+        t.Errorf("Res: %v\n", voxelGrid.NbVerticeX)
+        t.Errorf("Ref: %v\n", refNbVerticesX)
+    }
+
+    if voxelGrid.NbVerticeY != refNbVerticesY {
+        t.Errorf("Error 'TestInitVoxelGrid' nbVerticesY")
+        t.Errorf("Res: %v\n", voxelGrid.NbVerticeY)
+        t.Errorf("Ref: %v\n", refNbVerticesY)
+    }
+
+    if voxelGrid.NbVerticeZ != refNbVerticesZ {
+        t.Errorf("Error 'TestInitVoxelGrid' nbVerticesZ")
+        t.Errorf("Res: %v\n", voxelGrid.NbVerticeZ)
+        t.Errorf("Ref: %v\n", refNbVerticesZ)
+    }
+}
+
+
+
 func TestIsInsideVoxelGrid1(t *testing.T) {
     shift := vector3.InitVector3(0.0, 0.0, 0.0)
+    oppositeCorner := vector3.InitVector3(3.0, 3.0, 3.0)
 
-    newVoxelGrid := InitVoxelGrid(0.5, 5, 5, 5, shift)
+    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner)
 
     p1 := vector3.InitVector3(0.5, 0.5, 0.5)
     p2 := vector3.InitVector3(0.6, 0.5, 0.5)
@@ -23,7 +82,7 @@ func TestIsInsideVoxelGrid1(t *testing.T) {
     for _, elm := range tests {
         res := newVoxelGrid.IsInsideVoxelGrid(elm)
         if res != true {
-            t.Errorf("Error 'TestIsInsideVoxelGrid'")
+            t.Errorf("Error 'TestIsInsideVoxelGrid1'")
             t.Errorf("Res: %v\n", res)
             t.Errorf("Ref: %v\n", true)
         }
@@ -32,8 +91,9 @@ func TestIsInsideVoxelGrid1(t *testing.T) {
 
 func TestIsInsideVoxelGrid2(t *testing.T) {
     shift := vector3.InitVector3(1.0, 1.0, 1.0)
+    oppositeCorner := vector3.InitVector3(3.0, 3.0, 3.0)
 
-    newVoxelGrid := InitVoxelGrid(0.5, 5, 5, 5, shift)
+    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner)
 
     p1 := vector3.InitVector3(0.5, 0.5, 0.5)
     p2 := vector3.InitVector3(0.6, 0.5, 2.5)
@@ -52,7 +112,7 @@ func TestIsInsideVoxelGrid2(t *testing.T) {
     for idx, elm := range tests {
         res := newVoxelGrid.IsInsideVoxelGrid(elm)
         if res != ref[idx] {
-            t.Errorf("Error 'TestIsInsideVoxelGrid'")
+            t.Errorf("Error 'TestIsInsideVoxelGrid2' idx: %v", idx)
             t.Errorf("Res: %v\n", res)
             t.Errorf("Ref: %v\n", ref[idx])
         }

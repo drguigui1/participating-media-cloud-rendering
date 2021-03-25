@@ -1,6 +1,10 @@
 package voxel_grid
 
 import (
+//    "fmt"
+//    "os"
+    "math"
+
     "volumetric-cloud/vector3"
     "volumetric-cloud/ray"
     "volumetric-cloud/plane"
@@ -31,6 +35,7 @@ type VoxelGrid struct {
     NbVerticeZ int
 
     Shift vector3.Vector3
+    OppositeCorner vector3.Vector3
     Voxels []Voxel
 }
 
@@ -43,16 +48,24 @@ func InitVoxel(density, transmitivity float64, color vector3.Vector3) Voxel {
 }
 
 func InitVoxelGrid(voxelSize float64,
-                   nbVerticeX,
-                   nbVerticeY,
-                   nbVerticeZ int,
-                   shift vector3.Vector3) VoxelGrid {
+                   shift vector3.Vector3,
+                   oppositeCorner vector3.Vector3) VoxelGrid {
+
+    distX := math.Abs(shift.X - oppositeCorner.X)
+    distY := math.Abs(shift.Y - oppositeCorner.Y)
+    distZ := math.Abs(shift.Z - oppositeCorner.Z)
+
+    // compute number of VerticeX / VerticeY / VerticeZ
+    var nbVerticeX int = int(distX / voxelSize) + 1
+    var nbVerticeY int = int(distY / voxelSize) + 1
+    var nbVerticeZ int = int(distZ / voxelSize) + 1
 
     nbVertices := nbVerticeX * nbVerticeY * nbVerticeZ
     voxels := make([]Voxel, nbVertices)
 
     // Init voxels
     for i := 0; i < nbVertices; i += 1 {
+        // to change TODO
         voxels[i] = InitVoxel(0.0, 0.0, vector3.InitVector3(200.0 / 255.0,
                                                             100.0 / 255.0,
                                                             20.0 / 255.0))
@@ -64,6 +77,7 @@ func InitVoxelGrid(voxelSize float64,
         NbVerticeY: nbVerticeY,
         NbVerticeZ: nbVerticeZ,
         Shift: shift,
+        OppositeCorner: oppositeCorner,
         Voxels: voxels,
     }
 }
@@ -91,7 +105,7 @@ func (vGrid VoxelGrid) IsInsideVoxelGrid(p vector3.Vector3) bool {
 /*
 ** Get the first point that intersect the VoxelGrid
 */
-func (vGrid VoxelGrid) IntersectFaces(ray ray.Ray) (float64, bool, vector3.Vector3) {
+func (vGrid VoxelGrid) IntersectFaces(ray ray.Ray, i, j int) (float64, bool, vector3.Vector3) {
     edgeSizeX := vGrid.VoxelSize * float64(vGrid.NbVerticeX - 1)
     edgeSizeY := vGrid.VoxelSize * float64(vGrid.NbVerticeY - 1)
     edgeSizeZ := vGrid.VoxelSize * float64(vGrid.NbVerticeZ - 1)
@@ -110,31 +124,37 @@ func (vGrid VoxelGrid) IntersectFaces(ray ray.Ray) (float64, bool, vector3.Vecto
             vGrid.Shift.Copy(),
             vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z),
             vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
+            vector3.InitVector3(vGrid.Shift.X + edgeSizeX * 0.5, vGrid.Shift.Y + edgeSizeY * 0.5, vGrid.Shift.Z), // center
         },
         { // perpendicular to z
             vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
             vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
             vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ),
+            vector3.InitVector3(vGrid.Shift.X + edgeSizeX * 0.5, vGrid.Shift.Y + edgeSizeY * 0.5, vGrid.Shift.Z + edgeSizeZ), // center
         },
         { // perpendicular to x
             vGrid.Shift.Copy(),
             vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
             vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
+            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY * 0.5, vGrid.Shift.Z + edgeSizeZ * 0.5), // center
         },
         { // perpendicular to x
             vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z),
             vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
             vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
+            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y + edgeSizeY * 0.5, vGrid.Shift.Z + edgeSizeZ * 0.5), // center
         },
         { // perpendicular to y
             vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
             vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ),
             vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ),
+            vector3.InitVector3(vGrid.Shift.X + edgeSizeX * 0.5, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ * 0.5), // center
         },
         { // perpendicular to y
             vGrid.Shift.Copy(),
             vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z),
             vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
+            vector3.InitVector3(vGrid.Shift.X + edgeSizeX * 0.5, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ * 0.5), // center
         },
     }
 
@@ -153,12 +173,16 @@ func (vGrid VoxelGrid) IntersectFaces(ray ray.Ray) (float64, bool, vector3.Vecto
 
     for i := 0; i < 6; i += 1 {
         // create plane object
-        plane := plane.InitPlane(normals[i], colors[i], points[i][0], points[i][1], points[i][2])
+        plane := plane.InitPlane(normals[i], colors[i], points[i][0], points[i][1], points[i][2], points[i][3])
 
         // intersect a face
         t, hasHit = plane.Hit(ray)
 
         if hasHit {
+            //fmt.Println(i)
+            //fmt.Println(j)
+            //os.Exit(1)
+
             finalColor = colors[i]
             break
         }

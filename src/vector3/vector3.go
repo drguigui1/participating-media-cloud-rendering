@@ -2,6 +2,7 @@ package vector3
 
 import (
     "math"
+    "fmt"
 )
 
 type Vector3 struct {
@@ -16,6 +17,14 @@ func InitVector3(x, y, z float64) Vector3 {
         Y: y,
         Z: z,
     }
+}
+
+func (v *Vector3) Display() {
+    fmt.Println("Vector3")
+    fmt.Println("x: ", v.X)
+    fmt.Println("y: ", v.Y)
+    fmt.Println("z: ", v.Z)
+    fmt.Println("")
 }
 
 func (v *Vector3) Add(val float64) {
@@ -79,6 +88,10 @@ func DivVector3(v Vector3, val float64) Vector3 {
         Y: v.Y / val,
         Z: v.Z / val,
     }
+}
+
+func NegVector3(v Vector3) Vector3 {
+    return InitVector3(-v.X, -v.Y, -v.Z)
 }
 
 func UnitVector(v Vector3) Vector3 {

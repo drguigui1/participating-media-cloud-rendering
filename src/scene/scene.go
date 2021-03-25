@@ -5,6 +5,7 @@ import (
     "volumetric-cloud/img"
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/camera"
+    "volumetric-cloud/sphere"
 
     "sync"
 )
@@ -12,12 +13,14 @@ import (
 type Scene struct {
     // TODO change to many VoxelGrid
     VoxelGrid voxel_grid.VoxelGrid
+    Sphere sphere.Sphere
     Camera camera.Camera
 }
 
-func InitScene(voxelGrid voxel_grid.VoxelGrid, camera camera.Camera) Scene {
+func InitScene(voxelGrid voxel_grid.VoxelGrid, sphere sphere.Sphere, camera camera.Camera) Scene {
     return Scene{
         VoxelGrid: voxelGrid,
+        Sphere: sphere,
         Camera: camera,
     }
 }
@@ -31,12 +34,34 @@ func (s Scene) Render(imgSizeY, imgSizeX int) img.Img {
 
     for i := 0; i < imgSizeY; i += 1 {
         for j := 0; j < imgSizeX; j += 1 {
-            go s.renderPixel(image, i, j, &wg)
+            //go s.renderPixel(image, i, j, &wg)
+            s.renderPixelNoGoroutine(image, i, j)
             //image.SetPixel(i, j, 200, 100, 20)
         }
     }
 
     return image
+}
+
+func (s Scene) renderPixelNoGoroutine(image img.Img, i, j int) {
+
+    // create the ray
+    // need first column index (j) and then row index (i)
+    ray := s.Camera.CreateRay(j, i)
+
+    // Check intersect with Voxel Grid
+    _, hasHit, color := s.VoxelGrid.IntersectFaces(ray, i, j)
+    //_, _, hasHit := s.Sphere.Hit(ray)
+
+    // raymarch TODO
+
+    // set pixel
+    if hasHit {
+        //image.SetPixel(i, j, 255, 111, 0)
+        image.SetPixel(i, j, byte(color.X), byte(color.Y), byte(color.Z))
+    } else {
+        image.SetPixel(i, j, 255, 255, 255)
+    }
 }
 
 func (s Scene) renderPixel(image img.Img, i, j int, wg *sync.WaitGroup) {
@@ -45,7 +70,7 @@ func (s Scene) renderPixel(image img.Img, i, j int, wg *sync.WaitGroup) {
     ray := s.Camera.CreateRay(i, j)
 
     // Check intersect with Voxel Grid
-    _, hasHit, color := s.VoxelGrid.IntersectFaces(ray)
+    _, hasHit, color := s.VoxelGrid.IntersectFaces(ray, i, j)
 
     // raymarch TODO
 
