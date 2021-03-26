@@ -2,6 +2,7 @@ package voxel_grid
 
 import (
     "testing"
+    "reflect"
     "math"
 
     "volumetric-cloud/vector3"
@@ -170,5 +171,90 @@ func TestIsInsideVoxelGrid3(t *testing.T) {
         t.Errorf("Error 'TestIsInsideVoxelGrid2'")
         t.Errorf("Res: %v\n", res)
         t.Errorf("Ref: %v\n", false)
+    }
+}
+
+func TestRayMarchVoxelGrid(t *testing.T) {
+    voxelGrid := InitVoxelGrid(1.0,
+                               vector3.InitVector3(0.0, 0.0, -4.0),
+                               vector3.InitVector3(5.0, 4.0, -1.0))
+
+
+    origin := vector3.InitVector3(2.5, 2.0, 0.0)
+    dir := vector3.InitVector3(0.0, 0.0, -1.0)
+    ray := ray.InitRay(origin, dir)
+
+    points, hasHit := voxelGrid.RayMarch(ray, 0.5)
+    //fmt.Println(points)
+    if !hasHit {
+        t.Errorf("Error 'TestRayMarchVoxelGrid '")
+        t.Errorf("res: %v\n", hasHit)
+        t.Errorf("ref: %v\n", true)
+    }
+    m := []vector3.Vector3{
+        vector3.InitVector3(2.5, 2, -1.001),
+        vector3.InitVector3(2.5, 2, -1.501),
+        vector3.InitVector3(2.5, 2, -2.001),
+        vector3.InitVector3(2.5, 2, -2.501),
+        vector3.InitVector3(2.5, 2, -3.001),
+        vector3.InitVector3(2.5, 2, -3.501),
+        vector3.InitVector3(2.5, 2, -4.001),
+    }
+    //fmt.Println(m)
+    for i := 0; i < len(points); i+=1 {
+        if !reflect.DeepEqual(points[i], m[i]) {
+            t.Errorf("Error 'TestRayMarchVoxelGrid '")
+            t.Errorf("res: %v\n", points[i])
+            t.Errorf("ref: %v\n", m[i])
+        }
+    }
+}
+
+func TestGetWorldPosition1(t *testing.T) {
+    // init the voxel grid for the test
+    voxelGrid := InitVoxelGrid(1.0,
+                               vector3.InitVector3(0.0, 0.0, -4.0),
+                               vector3.InitVector3(5.0, 4.0, -1.0))
+
+    res := voxelGrid.GetWorldPosition(vector3.InitVector3(0, 0, 0))
+
+    if !reflect.DeepEqual(res, voxelGrid.Shift) {
+        t.Errorf("Error 'TestGetWorldPosition1'")
+        t.Errorf("Res: %v\n", res)
+        t.Errorf("Ref: %v\n", voxelGrid.Shift)
+    }
+}
+
+func TestGetWorldPosition2(t *testing.T) {
+    // init the voxel grid for the test
+    voxelGrid := InitVoxelGrid(1.0,
+                               vector3.InitVector3(0.0, 0.0, -4.0),
+                               vector3.InitVector3(5.0, 4.0, -1.0))
+
+    res := voxelGrid.GetWorldPosition(vector3.InitVector3(0, 0, 1))
+    ref := vector3.InitVector3(voxelGrid.Shift.X, voxelGrid.Shift.Y, voxelGrid.Shift.Z + voxelGrid.VoxelSize)
+
+    if !reflect.DeepEqual(res, ref) {
+        t.Errorf("Error 'TestGetWorldPosition2'")
+        t.Errorf("Res: %v\n", res)
+        t.Errorf("Ref: %v\n", ref)
+    }
+}
+
+func TestGetWorldPosition3(t *testing.T) {
+    // init the voxel grid for the test
+    voxelGrid := InitVoxelGrid(1.0,
+                               vector3.InitVector3(0.0, 0.0, -4.0),
+                               vector3.InitVector3(5.0, 4.0, -1.0))
+
+    res := voxelGrid.GetWorldPosition(vector3.InitVector3(3, 2, 1))
+    ref := vector3.InitVector3(voxelGrid.Shift.X + 3 * voxelGrid.VoxelSize,
+                               voxelGrid.Shift.Y + 2 * voxelGrid.VoxelSize,
+                               voxelGrid.Shift.Z + voxelGrid.VoxelSize)
+
+    if !reflect.DeepEqual(res, ref) {
+        t.Errorf("Error 'TestGetWorldPosition3'")
+        t.Errorf("Res: %v\n", res)
+        t.Errorf("Ref: %v\n", ref)
     }
 }

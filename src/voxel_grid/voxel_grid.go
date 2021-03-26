@@ -3,6 +3,7 @@ package voxel_grid
 import (
     "math"
 
+ //   "volumetric-cloud/light"
     "volumetric-cloud/vector3"
     "volumetric-cloud/ray"
 )
@@ -85,6 +86,17 @@ func (vGrid VoxelGrid) ShiftToVoxelCoordinates(p vector3.Vector3) vector3.Vector
 
 func (vGrid VoxelGrid) ShiftToWorldCoordinates(voxelCoordinatePoint vector3.Vector3) vector3.Vector3 {
     return vector3.AddVector3(voxelCoordinatePoint, vGrid.Shift)
+}
+
+// Get the position in the world coordinate system of the input coordinates of the voxel grid
+// ex:
+// input 0,0,0 (first vertice of the voxelGrid)
+// 1) (0,0,0) * voxelSize -> (0,0,0)
+// 2) (0,0,0) + shift
+// -> the output will be the shift
+func (vGrid VoxelGrid) GetWorldPosition(v vector3.Vector3) vector3.Vector3 {
+    res := vector3.MulVector3(v, vGrid.VoxelSize)
+    return vGrid.ShiftToWorldCoordinates(res) // shift the points to real world coordinates
 }
 
 func (vGrid VoxelGrid) IsInsideVoxelGrid(p vector3.Vector3) bool {
@@ -175,6 +187,44 @@ func (vGrid VoxelGrid) Hit(ray ray.Ray) (float64, bool, vector3.Vector3) {
     return tmin, true, color
 }
 
-func (voxelGrid *VoxelGrid) ComputeInsideTransmitance() {
-    // TODO
+func (voxelGrid VoxelGrid) RayMarch(ray ray.Ray, step float64) ([]vector3.Vector3, bool) {
+    // Check if already inside
+    var t float64
+    var hasHit bool
+    if voxelGrid.IsInsideVoxelGrid(ray.Origin) {
+        t = 0
+    } else {
+        // Get first point (origin)
+        t, hasHit, _ = voxelGrid.Hit(ray)
+
+        if !hasHit {
+            return []vector3.Vector3{}, false
+        }
+
+    }
+
+    // allocate slice
+    points := make([]vector3.Vector3, 0)
+
+    // compute origin
+    o := ray.RayAt(t + 0.001)
+
+    for voxelGrid.IsInsideVoxelGrid(o) {
+        points = append(points, o)
+        // TODO: add random value to step
+        o = vector3.AddVector3(o, vector3.MulVector3(ray.Direction, step))
+    }
+
+    return points, true
 }
+
+//func (voxelGrid *VoxelGrid) ComputeInsideLightTransmittance(light Light) {
+//    for int i := 0; i < voxelGrid.NbVerticeX; i += 1 {
+//        for int j := 0; j < voxelGrid.NbVerticeY; j += 1 {
+//            for int k := 0; k < voxelGrid.NbVerticeZ; k += 1 {
+//                // get the position of the voxel point
+//
+//            }
+//        }
+//    }
+//}
