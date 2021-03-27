@@ -322,3 +322,35 @@ func TestGetVoxelIndex4(t *testing.T) {
         t.Errorf("Ref: %v\n", ref)
     }
 }
+
+func TestGetDensity1(t *testing.T) {
+    // init the voxel grid for the test
+    voxelGrid := InitVoxelGrid(1.0,
+                               vector3.InitVector3(0.0, 0.0, -4.0),
+                               vector3.InitVector3(5.0, 4.0, -1.0))
+    voxelGrid.Voxels[0].Density = 0.2
+    ref := 0.2
+    res := voxelGrid.GetDensity(0,0,0)
+
+    if ref != res {
+        t.Errorf("Error 'TestGetDensity1'")
+        t.Errorf("Res: %v\n", res)
+        t.Errorf("Ref: %v\n", ref)
+    }
+}
+
+func TestGetDensity2(t *testing.T) {
+    // init the voxel grid for the test
+    voxelGrid := InitVoxelGrid(1.0,
+                               vector3.InitVector3(0.0, 0.0, -4.0),
+                               vector3.InitVector3(5.0, 4.0, -1.0))
+    voxelGrid.Voxels[7].Density = 0.2
+    ref := 0.2
+    res := voxelGrid.GetDensity(1,1,0)
+
+    if ref != res {
+        t.Errorf("Error 'TestGetDensity1'")
+        t.Errorf("Res: %v\n", res)
+        t.Errorf("Ref: %v\n", ref)
+    }
+}

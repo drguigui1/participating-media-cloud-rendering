@@ -114,6 +114,10 @@ func (vGrid VoxelGrid) GetVoxelIndex(v vector3.Vector3) vector3.Vector3 {
     return res
 }
 
+func (vGrid VoxelGrid) GetDensity(i, j, k int) float64 {
+    return vGrid.Voxels[i + j * vGrid.NbVerticeX + k * vGrid.NbVerticeX * vGrid.NbVerticeY].Density
+}
+
 func (vGrid VoxelGrid) IsInsideVoxelGrid(p vector3.Vector3) bool {
     pVoxel := vGrid.ShiftToVoxelCoordinates(p)
 
@@ -248,6 +252,12 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransmittance(light light.Light, s
                 pts, _ := voxelGrid.RayMarch(ray, step)
                 _ = pts
 
+//                transmittance := 1.0
+//                for _, p := range pts {
+//                    density := // get dendity
+//                    transmittance \= math.Exp(-step * )
+//                }
+//
             }
         }
     }
