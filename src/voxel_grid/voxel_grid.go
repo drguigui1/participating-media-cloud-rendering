@@ -2,6 +2,7 @@ package voxel_grid
 
 import (
     "math"
+    "math/rand"
 
     "volumetric-cloud/light"
     "volumetric-cloud/vector3"
@@ -63,10 +64,12 @@ func InitVoxelGrid(voxelSize float64,
 
     // Init voxels
     for i := 0; i < nbVertices; i += 1 {
-        // to change TODO
-        voxels[i] = InitVoxel(0.0, 0.0, vector3.InitVector3(200.0 / 255.0,
-                                                            100.0 / 255.0,
-                                                            20.0 / 255.0))
+        // TODO (change with perlin noise for density)
+        density := rand.Float64()
+        // transmitivity will be set latter
+        voxels[i] = InitVoxel(density, 0.0, vector3.InitVector3(200.0 / 255.0,
+                                                                100.0 / 255.0,
+                                                                20.0 / 255.0))
     }
 
     return VoxelGrid{
@@ -130,7 +133,6 @@ func (vGrid VoxelGrid) IsInsideVoxelGrid(p vector3.Vector3) bool {
        pVoxel.Z < 0 || pVoxel.Z > (vGrid.VoxelSize * float64(vGrid.NbVerticeZ - 1)) {
         return false
     }
-
     return true
 }
 
@@ -258,6 +260,8 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransmitivity(light light.Light, s
                 transmittance := 1.0
                 for _, p := range pts {
                     indexGrid := voxelGrid.GetVoxelIndex(p) // get the proper position in the grid
+
+                    // TODO maybe interpolate density (make function 'GetDensityInterp')
                     density := voxelGrid.GetDensity(int(indexGrid.X), int(indexGrid.Y), int(indexGrid.Z))
                     transmittance *= math.Exp(-step * density)
                 }

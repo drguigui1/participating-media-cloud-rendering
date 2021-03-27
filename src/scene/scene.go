@@ -24,7 +24,10 @@ type Scene struct {
 func InitScene(voxelGrid voxel_grid.VoxelGrid,
                sphere sphere.Sphere,
                camera camera.Camera,
-               light light.Light) Scene {
+               light light.Light,
+               step float64) Scene {
+    // compute light transmittance in the voxel grid
+    voxelGrid.ComputeInsideLightTransmitivity(light, step)
     return Scene{
         VoxelGrid: voxelGrid,
         Sphere: sphere,
