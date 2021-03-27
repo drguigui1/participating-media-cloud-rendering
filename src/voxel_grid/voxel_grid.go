@@ -118,6 +118,10 @@ func (vGrid VoxelGrid) GetDensity(i, j, k int) float64 {
     return vGrid.Voxels[i + j * vGrid.NbVerticeX + k * vGrid.NbVerticeX * vGrid.NbVerticeY].Density
 }
 
+func (vGrid *VoxelGrid) SetTransmitivity(i, j, k int, value float64) {
+    vGrid.Voxels[i + j * vGrid.NbVerticeX + k * vGrid.NbVerticeX * vGrid.NbVerticeY].Transmitivity = value
+}
+
 func (vGrid VoxelGrid) IsInsideVoxelGrid(p vector3.Vector3) bool {
     pVoxel := vGrid.ShiftToVoxelCoordinates(p)
 
@@ -237,7 +241,7 @@ func (voxelGrid VoxelGrid) RayMarch(ray ray.Ray, step float64) ([]vector3.Vector
     return points, true
 }
 
-func (voxelGrid *VoxelGrid) ComputeInsideLightTransmittance(light light.Light, step float64) {
+func (voxelGrid *VoxelGrid) ComputeInsideLightTransmitivity(light light.Light, step float64) {
     for i := 0; i < voxelGrid.NbVerticeX; i += 1 {
         for j := 0; j < voxelGrid.NbVerticeY; j += 1 {
             for k := 0; k < voxelGrid.NbVerticeZ; k += 1 {
@@ -250,14 +254,16 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransmittance(light light.Light, s
 
                 // launch the raymarching from this point to the light
                 pts, _ := voxelGrid.RayMarch(ray, step)
-                _ = pts
 
-//                transmittance := 1.0
-//                for _, p := range pts {
-//                    density := // get dendity
-//                    transmittance \= math.Exp(-step * )
-//                }
-//
+                transmittance := 1.0
+                for _, p := range pts {
+                    indexGrid := voxelGrid.GetVoxelIndex(p) // get the proper position in the grid
+                    density := voxelGrid.GetDensity(int(indexGrid.X), int(indexGrid.Y), int(indexGrid.Z))
+                    transmittance *= math.Exp(-step * density)
+                }
+
+                // set the transmitivity in the voxel grid (position i,j,k)
+                voxelGrid.SetTransmitivity(i, j, k, transmittance)
             }
         }
     }

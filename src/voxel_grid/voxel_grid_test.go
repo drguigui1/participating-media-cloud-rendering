@@ -354,3 +354,21 @@ func TestGetDensity2(t *testing.T) {
         t.Errorf("Ref: %v\n", ref)
     }
 }
+
+func TestSetTransmitivity1(t *testing.T) {
+     // init the voxel grid for the test
+    voxelGrid := InitVoxelGrid(1.0,
+                               vector3.InitVector3(0.0, 0.0, -4.0),
+                               vector3.InitVector3(5.0, 4.0, -1.0))
+
+    ref := 0.5
+    voxelGrid.SetTransmitivity(0, 0, 1, ref)
+
+    res := voxelGrid.Voxels[30].Transmitivity
+
+    if ref != res {
+        t.Errorf("Error 'TestSetTransmitivity1'")
+        t.Errorf("Res: %v\n", res)
+        t.Errorf("Ref: %v\n", ref)
+    }
+}
