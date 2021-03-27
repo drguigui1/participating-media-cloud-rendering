@@ -13,8 +13,8 @@ import (
 )
 
 func main() {
-    imgSizeX := 600
-    imgSizeY := 500
+    imgSizeX := 1200
+    imgSizeY := 1000
 
     // Camera
     aspectRatio := float64(imgSizeX) / float64(imgSizeY)
