@@ -58,6 +58,12 @@ func (v *Vector3) Div(val float64) {
     v.Z /= val
 }
 
+func (v *Vector3) Floor() {
+    v.X = math.Floor(v.X)
+    v.Y = math.Floor(v.Y)
+    v.Z = math.Floor(v.Z)
+}
+
 func (v *Vector3) Copy() Vector3 {
     return InitVector3(v.X, v.Y, v.Z)
 }

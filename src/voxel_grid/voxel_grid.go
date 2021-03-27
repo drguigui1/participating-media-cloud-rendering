@@ -3,7 +3,7 @@ package voxel_grid
 import (
     "math"
 
- //   "volumetric-cloud/light"
+    "volumetric-cloud/light"
     "volumetric-cloud/vector3"
     "volumetric-cloud/ray"
 )
@@ -80,10 +80,13 @@ func InitVoxelGrid(voxelSize float64,
     }
 }
 
+// Shift the voxel grid from its position to (0,0,0)
+// so, we need to shift the input point to get its position in the voxel grid (with (0,0,0) position)
 func (vGrid VoxelGrid) ShiftToVoxelCoordinates(p vector3.Vector3) vector3.Vector3 {
     return vector3.SubVector3(p, vGrid.Shift)
 }
 
+// Opposite as the previous one
 func (vGrid VoxelGrid) ShiftToWorldCoordinates(voxelCoordinatePoint vector3.Vector3) vector3.Vector3 {
     return vector3.AddVector3(voxelCoordinatePoint, vGrid.Shift)
 }
@@ -97,6 +100,18 @@ func (vGrid VoxelGrid) ShiftToWorldCoordinates(voxelCoordinatePoint vector3.Vect
 func (vGrid VoxelGrid) GetWorldPosition(v vector3.Vector3) vector3.Vector3 {
     res := vector3.MulVector3(v, vGrid.VoxelSize)
     return vGrid.ShiftToWorldCoordinates(res) // shift the points to real world coordinates
+}
+
+// From world position to voxel position
+// ex: 
+// input = (0,0,-4) (shift == 0,0,-4)
+// output -> (0, 0, 0)
+func (vGrid VoxelGrid) GetVoxelIndex(v vector3.Vector3) vector3.Vector3 {
+    // shift the point into the voxel coordinates (voxel start at (0,0,0) in the world coordinates)
+    res := vGrid.ShiftToVoxelCoordinates(v)
+    res.Div(vGrid.VoxelSize)
+    res.Floor()
+    return res
 }
 
 func (vGrid VoxelGrid) IsInsideVoxelGrid(p vector3.Vector3) bool {
@@ -218,13 +233,22 @@ func (voxelGrid VoxelGrid) RayMarch(ray ray.Ray, step float64) ([]vector3.Vector
     return points, true
 }
 
-//func (voxelGrid *VoxelGrid) ComputeInsideLightTransmittance(light Light) {
-//    for int i := 0; i < voxelGrid.NbVerticeX; i += 1 {
-//        for int j := 0; j < voxelGrid.NbVerticeY; j += 1 {
-//            for int k := 0; k < voxelGrid.NbVerticeZ; k += 1 {
-//                // get the position of the voxel point
-//
-//            }
-//        }
-//    }
-//}
+func (voxelGrid *VoxelGrid) ComputeInsideLightTransmittance(light light.Light, step float64) {
+    for i := 0; i < voxelGrid.NbVerticeX; i += 1 {
+        for j := 0; j < voxelGrid.NbVerticeY; j += 1 {
+            for k := 0; k < voxelGrid.NbVerticeZ; k += 1 {
+                // get the position of the voxel point
+                pWorld := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(i), float64(j), float64(k)))
+                lDir := vector3.UnitVector(vector3.SubVector3(light.Position, pWorld))
+
+                // build the ray from pWorld to the light
+                ray := ray.InitRay(pWorld, lDir)
+
+                // launch the raymarching from this point to the light
+                pts, _ := voxelGrid.RayMarch(ray, step)
+                _ = pts
+
+            }
+        }
+    }
+}

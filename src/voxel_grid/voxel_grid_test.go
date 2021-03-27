@@ -258,3 +258,67 @@ func TestGetWorldPosition3(t *testing.T) {
         t.Errorf("Ref: %v\n", ref)
     }
 }
+
+func TestGetVoxelIndex1(t *testing.T) {
+    // init the voxel grid for the test
+    voxelGrid := InitVoxelGrid(1.0,
+                               vector3.InitVector3(0.0, 0.0, -4.0),
+                               vector3.InitVector3(5.0, 4.0, -1.0))
+
+    res := voxelGrid.GetVoxelIndex(vector3.InitVector3(0.0, 0.0, -4.0))
+    ref := vector3.InitVector3(0, 0, 0)
+
+    if !reflect.DeepEqual(res, ref) {
+        t.Errorf("Error 'TestGetVoxelIndex1'")
+        t.Errorf("Res: %v\n", res)
+        t.Errorf("Ref: %v\n", ref)
+    }
+}
+
+func TestGetVoxelIndex2(t *testing.T) {
+    // init the voxel grid for the test
+    voxelGrid := InitVoxelGrid(1.0,
+                               vector3.InitVector3(0.0, 0.0, -4.0),
+                               vector3.InitVector3(5.0, 4.0, -1.0))
+
+    res := voxelGrid.GetVoxelIndex(vector3.InitVector3(1.0, 1.0, -3.0))
+    ref := vector3.InitVector3(1, 1, 1)
+
+    if !reflect.DeepEqual(res, ref) {
+        t.Errorf("Error 'TestGetVoxelIndex2'")
+        t.Errorf("Res: %v\n", res)
+        t.Errorf("Ref: %v\n", ref)
+    }
+}
+
+func TestGetVoxelIndex3(t *testing.T) {
+    // init the voxel grid for the test
+    voxelGrid := InitVoxelGrid(1.0,
+                               vector3.InitVector3(0.0, 0.0, -4.0),
+                               vector3.InitVector3(5.0, 4.0, -1.0))
+
+    res := voxelGrid.GetVoxelIndex(vector3.InitVector3(0.0, 1.0, -2.0))
+    ref := vector3.InitVector3(0, 1, 2)
+
+    if !reflect.DeepEqual(res, ref) {
+        t.Errorf("Error 'TestGetVoxelIndex3'")
+        t.Errorf("Res: %v\n", res)
+        t.Errorf("Ref: %v\n", ref)
+    }
+}
+
+func TestGetVoxelIndex4(t *testing.T) {
+    // init the voxel grid for the test
+    voxelGrid := InitVoxelGrid(1.0,
+                               vector3.InitVector3(0.0, 0.0, -4.0),
+                               vector3.InitVector3(5.0, 4.0, -1.0))
+
+    res := voxelGrid.GetVoxelIndex(vector3.InitVector3(5.0, 4.0, -1.0))
+    ref := vector3.InitVector3(5, 4, 3)
+
+    if !reflect.DeepEqual(res, ref) {
+        t.Errorf("Error 'TestGetVoxelIndex4'")
+        t.Errorf("Res: %v\n", res)
+        t.Errorf("Ref: %v\n", ref)
+    }
+}
