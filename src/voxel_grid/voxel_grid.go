@@ -1,9 +1,12 @@
 package voxel_grid
 
 import (
+    "math"
+    "math/rand"
+
+    "volumetric-cloud/light"
     "volumetric-cloud/vector3"
     "volumetric-cloud/ray"
-    "volumetric-cloud/plane"
 )
 
 /*
@@ -31,6 +34,7 @@ type VoxelGrid struct {
     NbVerticeZ int
 
     Shift vector3.Vector3
+    OppositeCorner vector3.Vector3
     Voxels []Voxel
 }
 
@@ -43,19 +47,29 @@ func InitVoxel(density, transmitivity float64, color vector3.Vector3) Voxel {
 }
 
 func InitVoxelGrid(voxelSize float64,
-                   nbVerticeX,
-                   nbVerticeY,
-                   nbVerticeZ int,
-                   shift vector3.Vector3) VoxelGrid {
+                   shift vector3.Vector3,
+                   oppositeCorner vector3.Vector3) VoxelGrid {
+
+    distX := math.Abs(shift.X - oppositeCorner.X)
+    distY := math.Abs(shift.Y - oppositeCorner.Y)
+    distZ := math.Abs(shift.Z - oppositeCorner.Z)
+
+    // compute number of VerticeX / VerticeY / VerticeZ
+    var nbVerticeX int = int(distX / voxelSize) + 1
+    var nbVerticeY int = int(distY / voxelSize) + 1
+    var nbVerticeZ int = int(distZ / voxelSize) + 1
 
     nbVertices := nbVerticeX * nbVerticeY * nbVerticeZ
     voxels := make([]Voxel, nbVertices)
 
     // Init voxels
     for i := 0; i < nbVertices; i += 1 {
-        voxels[i] = InitVoxel(0.0, 0.0, vector3.InitVector3(200.0 / 255.0,
-                                                            100.0 / 255.0,
-                                                            20.0 / 255.0))
+        // TODO (change with perlin noise for density)
+        density := rand.Float64()
+        // transmitivity will be set latter
+        voxels[i] = InitVoxel(density, 0.0, vector3.InitVector3(200.0 / 255.0,
+                                                                100.0 / 255.0,
+                                                                20.0 / 255.0))
     }
 
     return VoxelGrid{
@@ -64,16 +78,51 @@ func InitVoxelGrid(voxelSize float64,
         NbVerticeY: nbVerticeY,
         NbVerticeZ: nbVerticeZ,
         Shift: shift,
+        OppositeCorner: oppositeCorner,
         Voxels: voxels,
     }
 }
 
+// Shift the voxel grid from its position to (0,0,0)
+// so, we need to shift the input point to get its position in the voxel grid (with (0,0,0) position)
 func (vGrid VoxelGrid) ShiftToVoxelCoordinates(p vector3.Vector3) vector3.Vector3 {
     return vector3.SubVector3(p, vGrid.Shift)
 }
 
+// Opposite as the previous one
 func (vGrid VoxelGrid) ShiftToWorldCoordinates(voxelCoordinatePoint vector3.Vector3) vector3.Vector3 {
     return vector3.AddVector3(voxelCoordinatePoint, vGrid.Shift)
+}
+
+// Get the position in the world coordinate system of the input coordinates of the voxel grid
+// ex:
+// input 0,0,0 (first vertice of the voxelGrid)
+// 1) (0,0,0) * voxelSize -> (0,0,0)
+// 2) (0,0,0) + shift
+// -> the output will be the shift
+func (vGrid VoxelGrid) GetWorldPosition(v vector3.Vector3) vector3.Vector3 {
+    res := vector3.MulVector3(v, vGrid.VoxelSize)
+    return vGrid.ShiftToWorldCoordinates(res) // shift the points to real world coordinates
+}
+
+// From world position to voxel position
+// ex: 
+// input = (0,0,-4) (shift == 0,0,-4)
+// output -> (0, 0, 0)
+func (vGrid VoxelGrid) GetVoxelIndex(v vector3.Vector3) vector3.Vector3 {
+    // shift the point into the voxel coordinates (voxel start at (0,0,0) in the world coordinates)
+    res := vGrid.ShiftToVoxelCoordinates(v)
+    res.Div(vGrid.VoxelSize)
+    res.Floor()
+    return res
+}
+
+func (vGrid VoxelGrid) GetDensity(i, j, k int) float64 {
+    return vGrid.Voxels[i + j * vGrid.NbVerticeX + k * vGrid.NbVerticeX * vGrid.NbVerticeY].Density
+}
+
+func (vGrid *VoxelGrid) SetTransmitivity(i, j, k int, value float64) {
+    vGrid.Voxels[i + j * vGrid.NbVerticeX + k * vGrid.NbVerticeX * vGrid.NbVerticeY].Transmitivity = value
 }
 
 func (vGrid VoxelGrid) IsInsideVoxelGrid(p vector3.Vector3) bool {
@@ -84,85 +133,142 @@ func (vGrid VoxelGrid) IsInsideVoxelGrid(p vector3.Vector3) bool {
        pVoxel.Z < 0 || pVoxel.Z > (vGrid.VoxelSize * float64(vGrid.NbVerticeZ - 1)) {
         return false
     }
-
     return true
 }
 
-/*
-** Get the first point that intersect the VoxelGrid
-*/
-func (vGrid VoxelGrid) IntersectFaces(ray ray.Ray) (float64, bool, vector3.Vector3) {
-    edgeSizeX := vGrid.VoxelSize * float64(vGrid.NbVerticeX - 1)
-    edgeSizeY := vGrid.VoxelSize * float64(vGrid.NbVerticeY - 1)
-    edgeSizeZ := vGrid.VoxelSize * float64(vGrid.NbVerticeZ - 1)
+// AABB cube intersection
+func (vGrid VoxelGrid) Hit(ray ray.Ray) (float64, bool, vector3.Vector3) {
+    // compute tmin and tmax for x component
+    // check where the plane intersect planes made by x component of both points
+    // tmin: intersection with the clothest x plane (between both point)
 
-    normals := []vector3.Vector3{
-        vector3.InitVector3(0.0, 0.0, -1.0),
-        vector3.InitVector3(0.0, 0.0, 1.0),
-        vector3.InitVector3(-1.0, 0.0, 0.0),
-        vector3.InitVector3(1.0, 0.0, 0.0),
-        vector3.InitVector3(0.0, 1.0, 0.0),
-        vector3.InitVector3(0.0, -1.0, 0.0),
+    tmin := (vGrid.Shift.X - ray.Origin.X) / ray.Direction.X
+    tmax := (vGrid.OppositeCorner.X - ray.Origin.X) / ray.Direction.X
+
+    if tmin > tmax {
+        tmin, tmax = tmax, tmin // swap values
     }
 
-    points := [][]vector3.Vector3{
-        { // perpendicular to z
-            vGrid.Shift.Copy(),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z),
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
-        },
-        { // perpendicular to z
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ),
-        },
-        { // perpendicular to x
-            vGrid.Shift.Copy(),
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
-        },
-        { // perpendicular to x
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
-        },
-        { // perpendicular to y
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z),
-            vector3.InitVector3(vGrid.Shift.X, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y + edgeSizeY, vGrid.Shift.Z + edgeSizeZ),
-        },
-        { // perpendicular to y
-            vGrid.Shift.Copy(),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z),
-            vector3.InitVector3(vGrid.Shift.X + edgeSizeX, vGrid.Shift.Y, vGrid.Shift.Z + edgeSizeZ),
-        },
+    tymin := (vGrid.Shift.Y - ray.Origin.Y) / ray.Direction.Y
+    tymax := (vGrid.OppositeCorner.Y - ray.Origin.Y) / ray.Direction.Y
+
+    if tymin > tymax {
+        tymin, tymax = tymax, tymin
     }
 
-    colors := []vector3.Vector3{
-        vector3.InitVector3(200, 100, 10), // orange
-        vector3.InitVector3(100, 200, 10), // green
-        vector3.InitVector3(100, 100, 100), // grey
-        vector3.InitVector3(10, 100, 100), // blue
-        vector3.InitVector3(0, 0, 0), // black
-        vector3.InitVector3(200, 11, 168), // purple
+    // the ray does not hit the cube
+    if tmin > tymax || tymin > tmax {
+        return 0.0, false, vector3.Vector3{}
     }
 
-    var t float64 = 0.0
-    var hasHit bool = false
-    var finalColor vector3.Vector3
+    if tymin > tmin {
+        tmin = tymin
+    }
 
-    for i := 0; i < 6; i += 1 {
-        // create plane object
-        plane := plane.InitPlane(normals[i], colors[i], points[i][0], points[i][1], points[i][2])
+    if tymax < tmax {
+        tmax = tymax
+    }
 
-        // intersect a face
-        t, hasHit = plane.Hit(ray)
+    tzmin := (vGrid.Shift.Z - ray.Origin.Z) / ray.Direction.Z
+    tzmax := (vGrid.OppositeCorner.Z - ray.Origin.Z) / ray.Direction.Z
 
-        if hasHit {
-            finalColor = colors[i]
-            break
+    if tzmin > tzmax {
+        tzmin, tzmax = tzmax, tzmin
+    }
+
+    if tmin > tzmax || tzmin > tmax {
+        return 0.0, false, vector3.Vector3{}
+    }
+
+    if tzmin > tmin {
+        tmin = tzmin
+    }
+
+    if tzmax < tmax {
+        tmax = tzmax
+    }
+
+    if tmin < 0 {
+        return 0.0, false, vector3.Vector3{}
+    }
+
+    p := ray.RayAt(tmin)
+
+    var color vector3.Vector3
+    if Round4(p.X) == vGrid.Shift.X {
+        color = vector3.InitVector3(255, 0, 0)
+    } else if Round4(p.X) == vGrid.OppositeCorner.X {
+        color = vector3.InitVector3(255, 255, 0)
+    } else if Round4(p.Y) == vGrid.Shift.Y {
+        color = vector3.InitVector3(255, 0, 255)
+    } else if Round4(p.Y) == vGrid.OppositeCorner.Y {
+        color = vector3.InitVector3(0, 0, 255)
+    } else if Round4(p.Z) == vGrid.Shift.Z {
+        color = vector3.InitVector3(0, 255, 0)
+    } else if Round4(p.Z) == vGrid.OppositeCorner.Z {
+        color = vector3.InitVector3(100, 100, 100)
+    }
+
+    return tmin, true, color
+}
+
+func (voxelGrid VoxelGrid) RayMarch(ray ray.Ray, step float64) ([]vector3.Vector3, bool) {
+    // Check if already inside
+    var t float64
+    var hasHit bool
+    if voxelGrid.IsInsideVoxelGrid(ray.Origin) {
+        t = 0
+    } else {
+        // Get first point (origin)
+        t, hasHit, _ = voxelGrid.Hit(ray)
+
+        if !hasHit {
+            return []vector3.Vector3{}, false
+        }
+
+    }
+
+    // allocate slice
+    points := make([]vector3.Vector3, 0)
+
+    // compute origin
+    o := ray.RayAt(t + 0.001)
+
+    for voxelGrid.IsInsideVoxelGrid(o) {
+        points = append(points, o)
+        // TODO: add random value to step
+        o = vector3.AddVector3(o, vector3.MulVector3(ray.Direction, step))
+    }
+
+    return points, true
+}
+
+func (voxelGrid *VoxelGrid) ComputeInsideLightTransmitivity(light light.Light, step float64) {
+    for i := 0; i < voxelGrid.NbVerticeX; i += 1 {
+        for j := 0; j < voxelGrid.NbVerticeY; j += 1 {
+            for k := 0; k < voxelGrid.NbVerticeZ; k += 1 {
+                // get the position of the voxel point
+                pWorld := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(i), float64(j), float64(k)))
+                lDir := vector3.UnitVector(vector3.SubVector3(light.Position, pWorld))
+
+                // build the ray from pWorld to the light
+                ray := ray.InitRay(pWorld, lDir)
+
+                // launch the raymarching from this point to the light
+                pts, _ := voxelGrid.RayMarch(ray, step)
+
+                transmittance := 1.0
+                for _, p := range pts {
+                    indexGrid := voxelGrid.GetVoxelIndex(p) // get the proper position in the grid
+
+                    // TODO maybe interpolate density (make function 'GetDensityInterp')
+                    density := voxelGrid.GetDensity(int(indexGrid.X), int(indexGrid.Y), int(indexGrid.Z))
+                    transmittance *= math.Exp(-step * density)
+                }
+
+                // set the transmitivity in the voxel grid (position i,j,k)
+                voxelGrid.SetTransmitivity(i, j, k, transmittance)
+            }
         }
     }
-
-    return t, hasHit, finalColor
 }
