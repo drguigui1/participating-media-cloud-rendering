@@ -202,8 +202,10 @@ func TestRayMarchVoxelGrid(t *testing.T) {
     }
     //fmt.Println(m)
     for i := 0; i < len(points); i+=1 {
-        if !reflect.DeepEqual(points[i], m[i]) {
-            t.Errorf("Error 'TestRayMarchVoxelGrid '")
+        if Round3(points[i].X) != m[i].X ||
+           Round3(points[i].Y) != m[i].Y ||
+           Round3(points[i].Z) != m[i].Z {
+            t.Errorf("Error 'TestRayMarchVoxelGrid'")
             t.Errorf("res: %v\n", points[i])
             t.Errorf("ref: %v\n", m[i])
         }

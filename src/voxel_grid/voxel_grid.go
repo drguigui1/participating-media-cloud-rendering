@@ -192,6 +192,7 @@ func (vGrid VoxelGrid) Hit(ray ray.Ray) (float64, bool, vector3.Vector3) {
         return 0.0, false, vector3.Vector3{}
     }
 
+    tmin += 0.0001
     p := ray.RayAt(tmin)
 
     var color vector3.Vector3
@@ -271,4 +272,13 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransmitivity(light light.Light, s
             }
         }
     }
+}
+
+// return the proper color
+func (vGrid VoxelGrid) RenderPixel(ray ray.Ray, step float64) (vector3.Vector3, bool) {
+    // launch the ray marching (from hit point)
+    // pts := vGrid.RayMarch(ray, step)
+
+    // TODO
+    return vector3.Vector3{}, false
 }
