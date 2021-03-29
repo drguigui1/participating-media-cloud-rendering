@@ -1,14 +1,12 @@
 package scene
 
 import (
-    //"volumetric-cloud/vector3"
     "volumetric-cloud/img"
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/camera"
     "volumetric-cloud/sphere"
     "volumetric-cloud/light"
-    "volumetric-cloud/ray"
-    "volumetric-cloud/vector3"
+    "volumetric-cloud/background"
 
     "sync"
 )
@@ -24,10 +22,9 @@ type Scene struct {
 func InitScene(voxelGrid voxel_grid.VoxelGrid,
                sphere sphere.Sphere,
                camera camera.Camera,
-               light light.Light,
-               step float64) Scene {
+               light light.Light) Scene {
     // compute light transmittance in the voxel grid
-    voxelGrid.ComputeInsideLightTransmitivity(light, step)
+    voxelGrid.ComputeInsideLightTransparency(light)
     return Scene{
         VoxelGrid: voxelGrid,
         Sphere: sphere,
@@ -60,17 +57,15 @@ func (s Scene) renderPixelNoGoroutine(image img.Img, i, j int) {
     r := s.Camera.CreateRay(j, i)
 
     // Check intersect with Voxel Grid
-    //t, hasHit, _ := s.VoxelGrid.Hit(ray)
-    //p := r.RayAt(t)
-    color, hasHit := s.VoxelGrid.RenderPixel(r, 0.2)
+    color, hasHit := s.VoxelGrid.RenderPixel(r, s.Light.Color)
 
     // set pixel
     if hasHit {
         // compute pizel color
-        image.SetPixel(i, j, byte(color.X), byte(color.Y), byte(color.Z))
+        image.SetPixel(i, j, byte(color.X * 255.0), byte(color.Y * 255.0), byte(color.Z * 255.0))
     } else {
         // gradient case
-        colorG := s.RenderGradient(r)
+        colorG := background.RenderGradient(r)
         image.SetPixel(i, j, byte(colorG.X * 255.0), byte(colorG.Y * 255), byte(colorG.Z * 255))
     }
 }
@@ -92,11 +87,4 @@ func (s Scene) renderPixel(image img.Img, i, j int, wg *sync.WaitGroup) {
 //    }
 //
 //    wg.Done()
-}
-
-func (s Scene) RenderGradient(ray ray.Ray) vector3.Vector3 {
-    dir := vector3.UnitVector(ray.Direction);
-    tmp := 0.5 * (dir.Y + 1.0);
-    tmp2 := 1.0 - tmp
-    return vector3.AddVector3(vector3.InitVector3(1.0 * tmp2, 1.0 * tmp2, 1.0 * tmp2), vector3.InitVector3(0.35 * tmp, 0.76 * tmp, 0.75 * tmp))
 }

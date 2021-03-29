@@ -17,5 +17,5 @@ func InitRay(ori, dir vector3.Vector3) Ray {
 }
 
 func (r Ray) RayAt(t float64) vector3.Vector3 {
-    return vector3.AddVector3(r.Origin, vector3.MulVector3(r.Direction, t))
+    return vector3.AddVector3(r.Origin, vector3.MulVector3Scalar(r.Direction, t))
 }

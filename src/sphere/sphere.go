@@ -33,7 +33,7 @@ func (s Sphere) Hit(ray ray.Ray) (float64, vector3.Vector3, bool) {
     diff := vector3.SubVector3(ray.Origin, s.Center)
 
     a := vector3.DotProduct(ray.Direction, ray.Direction)
-    b := vector3.DotProduct(vector3.MulVector3(ray.Direction, 2.0), diff)
+    b := vector3.DotProduct(vector3.MulVector3Scalar(ray.Direction, 2.0), diff)
     c := vector3.DotProduct(diff, diff) - (s.Radius * s.Radius)
 
     delta := b * b - 4.0 * a * c
