@@ -31,6 +31,20 @@ func TestVector3AddVector3(t *testing.T) {
     }
 }
 
+func TestVector3AddVector4(t *testing.T) {
+    v1 := InitVector3(2.0, 1.0, 3.0)
+    v2 := InitVector3(2.0, 1.0, 3.0)
+    ref := InitVector3(4.0, 2.0, 6.0)
+    v1.AddVector3(v2)
+
+    if !reflect.DeepEqual(v1, ref) {
+        t.Errorf("Error 'Vector3 AddVector4'\n")
+        t.Errorf("res: %v\n", v1)
+        t.Errorf("ref: %v\n", ref)
+    }
+}
+
+
 func TestVector3SubVector3(t *testing.T) {
     v1 := InitVector3(2.0, 1.0, 4.0)
     v2 := InitVector3(2.0, 2.0, 3.0)

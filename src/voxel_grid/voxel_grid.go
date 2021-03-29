@@ -7,17 +7,18 @@ import (
     "volumetric-cloud/light"
     "volumetric-cloud/vector3"
     "volumetric-cloud/ray"
+    "volumetric-cloud/background"
 )
 
 /*
 ** One voxel == one cube
 ** 'Density': density in the voxel
-** 'Transmitivity': how the voxel transmit the light
+** 'Transparency': how the voxel transmit the light
 ** 'Color': color inside the voxel
 */
 type Voxel struct {
     Density float64
-    Transmitivity float64
+    Transparency float64
     Color vector3.Vector3
 }
 
@@ -32,23 +33,25 @@ type VoxelGrid struct {
     NbVerticeX int
     NbVerticeY int
     NbVerticeZ int
+    Step float64
 
     Shift vector3.Vector3
     OppositeCorner vector3.Vector3
     Voxels []Voxel
 }
 
-func InitVoxel(density, transmitivity float64, color vector3.Vector3) Voxel {
+func InitVoxel(density, transparency float64, color vector3.Vector3) Voxel {
     return Voxel{
         Density: density,
-        Transmitivity: transmitivity,
+        Transparency: transparency,
         Color: color,
     }
 }
 
 func InitVoxelGrid(voxelSize float64,
                    shift vector3.Vector3,
-                   oppositeCorner vector3.Vector3) VoxelGrid {
+                   oppositeCorner vector3.Vector3,
+                   step float64) VoxelGrid {
 
     distX := math.Abs(shift.X - oppositeCorner.X)
     distY := math.Abs(shift.Y - oppositeCorner.Y)
@@ -67,9 +70,9 @@ func InitVoxelGrid(voxelSize float64,
         // TODO (change with perlin noise for density)
         density := rand.Float64()
         // transmitivity will be set latter
-        voxels[i] = InitVoxel(density, 0.0, vector3.InitVector3(200.0 / 255.0,
+        voxels[i] = InitVoxel(density, 0.0, vector3.InitVector3(100.0 / 255.0,
                                                                 100.0 / 255.0,
-                                                                20.0 / 255.0))
+                                                                100.0 / 255.0))
     }
 
     return VoxelGrid{
@@ -80,6 +83,7 @@ func InitVoxelGrid(voxelSize float64,
         Shift: shift,
         OppositeCorner: oppositeCorner,
         Voxels: voxels,
+        Step: step,
     }
 }
 
@@ -101,7 +105,7 @@ func (vGrid VoxelGrid) ShiftToWorldCoordinates(voxelCoordinatePoint vector3.Vect
 // 2) (0,0,0) + shift
 // -> the output will be the shift
 func (vGrid VoxelGrid) GetWorldPosition(v vector3.Vector3) vector3.Vector3 {
-    res := vector3.MulVector3(v, vGrid.VoxelSize)
+    res := vector3.MulVector3Scalar(v, vGrid.VoxelSize)
     return vGrid.ShiftToWorldCoordinates(res) // shift the points to real world coordinates
 }
 
@@ -121,8 +125,16 @@ func (vGrid VoxelGrid) GetDensity(i, j, k int) float64 {
     return vGrid.Voxels[i + j * vGrid.NbVerticeX + k * vGrid.NbVerticeX * vGrid.NbVerticeY].Density
 }
 
-func (vGrid *VoxelGrid) SetTransmitivity(i, j, k int, value float64) {
-    vGrid.Voxels[i + j * vGrid.NbVerticeX + k * vGrid.NbVerticeX * vGrid.NbVerticeY].Transmitivity = value
+func (vGrid VoxelGrid) GetTransparency(i, j, k int) float64 {
+    return vGrid.Voxels[i + j * vGrid.NbVerticeX + k * vGrid.NbVerticeX * vGrid.NbVerticeY].Transparency
+}
+
+func (vGrid VoxelGrid) GetColor(i, j, k int) vector3.Vector3 {
+    return vGrid.Voxels[i + j * vGrid.NbVerticeX + k * vGrid.NbVerticeX * vGrid.NbVerticeY].Color
+}
+
+func (vGrid *VoxelGrid) SetTransparency(i, j, k int, value float64) {
+    vGrid.Voxels[i + j * vGrid.NbVerticeX + k * vGrid.NbVerticeX * vGrid.NbVerticeY].Transparency = value
 }
 
 func (vGrid VoxelGrid) IsInsideVoxelGrid(p vector3.Vector3) bool {
@@ -192,6 +204,7 @@ func (vGrid VoxelGrid) Hit(ray ray.Ray) (float64, bool, vector3.Vector3) {
         return 0.0, false, vector3.Vector3{}
     }
 
+    tmin += 0.0001
     p := ray.RayAt(tmin)
 
     var color vector3.Vector3
@@ -212,7 +225,7 @@ func (vGrid VoxelGrid) Hit(ray ray.Ray) (float64, bool, vector3.Vector3) {
     return tmin, true, color
 }
 
-func (voxelGrid VoxelGrid) RayMarch(ray ray.Ray, step float64) ([]vector3.Vector3, bool) {
+func (voxelGrid VoxelGrid) RayMarch(ray ray.Ray) ([]vector3.Vector3, bool) {
     // Check if already inside
     var t float64
     var hasHit bool
@@ -237,13 +250,13 @@ func (voxelGrid VoxelGrid) RayMarch(ray ray.Ray, step float64) ([]vector3.Vector
     for voxelGrid.IsInsideVoxelGrid(o) {
         points = append(points, o)
         // TODO: add random value to step
-        o = vector3.AddVector3(o, vector3.MulVector3(ray.Direction, step))
+        o = vector3.AddVector3(o, vector3.MulVector3Scalar(ray.Direction, voxelGrid.Step))
     }
 
     return points, true
 }
 
-func (voxelGrid *VoxelGrid) ComputeInsideLightTransmitivity(light light.Light, step float64) {
+func (voxelGrid *VoxelGrid) ComputeInsideLightTransparency(light light.Light) {
     for i := 0; i < voxelGrid.NbVerticeX; i += 1 {
         for j := 0; j < voxelGrid.NbVerticeY; j += 1 {
             for k := 0; k < voxelGrid.NbVerticeZ; k += 1 {
@@ -255,20 +268,66 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransmitivity(light light.Light, s
                 ray := ray.InitRay(pWorld, lDir)
 
                 // launch the raymarching from this point to the light
-                pts, _ := voxelGrid.RayMarch(ray, step)
+                pts, _ := voxelGrid.RayMarch(ray)
 
-                transmittance := 1.0
+                insideTransparency := 1.0
                 for _, p := range pts {
                     indexGrid := voxelGrid.GetVoxelIndex(p) // get the proper position in the grid
 
                     // TODO maybe interpolate density (make function 'GetDensityInterp')
                     density := voxelGrid.GetDensity(int(indexGrid.X), int(indexGrid.Y), int(indexGrid.Z))
-                    transmittance *= math.Exp(-step * density)
+                    insideTransparency *= math.Exp(-voxelGrid.Step * density)
                 }
 
-                // set the transmitivity in the voxel grid (position i,j,k)
-                voxelGrid.SetTransmitivity(i, j, k, transmittance)
+                // set the transmittance in the voxel grid (position i,j,k)
+                voxelGrid.SetTransparency(i, j, k, insideTransparency)
             }
         }
     }
+}
+
+// return the proper color
+func (vGrid VoxelGrid) RenderPixel(ray ray.Ray, lightColor vector3.Vector3) (vector3.Vector3, bool) {
+    pts, hasHit := vGrid.RayMarch(ray)
+    if !hasHit {
+        return vector3.Vector3{}, false
+    }
+
+    var accTransparency float64 = 1.0;
+    color := vector3.InitVector3(0.0, 0.0, 0.0)
+
+    for _, p := range pts {
+        var voxelLight vector3.Vector3
+
+        // get the index in the voxelGrid of the points 'p'
+        // TODO: use interpolation
+        vGridCoord := vGrid.GetVoxelIndex(p)
+        density := vGrid.GetDensity(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
+
+        // get transparency / transmittance
+        insideTransparency := vGrid.GetTransparency(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
+
+        // get the color at specific position of the voxel
+        //voxelColor := vGrid.GetColor(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
+
+        //voxelLight = vector3.HadamarProduct(voxelColor, lightColor)
+        voxelLight = lightColor
+        voxelLight.Mul(insideTransparency)
+        voxelLight.Mul(density)
+
+        accTransparency *= math.Exp(-vGrid.Step * density)
+
+        voxelLight.Mul(accTransparency * vGrid.Step)
+        color.AddVector3(voxelLight)
+    }
+
+    // compute background color
+    backgroundColor := background.RenderGradient(ray)
+
+    // background contribution
+    backgroundColor.Mul(accTransparency)
+    color.AddVector3(backgroundColor)
+
+    color.Clamp(0.0, 1.0)
+    return color, true
 }

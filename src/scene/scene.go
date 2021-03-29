@@ -1,14 +1,12 @@
 package scene
 
 import (
-    //"volumetric-cloud/vector3"
     "volumetric-cloud/img"
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/camera"
     "volumetric-cloud/sphere"
     "volumetric-cloud/light"
-    "volumetric-cloud/ray"
-    "volumetric-cloud/vector3"
+    "volumetric-cloud/background"
 
     "sync"
 )
@@ -24,10 +22,9 @@ type Scene struct {
 func InitScene(voxelGrid voxel_grid.VoxelGrid,
                sphere sphere.Sphere,
                camera camera.Camera,
-               light light.Light,
-               step float64) Scene {
+               light light.Light) Scene {
     // compute light transmittance in the voxel grid
-    voxelGrid.ComputeInsideLightTransmitivity(light, step)
+    voxelGrid.ComputeInsideLightTransparency(light)
     return Scene{
         VoxelGrid: voxelGrid,
         Sphere: sphere,
@@ -57,29 +54,25 @@ func (s Scene) Render(imgSizeY, imgSizeX int) img.Img {
 func (s Scene) renderPixelNoGoroutine(image img.Img, i, j int) {
     // create the ray
     // need first column index (j) and then row index (i)
-    ray := s.Camera.CreateRay(j, i)
+    r := s.Camera.CreateRay(j, i)
 
     // Check intersect with Voxel Grid
-    _, hasHit, color := s.VoxelGrid.Hit(ray)
-    //_, _, hasHit := s.Sphere.Hit(ray)
-
-    // raymarch TODO
+    color, hasHit := s.VoxelGrid.RenderPixel(r, s.Light.Color)
 
     // set pixel
     if hasHit {
-        //image.SetPixel(i, j, 255, 111, 0)
-        image.SetPixel(i, j, byte(color.X), byte(color.Y), byte(color.Z))
+        // compute pizel color
+        image.SetPixel(i, j, byte(color.X * 255.0), byte(color.Y * 255.0), byte(color.Z * 255.0))
     } else {
         // gradient case
-        color := s.RenderGradient(ray)
-        image.SetPixel(i, j, byte(color.X * 255.0), byte(color.Y * 255), byte(color.Z * 255))
+        colorG := background.RenderGradient(r)
+        image.SetPixel(i, j, byte(colorG.X * 255.0), byte(colorG.Y * 255), byte(colorG.Z * 255))
     }
 }
 
 func (s Scene) renderPixel(image img.Img, i, j int, wg *sync.WaitGroup) {
-
     // create the ray
-//    ray := s.Camera.CreateRay(i, j)
+    // ray := s.Camera.CreateRay(i, j)
 
     // Check intersect with Voxel Grid
     //_, hasHit, color := s.VoxelGrid.IntersectFaces(ray, i, j)
@@ -94,11 +87,4 @@ func (s Scene) renderPixel(image img.Img, i, j int, wg *sync.WaitGroup) {
 //    }
 //
 //    wg.Done()
-}
-
-func (s Scene) RenderGradient(ray ray.Ray) vector3.Vector3 {
-    dir := vector3.UnitVector(ray.Direction);
-    tmp := 0.5 * (dir.Y + 1.0);
-    tmp2 := 1.0 - tmp
-    return vector3.AddVector3(vector3.InitVector3(1.0 * tmp2, 1.0 * tmp2, 1.0 * tmp2), vector3.InitVector3(0.35 * tmp, 0.76 * tmp, 0.75 * tmp))
 }

@@ -12,7 +12,7 @@ import (
 func TestInitVoxelGrid1(t *testing.T) {
     voxelGrid := InitVoxelGrid(1.0,
                   vector3.InitVector3(0.0, 0.0, -1.0),
-                  vector3.InitVector3(5.0, 4.0, -4.0))
+                  vector3.InitVector3(5.0, 4.0, -4.0), 0.0)
 
     refNbVerticesX := 6
     refNbVerticesY := 5
@@ -40,7 +40,7 @@ func TestInitVoxelGrid1(t *testing.T) {
 func TestInitVoxelGrid2(t *testing.T) {
     voxelGrid := InitVoxelGrid(1.0,
                   vector3.InitVector3(0.0, 0.0, -1.0),
-                  vector3.InitVector3(-5.0, 4.0, -4.0))
+                  vector3.InitVector3(-5.0, 4.0, -4.0), 0.0)
 
     refNbVerticesX := 6
     refNbVerticesY := 5
@@ -71,7 +71,7 @@ func TestIsInsideVoxelGrid1(t *testing.T) {
     shift := vector3.InitVector3(0.0, 0.0, 0.0)
     oppositeCorner := vector3.InitVector3(3.0, 3.0, 3.0)
 
-    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner)
+    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner, 0.0)
 
     p1 := vector3.InitVector3(0.5, 0.5, 0.5)
     p2 := vector3.InitVector3(0.6, 0.5, 0.5)
@@ -97,7 +97,7 @@ func TestIsInsideVoxelGrid2(t *testing.T) {
     shift := vector3.InitVector3(1.0, 1.0, 1.0)
     oppositeCorner := vector3.InitVector3(3.0, 3.0, 3.0)
 
-    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner)
+    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner, 0.0)
 
     p1 := vector3.InitVector3(0.5, 0.5, 0.5)
     p2 := vector3.InitVector3(0.6, 0.5, 2.5)
@@ -130,7 +130,7 @@ func TestHit1(t *testing.T) {
 
     shift := vector3.InitVector3(0.0, 0.0, -2.0)
     oppositePoint := vector3.InitVector3(1.0, 1.0, -4.0)
-    voxelGrid := InitVoxelGrid(0.5, shift, oppositePoint)
+    voxelGrid := InitVoxelGrid(0.5, shift, oppositePoint, 0.0)
 
     res, hasHit, _ := voxelGrid.Hit(ray)
 
@@ -148,7 +148,7 @@ func TestHit2(t *testing.T) {
 
     shift := vector3.InitVector3(0.0, 0.0, -2.0)
     oppositePoint := vector3.InitVector3(1.0, 1.0, -4.0)
-    voxelGrid := InitVoxelGrid(0.5, shift, oppositePoint)
+    voxelGrid := InitVoxelGrid(0.5, shift, oppositePoint, 0.0)
 
     res, hasHit, _ := voxelGrid.Hit(ray)
 
@@ -163,7 +163,7 @@ func TestIsInsideVoxelGrid3(t *testing.T) {
     shift := vector3.InitVector3(0.0, 0.0, -4.0)
     oppositeCorner := vector3.InitVector3(5.0, 4.0, -1.0)
 
-    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner)
+    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner, 0.0)
 
     p1 := vector3.InitVector3(2.5, 2.0, 0.0)
     res := newVoxelGrid.IsInsideVoxelGrid(p1)
@@ -177,14 +177,15 @@ func TestIsInsideVoxelGrid3(t *testing.T) {
 func TestRayMarchVoxelGrid(t *testing.T) {
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0))
+                               vector3.InitVector3(5.0, 4.0, -1.0),
+                               0.5)
 
 
     origin := vector3.InitVector3(2.5, 2.0, 0.0)
     dir := vector3.InitVector3(0.0, 0.0, -1.0)
     ray := ray.InitRay(origin, dir)
 
-    points, hasHit := voxelGrid.RayMarch(ray, 0.5)
+    points, hasHit := voxelGrid.RayMarch(ray)
     //fmt.Println(points)
     if !hasHit {
         t.Errorf("Error 'TestRayMarchVoxelGrid '")
@@ -202,8 +203,10 @@ func TestRayMarchVoxelGrid(t *testing.T) {
     }
     //fmt.Println(m)
     for i := 0; i < len(points); i+=1 {
-        if !reflect.DeepEqual(points[i], m[i]) {
-            t.Errorf("Error 'TestRayMarchVoxelGrid '")
+        if Round3(points[i].X) != m[i].X ||
+           Round3(points[i].Y) != m[i].Y ||
+           Round3(points[i].Z) != m[i].Z {
+            t.Errorf("Error 'TestRayMarchVoxelGrid'")
             t.Errorf("res: %v\n", points[i])
             t.Errorf("ref: %v\n", m[i])
         }
@@ -214,7 +217,7 @@ func TestGetWorldPosition1(t *testing.T) {
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0))
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
 
     res := voxelGrid.GetWorldPosition(vector3.InitVector3(0, 0, 0))
 
@@ -229,7 +232,7 @@ func TestGetWorldPosition2(t *testing.T) {
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0))
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
 
     res := voxelGrid.GetWorldPosition(vector3.InitVector3(0, 0, 1))
     ref := vector3.InitVector3(voxelGrid.Shift.X, voxelGrid.Shift.Y, voxelGrid.Shift.Z + voxelGrid.VoxelSize)
@@ -245,7 +248,7 @@ func TestGetWorldPosition3(t *testing.T) {
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0))
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
 
     res := voxelGrid.GetWorldPosition(vector3.InitVector3(3, 2, 1))
     ref := vector3.InitVector3(voxelGrid.Shift.X + 3 * voxelGrid.VoxelSize,
@@ -263,7 +266,7 @@ func TestGetVoxelIndex1(t *testing.T) {
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0))
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
 
     res := voxelGrid.GetVoxelIndex(vector3.InitVector3(0.0, 0.0, -4.0))
     ref := vector3.InitVector3(0, 0, 0)
@@ -279,7 +282,7 @@ func TestGetVoxelIndex2(t *testing.T) {
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0))
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
 
     res := voxelGrid.GetVoxelIndex(vector3.InitVector3(1.0, 1.0, -3.0))
     ref := vector3.InitVector3(1, 1, 1)
@@ -295,7 +298,7 @@ func TestGetVoxelIndex3(t *testing.T) {
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0))
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
 
     res := voxelGrid.GetVoxelIndex(vector3.InitVector3(0.0, 1.0, -2.0))
     ref := vector3.InitVector3(0, 1, 2)
@@ -311,7 +314,7 @@ func TestGetVoxelIndex4(t *testing.T) {
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0))
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
 
     res := voxelGrid.GetVoxelIndex(vector3.InitVector3(5.0, 4.0, -1.0))
     ref := vector3.InitVector3(5, 4, 3)
@@ -327,7 +330,7 @@ func TestGetDensity1(t *testing.T) {
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0))
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
     voxelGrid.Voxels[0].Density = 0.2
     ref := 0.2
     res := voxelGrid.GetDensity(0,0,0)
@@ -343,7 +346,7 @@ func TestGetDensity2(t *testing.T) {
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0))
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
     voxelGrid.Voxels[7].Density = 0.2
     ref := 0.2
     res := voxelGrid.GetDensity(1,1,0)
@@ -359,15 +362,15 @@ func TestSetTransmitivity1(t *testing.T) {
      // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0))
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
 
     ref := 0.5
-    voxelGrid.SetTransmitivity(0, 0, 1, ref)
+    voxelGrid.SetTransparency(0, 0, 1, ref)
 
-    res := voxelGrid.Voxels[30].Transmitivity
+    res := voxelGrid.Voxels[30].Transparency
 
     if ref != res {
-        t.Errorf("Error 'TestSetTransmitivity1'")
+        t.Errorf("Error 'TestSetTransparency1'")
         t.Errorf("Res: %v\n", res)
         t.Errorf("Ref: %v\n", ref)
     }

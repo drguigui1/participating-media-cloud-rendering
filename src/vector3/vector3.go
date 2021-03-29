@@ -33,6 +33,12 @@ func (v *Vector3) Add(val float64) {
     v.Z += val
 }
 
+func (v *Vector3) AddVector3(other Vector3) {
+    v.X += other.X
+    v.Y += other.Y
+    v.Z += other.Z
+}
+
 func (v *Vector3) Sub(val float64) {
     v.X -= val
     v.Y -= val
@@ -64,6 +70,26 @@ func (v *Vector3) Floor() {
     v.Z = math.Floor(v.Z)
 }
 
+func (v *Vector3) Clamp(low, high float64) {
+    if v.X < low {
+        v.X = low
+    } else if v.X > high {
+        v.X = high
+    }
+
+    if v.Y < low {
+        v.Y = low
+    } else if v.Y > high {
+        v.Y = high
+    }
+
+    if v.Z < low {
+        v.Z = low
+    } else if v.Z > high {
+        v.Z = high
+    }
+}
+
 func (v *Vector3) Copy() Vector3 {
     return InitVector3(v.X, v.Y, v.Z)
 }
@@ -80,7 +106,11 @@ func SubVector3(v1, v2 Vector3) Vector3 {
     return InitVector3(v1.X - v2.X, v1.Y - v2.Y, v1.Z - v2.Z)
 }
 
-func MulVector3(v Vector3, val float64) Vector3 {
+func HadamarProduct(v1, v2 Vector3) Vector3 {
+    return InitVector3(v1.X * v2.X, v1.Y * v2.Y, v1.Z * v2.Z)
+}
+
+func MulVector3Scalar(v Vector3, val float64) Vector3 {
     return Vector3{
         X: v.X * val,
         Y: v.Y * val,
