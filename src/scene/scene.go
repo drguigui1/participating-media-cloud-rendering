@@ -7,7 +7,9 @@ import (
     "volumetric-cloud/sphere"
     "volumetric-cloud/light"
     "volumetric-cloud/background"
+    "volumetric-cloud/vector3"
 
+    "math/rand"
     "sync"
 )
 
@@ -33,7 +35,7 @@ func InitScene(voxelGrid voxel_grid.VoxelGrid,
     }
 }
 
-func (s Scene) Render(imgSizeY, imgSizeX int) img.Img {
+func (s Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
     image := img.InitImg(imgSizeY, imgSizeX)
 
     // create the wait group
@@ -43,31 +45,39 @@ func (s Scene) Render(imgSizeY, imgSizeX int) img.Img {
     for i := 0; i < imgSizeY; i += 1 {
         for j := 0; j < imgSizeX; j += 1 {
             //go s.renderPixel(image, i, j, &wg)
-            s.renderPixelNoGoroutine(image, i, j)
-            //image.SetPixel(i, j, 200, 100, 20)
+            s.renderPixelNoGoroutine(image, i, j, nbRaysPerPixel)
         }
     }
 
     return image
 }
 
-func (s Scene) renderPixelNoGoroutine(image img.Img, i, j int) {
-    // create the ray
-    // need first column index (j) and then row index (i)
-    r := s.Camera.CreateRay(j, i)
+func (s Scene) renderPixelNoGoroutine(image img.Img, i, j, nbRaysPerPixel int) {
+    color := vector3.InitVector3(0, 0, 0)
+    for k := 0; k < nbRaysPerPixel; k += 1 {
+        // create the ray
+        // need first column index (j) and then row index (i)
+        r := s.Camera.CreateRay(float64(j) + rand.Float64(), float64(i) + rand.Float64())
 
-    // Check intersect with Voxel Grid
-    color, hasHit := s.VoxelGrid.RenderPixel(r, s.Light.Color)
+        // Check intersect with Voxel Grid
+        c, hasHit := s.VoxelGrid.ComputePixelColor(r, s.Light.Color)
 
-    // set pixel
-    if hasHit {
-        // compute pizel color
-        image.SetPixel(i, j, byte(color.X * 255.0), byte(color.Y * 255.0), byte(color.Z * 255.0))
-    } else {
-        // gradient case
-        colorG := background.RenderGradient(r)
-        image.SetPixel(i, j, byte(colorG.X * 255.0), byte(colorG.Y * 255), byte(colorG.Z * 255))
+        // set pixel
+        if hasHit {
+            // compute pizel color
+            color.AddVector3(vector3.InitVector3(c.X, c.Y, c.Z))
+        } else {
+            // gradient case
+            colorG := background.RenderGradient(r)
+            color.AddVector3(colorG)
+        }
     }
+
+    // divide color vector by nbRaysPerPixel
+    color.Div(float64(nbRaysPerPixel))
+
+    // Set the pixel color
+    image.SetPixel(i, j, byte(color.X * 255.0), byte(color.Y * 255.0), byte(color.Z * 255.0))
 }
 
 func (s Scene) renderPixel(image img.Img, i, j int, wg *sync.WaitGroup) {
