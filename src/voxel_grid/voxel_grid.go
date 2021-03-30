@@ -72,7 +72,7 @@ func InitVoxelGrid(voxelSize float64,
                 // compute distance between (x, y, z) and center and make ratio with maxdistance which is distance from center to corner
                 dist := math.Sqrt(math.Pow(float64(x - nbVerticeX/2), 2.0) + math.Pow(float64(y-nbVerticeY/2), 2.0) + math.Pow(float64(z-nbVerticeZ/2), 2.0))
                 // result between 0 and 1
-                density := 1 - dist/maxDist
+                density := 1 - 1.5 * dist/maxDist
                 if density < 0 {
                     density = 0
                 }
