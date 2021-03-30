@@ -2,7 +2,7 @@ package voxel_grid
 
 import (
     "math"
-    "math/rand"
+  //  "math/rand"
 
     "volumetric-cloud/light"
     "volumetric-cloud/vector3"
@@ -62,10 +62,25 @@ func InitVoxelGrid(voxelSize float64,
     var nbVerticeY int = int(distY / voxelSize) + 1
     var nbVerticeZ int = int(distZ / voxelSize) + 1
 
+
     nbVertices := nbVerticeX * nbVerticeY * nbVerticeZ
     voxels := make([]Voxel, nbVertices)
+    maxDist := math.Sqrt(math.Pow(float64(nbVerticeX/2), 2.0) + math.Pow(float64(nbVerticeY/2), 2.0) + math.Pow(float64(nbVerticeZ/2), 2.0))
+    for z := 0; z < nbVerticeZ; z += 1 {
+        for y := 0; y < nbVerticeY; y += 1 {
+            for x := 0; x < nbVerticeX; x += 1 {
+                // compute distance between (x, y, z) and center and make ratio with maxdistance which is distance from center to corner
+                dist := math.Sqrt(math.Pow(float64(x - nbVerticeX/2), 2.0) + math.Pow(float64(y-nbVerticeY/2), 2.0) + math.Pow(float64(z-nbVerticeZ/2), 2.0))
+                // result between 0 and 1
+                density := 1-dist/maxDist
+                voxels[x + y * nbVerticeX + z * nbVerticeX * nbVerticeY] = InitVoxel(density, 0.0, vector3.InitVector3(100.0 / 255.0,
+                    100.0 / 255.0,
+                    100.0 / 255.0))
+            }
+        }
 
-    // Init voxels
+    }
+    /* Init voxels with random floats between 0 and 1
     for i := 0; i < nbVertices; i += 1 {
         // TODO (change with perlin noise for density)
         density := rand.Float64()
@@ -74,6 +89,8 @@ func InitVoxelGrid(voxelSize float64,
                                                                 100.0 / 255.0,
                                                                 100.0 / 255.0))
     }
+     */
+
 
     return VoxelGrid{
         VoxelSize: voxelSize, // size of one voxel

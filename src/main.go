@@ -18,7 +18,7 @@ func main() {
     // Camera
     aspectRatio := float64(imgSizeX) / float64(imgSizeY)
     fieldOfView := math.Pi / 2
-    origin := vector3.InitVector3(2.0, 3.0, 3.0)
+    origin := vector3.InitVector3(-5, 5, 3.0)
     camera := camera.InitCamera(
        aspectRatio,
        fieldOfView,
@@ -26,7 +26,7 @@ func main() {
        imgSizeY,
        origin,
        -math.Pi / 8.0,
-       0.0,
+       -math.Pi/4.0,
        0.0,
     )
 
