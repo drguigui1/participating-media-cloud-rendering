@@ -2,7 +2,7 @@ package voxel_grid
 
 import (
     "math"
-  //  "math/rand"
+//    "math/rand"
 
     "volumetric-cloud/light"
     "volumetric-cloud/vector3"
@@ -72,7 +72,10 @@ func InitVoxelGrid(voxelSize float64,
                 // compute distance between (x, y, z) and center and make ratio with maxdistance which is distance from center to corner
                 dist := math.Sqrt(math.Pow(float64(x - nbVerticeX/2), 2.0) + math.Pow(float64(y-nbVerticeY/2), 2.0) + math.Pow(float64(z-nbVerticeZ/2), 2.0))
                 // result between 0 and 1
-                density := 1-dist/maxDist
+                density := 1 - dist/maxDist
+                if density < 0 {
+                    density = 0
+                }
                 voxels[x + y * nbVerticeX + z * nbVerticeX * nbVerticeY] = InitVoxel(density, 0.0, vector3.InitVector3(100.0 / 255.0,
                     100.0 / 255.0,
                     100.0 / 255.0))
@@ -80,17 +83,15 @@ func InitVoxelGrid(voxelSize float64,
         }
 
     }
-    /* Init voxels with random floats between 0 and 1
-    for i := 0; i < nbVertices; i += 1 {
+    // Init voxels with random floats between 0 and 1
+/*    for i := 0; i < nbVertices; i += 1 {
         // TODO (change with perlin noise for density)
         density := rand.Float64()
         // transmitivity will be set latter
         voxels[i] = InitVoxel(density, 0.0, vector3.InitVector3(100.0 / 255.0,
                                                                 100.0 / 255.0,
                                                                 100.0 / 255.0))
-    }
-     */
-
+    }*/
 
     return VoxelGrid{
         VoxelSize: voxelSize, // size of one voxel
@@ -320,6 +321,10 @@ func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3
         // TODO: use interpolation
         vGridCoord := vGrid.GetVoxelIndex(p)
         density := vGrid.GetDensity(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
+
+        if density < 0.001 {
+            continue
+        }
 
         // get transparency / transmittance
         insideTransparency := vGrid.GetTransparency(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
