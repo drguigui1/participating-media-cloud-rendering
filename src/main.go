@@ -46,7 +46,7 @@ func main() {
     s := scene.InitScene(voxelGrid, sphere, camera, light);
 
     // Render
-    image := s.Render(imgSizeY, imgSizeX, 10)
+    image := s.Render(imgSizeY, imgSizeX, 3)
 
     // Save
     image.SavePPM("tmp.ppm")

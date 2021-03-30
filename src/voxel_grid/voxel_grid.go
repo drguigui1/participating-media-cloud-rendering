@@ -315,9 +315,11 @@ func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3
         voxelLight.Mul(insideTransparency)
         voxelLight.Mul(density)
 
-        accTransparency *= math.Exp(-vGrid.Step * density)
+        beerlambert := math.Exp(-vGrid.Step * density)
+        accTransparency *= beerlambert
 
-        voxelLight.Mul(accTransparency * vGrid.Step)
+        //voxelLight.Mul(accTransparency * vGrid.Step)
+        voxelLight.Mul((1 - beerlambert) / density)
         color.AddVector3(voxelLight)
     }
 
