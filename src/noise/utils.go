@@ -43,3 +43,28 @@ func InitPermutationTable(size int) []int {
     Shuffle(&permutationTable)
     return Stack(permutationTable, permutationTable)
 }
+
+// Dot product between x,y,z and the gradient vectors
+// (according to the value in the hash table)
+func GradDotProduct(hashRes int, x, y, z float64) float64 {
+    m := []float64{
+        x + y,
+        -x + y,
+        x - y,
+        -x - y,
+        x + z,
+        -x + z,
+        x - z,
+        -x - z,
+        y + z,
+        -y + z,
+        y - z,
+        -y - z,
+        x + y,
+        -y + z,
+        -x + y,
+        -y - z,
+    }
+
+    return m[hashRes & 15] // % 16
+}
