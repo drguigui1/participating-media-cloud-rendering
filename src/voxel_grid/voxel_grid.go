@@ -287,7 +287,7 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransparency(light light.Light) {
 }
 
 // return the proper color
-func (vGrid VoxelGrid) RenderPixel(ray ray.Ray, lightColor vector3.Vector3) (vector3.Vector3, bool) {
+func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3) (vector3.Vector3, bool) {
     pts, hasHit := vGrid.RayMarch(ray)
     if !hasHit {
         return vector3.Vector3{}, false

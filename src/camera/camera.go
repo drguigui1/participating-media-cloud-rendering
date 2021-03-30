@@ -70,10 +70,10 @@ func InitCamera(aspectRatio,
     }
 }
 
-func (c Camera) CreateRay(i, j int) ray.Ray {
+func (c Camera) CreateRay(i, j float64) ray.Ray {
     // position on the point in the 3D world
-    var px float64 = (2.0 * (float64(i) + 0.5) / float64(c.ImgWidth) - 1.0) * math.Tan(c.FieldOfView * 0.5)
-    var py float64 = (1.0 - 2.0 * (float64(j) + 0.5) / float64(c.ImgHeight)) * math.Tan(c.FieldOfView * 0.5) * 1.0 / c.AspectRatio
+    var px float64 = (2.0 * (i + 0.5) / float64(c.ImgWidth) - 1.0) * math.Tan(c.FieldOfView * 0.5)
+    var py float64 = (1.0 - 2.0 * (j + 0.5) / float64(c.ImgHeight)) * math.Tan(c.FieldOfView * 0.5) * 1.0 / c.AspectRatio
     var pz float64 = -1.0
 
     // create the ray direction
