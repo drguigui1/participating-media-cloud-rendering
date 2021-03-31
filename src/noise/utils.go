@@ -1,6 +1,7 @@
 package noise
 
 import (
+    "math"
     "math/rand"
 )
 
@@ -67,4 +68,9 @@ func GradDotProduct(hashRes int, x, y, z float64) float64 {
     }
 
     return m[hashRes & 15] // % 16
+}
+
+// Fade function (from 'Improving Noise' paper 2002 Ken Perlin)
+func Fade(t float64) float64 {
+    return 6 * math.Pow(t, 5.0) - 15 * math.Pow(t, 4.0) + 10 * math.Pow(t, 3.0)
 }

@@ -8,6 +8,7 @@ import (
     "volumetric-cloud/vector3"
     "volumetric-cloud/ray"
     "volumetric-cloud/background"
+    "volumetric-cloud/noise"
 )
 
 /*
@@ -62,47 +63,56 @@ func InitVoxelGrid(voxelSize float64,
     var nbVerticeY int = int(distY / voxelSize) + 1
     var nbVerticeZ int = int(distZ / voxelSize) + 1
 
-
-    nbVertices := nbVerticeX * nbVerticeY * nbVerticeZ
-    voxels := make([]Voxel, nbVertices)
-    maxDist := math.Sqrt(math.Pow(float64(nbVerticeX/2), 2.0) + math.Pow(float64(nbVerticeY/2), 2.0) + math.Pow(float64(nbVerticeZ/2), 2.0))
-    for z := 0; z < nbVerticeZ; z += 1 {
-        for y := 0; y < nbVerticeY; y += 1 {
-            for x := 0; x < nbVerticeX; x += 1 {
-                // compute distance between (x, y, z) and center and make ratio with maxdistance which is distance from center to corner
-                dist := math.Sqrt(math.Pow(float64(x - nbVerticeX/2), 2.0) + math.Pow(float64(y-nbVerticeY/2), 2.0) + math.Pow(float64(z-nbVerticeZ/2), 2.0))
-                // result between 0 and 1
-                density := 1 - 1.5 * dist/maxDist
-                if density < 0 {
-                    density = 0
-                }
-                voxels[x + y * nbVerticeX + z * nbVerticeX * nbVerticeY] = InitVoxel(density, 0.0, vector3.InitVector3(100.0 / 255.0,
-                    100.0 / 255.0,
-                    100.0 / 255.0))
-            }
-        }
-
-    }
-    // Init voxels with random floats between 0 and 1
-/*    for i := 0; i < nbVertices; i += 1 {
-        // TODO (change with perlin noise for density)
-        density := rand.Float64()
-        // transmitivity will be set latter
-        voxels[i] = InitVoxel(density, 0.0, vector3.InitVector3(100.0 / 255.0,
-                                                                100.0 / 255.0,
-                                                                100.0 / 255.0))
-    }*/
-
-    return VoxelGrid{
+    voxelGrid := VoxelGrid{
         VoxelSize: voxelSize, // size of one voxel
         NbVerticeX: nbVerticeX,
         NbVerticeY: nbVerticeY,
         NbVerticeZ: nbVerticeZ,
         Shift: shift,
         OppositeCorner: oppositeCorner,
-        Voxels: voxels,
         Step: step,
     }
+
+
+    nbVertices := nbVerticeX * nbVerticeY * nbVerticeZ
+    voxels := make([]Voxel, nbVertices)
+    maxDist := math.Sqrt(math.Pow(float64(nbVerticeX/2), 2.0) + math.Pow(float64(nbVerticeY/2), 2.0) + math.Pow(float64(nbVerticeZ/2), 2.0))
+
+    perlinNoise := noise.InitPerlinNoise(0.5, 2.0, 0.5, 0.5, 5)
+
+    for z := 0; z < nbVerticeZ; z += 1 {
+        for y := 0; y < nbVerticeY; y += 1 {
+            for x := 0; x < nbVerticeX; x += 1 {
+                // put x,y,z in world coordinate
+                worldVec := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(x), float64(y), float64(z)))
+                // compute distance between (x, y, z) and center and make ratio with maxdistance which is distance from center to corner
+                dist := math.Sqrt(math.Pow(float64(x - nbVerticeX/2), 2.0) + math.Pow(float64(y-nbVerticeY/2), 2.0) + math.Pow(float64(z-nbVerticeZ/2), 2.0))
+                // result between 0 and 1
+
+                noiseValue := perlinNoise.GeneratePerlinNoise(worldVec.X, worldVec.Y, worldVec.Z)
+                dist = dist / maxDist
+                sharpness := 0.5 
+                d := 5.0
+                noiseValue -= dist + 0.3
+                if noiseValue < 0 {
+                    noiseValue = 0
+                }
+                noiseValue *= d
+                density := 1.0 - 1.4 * math.Pow(sharpness, noiseValue)
+
+                if density < 0 {
+                    density = 0
+                }
+
+                voxels[x + y * nbVerticeX + z * nbVerticeX * nbVerticeY] = InitVoxel(density, 0.0, vector3.InitVector3(100.0 / 255.0,
+                    100.0 / 255.0,
+                    100.0 / 255.0))
+            }
+        }
+    }
+
+    voxelGrid.Voxels = voxels
+    return voxelGrid
 }
 
 // Shift the voxel grid from its position to (0,0,0)

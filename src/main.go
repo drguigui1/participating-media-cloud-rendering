@@ -2,6 +2,7 @@ package main
 
 import (
     "math"
+    "math/rand"
 
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/scene"
@@ -12,6 +13,8 @@ import (
 )
 
 func main() {
+    rand.Seed(42)
+
     imgSizeX := 1200
     imgSizeY := 1000
 
@@ -40,7 +43,7 @@ func main() {
 
     // Lights
     //light := light.InitLight(vector3.InitVector3(0.0, 5.0, 0.0), vector3.InitVector3(100.0 / 255.0, 100.0 / 255.0, 100.0 / 255.0))
-    light := light.InitLight(vector3.InitVector3(0.0, 6.0, 0.0), vector3.InitVector3(0.8, 0.8, 0.8))
+    light := light.InitLight(vector3.InitVector3(0.0, 6.0, 0.0), vector3.InitVector3(0.7, 0.7, 0.7))
 
     // Scene
     s := scene.InitScene(voxelGrid, sphere, camera, light);
