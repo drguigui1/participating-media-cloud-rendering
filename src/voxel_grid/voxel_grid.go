@@ -2,7 +2,6 @@ package voxel_grid
 
 import (
     "math"
-//    "math/rand"
 
     "volumetric-cloud/light"
     "volumetric-cloud/vector3"
@@ -76,9 +75,11 @@ func InitVoxelGrid(voxelSize float64,
 
     nbVertices := nbVerticeX * nbVerticeY * nbVerticeZ
     voxels := make([]Voxel, nbVertices)
-    maxDist := math.Sqrt(math.Pow(float64(nbVerticeX/2), 2.0) + math.Pow(float64(nbVerticeY/2), 2.0) + math.Pow(float64(nbVerticeZ/2), 2.0))
 
-    perlinNoise := noise.InitPerlinNoise(0.5, 2.0, 0.5, 0.5, 5)
+    center := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(nbVerticeX / 2.0), float64(nbVerticeY / 2.0), float64(nbVerticeZ / 2.0)))
+    maxDist := vector3.SubVector3(shift, center).Length()
+
+    perlinNoise := noise.InitPerlinNoise(1.0, 2.0, 1.0, 0.7, 3)
 
     for z := 0; z < nbVerticeZ; z += 1 {
         for y := 0; y < nbVerticeY; y += 1 {
@@ -86,19 +87,18 @@ func InitVoxelGrid(voxelSize float64,
                 // put x,y,z in world coordinate
                 worldVec := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(x), float64(y), float64(z)))
                 // compute distance between (x, y, z) and center and make ratio with maxdistance which is distance from center to corner
-                dist := math.Sqrt(math.Pow(float64(x - nbVerticeX/2), 2.0) + math.Pow(float64(y-nbVerticeY/2), 2.0) + math.Pow(float64(z-nbVerticeZ/2), 2.0))
-                // result between 0 and 1
+                dist := vector3.SubVector3(worldVec, center).Length()
 
                 noiseValue := perlinNoise.GeneratePerlinNoise(worldVec.X, worldVec.Y, worldVec.Z)
                 dist = dist / maxDist
-                sharpness := 0.5 
+                sharpness := 0.5
                 d := 5.0
                 noiseValue -= dist + 0.3
                 if noiseValue < 0 {
                     noiseValue = 0
                 }
                 noiseValue *= d
-                density := 1.0 - 1.4 * math.Pow(sharpness, noiseValue)
+                density := 1.0 - math.Pow(sharpness, noiseValue)
 
                 if density < 0 {
                     density = 0
