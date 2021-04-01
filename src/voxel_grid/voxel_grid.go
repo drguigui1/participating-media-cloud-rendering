@@ -79,7 +79,7 @@ func InitVoxelGrid(voxelSize float64,
     center := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(nbVerticeX / 2.0), float64(nbVerticeY / 2.0), float64(nbVerticeZ / 2.0)))
     maxDist := vector3.SubVector3(shift, center).Length()
 
-    perlinNoise := noise.InitPerlinNoise(1.0, 2.0, 1.0, 0.7, 3)
+    perlinNoise := noise.InitPerlinNoise(1, 2.0, 1, 0.5, 5)
 
     for z := 0; z < nbVerticeZ; z += 1 {
         for y := 0; y < nbVerticeY; y += 1 {
@@ -88,11 +88,17 @@ func InitVoxelGrid(voxelSize float64,
                 worldVec := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(x), float64(y), float64(z)))
                 // compute distance between (x, y, z) and center and make ratio with maxdistance which is distance from center to corner
                 dist := vector3.SubVector3(worldVec, center).Length()
+                height := HeightDistribution(float64(y/2) /  (float64(nbVerticeY)), 10, 1)
+                height += GaussianTower(0.4, float64(x), float64(y), float64(z), []float64 { 0.1, 0.31, 0.4 },
+                             []float64 { 0.4, 0.3, 0.6 })
+
 
                 noiseValue := perlinNoise.GeneratePerlinNoise(worldVec.X, worldVec.Y, worldVec.Z)
+                noiseValue *= HeightDistribution(float64(y/2) /  (float64(nbVerticeY)), 20, 1)
+
                 dist = dist / maxDist
                 sharpness := 0.5
-                d := 5.0
+                d := 10.0
                 noiseValue -= dist + 0.3
                 if noiseValue < 0 {
                     noiseValue = 0
