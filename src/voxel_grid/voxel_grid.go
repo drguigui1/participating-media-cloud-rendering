@@ -8,6 +8,7 @@ import (
     "volumetric-cloud/ray"
     "volumetric-cloud/background"
     "volumetric-cloud/noise"
+    "volumetric-cloud/interpolation"
 )
 
 /*
@@ -79,7 +80,7 @@ func InitVoxelGrid(voxelSize float64,
     center := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(nbVerticeX / 2.0), float64(nbVerticeY / 2.0), float64(nbVerticeZ / 2.0)))
     maxDist := vector3.SubVector3(shift, center).Length()
 
-    perlinNoise := noise.InitPerlinNoise(1.0, 2.0, 1.0, 0.7, 3)
+    perlinNoise := noise.InitPerlinNoise(1.0, 2.0, 1.0, 0.5, 5)
 
     for z := 0; z < nbVerticeZ; z += 1 {
         for y := 0; y < nbVerticeY; y += 1 {
@@ -88,12 +89,19 @@ func InitVoxelGrid(voxelSize float64,
                 worldVec := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(x), float64(y), float64(z)))
                 // compute distance between (x, y, z) and center and make ratio with maxdistance which is distance from center to corner
                 dist := vector3.SubVector3(worldVec, center).Length()
+                //height := HeightDistribution(float64(y/2) /  (float64(nbVerticeY)), 10, 1)
+                //height += GaussianTower(0.4, float64(x), float64(y), float64(z), []float64 { 0.1, 0.31, 0.4 },
+                 //            []float64 { 0.4, 0.3, 0.6 })
 
+
+                //noiseValue := perlinNoise.GeneratePerlinNoise(worldVec.X, worldVec.Y, worldVec.Z)
                 noiseValue := perlinNoise.GeneratePerlinNoise(worldVec.X, worldVec.Y, worldVec.Z)
+                //noiseValue *= HeightDistribution(float64(y/2) /  (float64(nbVerticeY)), 20, 1)
+
                 dist = dist / maxDist
-                sharpness := 0.5
-                d := 5.0
-                noiseValue -= dist + 0.3
+                sharpness := 0.1
+                d := 2.0
+                noiseValue -= dist - 0.5
                 if noiseValue < 0 {
                     noiseValue = 0
                 }
@@ -163,6 +171,84 @@ func (vGrid VoxelGrid) GetColor(i, j, k int) vector3.Vector3 {
 
 func (vGrid *VoxelGrid) SetTransparency(i, j, k int, value float64) {
     vGrid.Voxels[i + j * vGrid.NbVerticeX + k * vGrid.NbVerticeX * vGrid.NbVerticeY].Transparency = value
+}
+
+// (x,y,z) point in the real world
+func (vGrid *VoxelGrid) LinearInterpolateDensity(x, y, z float64) float64 {
+    // Get the index of the current position in the voxel
+    p1 := vGrid.GetVoxelIndex(vector3.InitVector3(x, y, z))
+    p2 := vector3.InitVector3(p1.X, p1.Y + 1, p1.Z)
+    p3 := vector3.InitVector3(p1.X, p1.Y, p1.Z + 1)
+    p4 := vector3.InitVector3(p1.X, p1.Y + 1, p1.Z + 1)
+    p5 := vector3.InitVector3(p1.X + 1, p1.Y, p1.Z)
+    p6 := vector3.InitVector3(p1.X + 1, p1.Y + 1, p1.Z)
+    p7 := vector3.InitVector3(p1.X + 1, p1.Y, p1.Z + 1)
+    p8 := vector3.InitVector3(p1.X + 1, p1.Y + 1, p1.Z + 1)
+
+    d1 := vGrid.GetDensity(int(p1.X), int(p1.Y), int(p1.Z))
+    d2 := vGrid.GetDensity(int(p2.X), int(p2.Y), int(p2.Z))
+    d3 := vGrid.GetDensity(int(p3.X), int(p3.Y), int(p3.Z))
+    d4 := vGrid.GetDensity(int(p4.X), int(p4.Y), int(p4.Z))
+    d5 := vGrid.GetDensity(int(p5.X), int(p5.Y), int(p5.Z))
+    d6 := vGrid.GetDensity(int(p6.X), int(p6.Y), int(p6.Z))
+    d7 := vGrid.GetDensity(int(p7.X), int(p7.Y), int(p7.Z))
+    d8 := vGrid.GetDensity(int(p8.X), int(p8.Y), int(p8.Z))
+
+    // Get t value for interpolation
+    t := vector3.SubVector3(vector3.InitVector3(x, y, z), vGrid.GetWorldPosition(p1))
+    t.Div(vGrid.VoxelSize)
+
+    // interpolation with x axis
+    interpP1P5 := interpolation.Lerp(d1, d5, t.X)
+    interpP2P6 := interpolation.Lerp(d2, d6, t.X)
+    interpP3P7 := interpolation.Lerp(d3, d7, t.X)
+    interpP4P8 := interpolation.Lerp(d4, d8, t.X)
+
+    // y axis
+    interpY1 := interpolation.Lerp(interpP1P5, interpP2P6, t.Y)
+    interpY2 := interpolation.Lerp(interpP3P7, interpP4P8, t.Y)
+
+    // z axis
+    return interpolation.Lerp(interpY1, interpY2, t.Z)
+}
+
+// (x,y,z) point in the real world
+func (vGrid *VoxelGrid) LinearInterpolateTransparency(x, y, z float64) float64 {
+    // Get the index of the current position in the voxel
+    p1 := vGrid.GetVoxelIndex(vector3.InitVector3(x, y, z))
+    p2 := vector3.InitVector3(p1.X, p1.Y + 1, p1.Z)
+    p3 := vector3.InitVector3(p1.X, p1.Y, p1.Z + 1)
+    p4 := vector3.InitVector3(p1.X, p1.Y + 1, p1.Z + 1)
+    p5 := vector3.InitVector3(p1.X + 1, p1.Y, p1.Z)
+    p6 := vector3.InitVector3(p1.X + 1, p1.Y + 1, p1.Z)
+    p7 := vector3.InitVector3(p1.X + 1, p1.Y, p1.Z + 1)
+    p8 := vector3.InitVector3(p1.X + 1, p1.Y + 1, p1.Z + 1)
+
+    t1 := vGrid.GetTransparency(int(p1.X), int(p1.Y), int(p1.Z))
+    t2 := vGrid.GetTransparency(int(p2.X), int(p2.Y), int(p2.Z))
+    t3 := vGrid.GetTransparency(int(p3.X), int(p3.Y), int(p3.Z))
+    t4 := vGrid.GetTransparency(int(p4.X), int(p4.Y), int(p4.Z))
+    t5 := vGrid.GetTransparency(int(p5.X), int(p5.Y), int(p5.Z))
+    t6 := vGrid.GetTransparency(int(p6.X), int(p6.Y), int(p6.Z))
+    t7 := vGrid.GetTransparency(int(p7.X), int(p7.Y), int(p7.Z))
+    t8 := vGrid.GetTransparency(int(p8.X), int(p8.Y), int(p8.Z))
+
+    // Get t value for interpolation
+    t := vector3.SubVector3(vector3.InitVector3(x, y, z), vGrid.GetWorldPosition(p1))
+    t.Div(vGrid.VoxelSize)
+
+    // interpolation with x axis
+    interpP1P5 := interpolation.Lerp(t1, t5, t.X)
+    interpP2P6 := interpolation.Lerp(t2, t6, t.X)
+    interpP3P7 := interpolation.Lerp(t3, t7, t.X)
+    interpP4P8 := interpolation.Lerp(t4, t8, t.X)
+
+    // y axis
+    interpY1 := interpolation.Lerp(interpP1P5, interpP2P6, t.Y)
+    interpY2 := interpolation.Lerp(interpP3P7, interpP4P8, t.Y)
+
+    // z axis
+    return interpolation.Lerp(interpY1, interpY2, t.Z)
 }
 
 func (vGrid VoxelGrid) IsInsideVoxelGrid(p vector3.Vector3) bool {
@@ -328,21 +414,22 @@ func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3
         var voxelLight vector3.Vector3
 
         // get the index in the voxelGrid of the points 'p'
-        // TODO: use interpolation
-        vGridCoord := vGrid.GetVoxelIndex(p)
-        density := vGrid.GetDensity(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
+        //vGridCoord := vGrid.GetVoxelIndex(p)
+        //density := vGrid.GetDensity(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
+        density := vGrid.LinearInterpolateDensity(p.X, p.Y, p.Z)
 
         if density < 0.001 {
             continue
         }
 
         // get transparency / transmittance
-        insideTransparency := vGrid.GetTransparency(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
+        //insideTransparency := vGrid.GetTransparency(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
+        insideTransparency := vGrid.LinearInterpolateTransparency(p.X, p.Y, p.Z)
 
         // get the color at specific position of the voxel
         //voxelColor := vGrid.GetColor(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
-
         //voxelLight = vector3.HadamarProduct(voxelColor, lightColor)
+
         voxelLight = lightColor
         voxelLight.Mul(insideTransparency)
         voxelLight.Mul(density)

@@ -26,7 +26,6 @@ type PerlinNoise struct {
 }
 
 func InitPerlinNoise(freq, freqFactor, amplitude, amplitudeFactor float64, octaves int) PerlinNoise {
-    
     // init permutation
     permutationTable := InitPermutationTable(256)
     n := Noise{
@@ -55,8 +54,6 @@ func (p PerlinNoise) EvalPerlinNoise(x, y, z float64) float64 {
     zi1 := (zi0 + 1) & 255
 
     // Get float value of x,y,z
-
-
     xf := x - math.Floor(x)
     yf := y - math.Floor(y)
     zf := z - math.Floor(z)
@@ -89,17 +86,32 @@ func (p PerlinNoise) EvalPerlinNoise(x, y, z float64) float64 {
     // Linear interpolation
 
     // x axis interpolation
-    interpP1P5 := interpolation.Lerp(u, dot1, dot5)
-    interpP2P6 := interpolation.Lerp(u, dot2, dot6)
-    interpP3P7 := interpolation.Lerp(u, dot3, dot7)
-    interpP4P8 := interpolation.Lerp(u, dot4, dot8)
+    interpP1P5 := interpolation.Lerp(dot1, dot5, u)
+    interpP2P6 := interpolation.Lerp(dot2, dot6, u)
+    interpP3P7 := interpolation.Lerp(dot3, dot7, u)
+    interpP4P8 := interpolation.Lerp(dot4, dot8, u)
 
     // y axis interpolation
-    interpY1 := interpolation.Lerp(v, interpP1P5, interpP2P6)
-    interpY2 := interpolation.Lerp(v, interpP3P7, interpP4P8)
+    interpY1 := interpolation.Lerp(interpP1P5, interpP2P6, v)
+    interpY2 := interpolation.Lerp(interpP3P7, interpP4P8, v)
 
     // z axis
-    return interpolation.Lerp(w, interpY1, interpY2)
+    return interpolation.Lerp(interpY1, interpY2, w)
+
+    // Cosinus interpolate
+    // x axis interpolation
+    /*interpP1P5 := interpolation.CosineInterpolate(dot1, dot5, u)
+    interpP2P6 := interpolation.CosineInterpolate(dot2, dot6, u)
+    interpP3P7 := interpolation.CosineInterpolate(dot3, dot7, u)
+    interpP4P8 := interpolation.CosineInterpolate(dot4, dot8, u)
+
+    // y axis interpolation
+    interpY1 := interpolation.CosineInterpolate(interpP1P5, interpP2P6, v)
+    interpY2 := interpolation.CosineInterpolate(interpP3P7, interpP4P8, v)
+
+    // z axis
+    return interpolation.CosineInterpolate(interpY1, interpY2, w)*/
+
 }
 
 func (p PerlinNoise) GeneratePerlinNoise(x, y, z float64) float64 {
@@ -114,8 +126,4 @@ func (p PerlinNoise) GeneratePerlinNoise(x, y, z float64) float64 {
         freq *= p.N.FreqFactor
     }
     return res
-}
-
-func InitValueNoise(freq float64) ValueNoise {
-    return ValueNoise{}
 }
