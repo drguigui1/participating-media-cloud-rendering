@@ -21,7 +21,7 @@ func main() {
     // Camera
     aspectRatio := float64(imgSizeX) / float64(imgSizeY)
     fieldOfView := math.Pi / 2
-    origin := vector3.InitVector3(0, 8, 5)
+    /*origin := vector3.InitVector3(0, 8, 5)
     camera := camera.InitCamera(
        aspectRatio,
        fieldOfView,
@@ -31,7 +31,20 @@ func main() {
        -math.Pi / 8,
        0.0,
        0.0,
+    )*/
+
+    origin := vector3.InitVector3(0, 3, 5)
+    camera := camera.InitCamera(
+       aspectRatio,
+       fieldOfView,
+       imgSizeX,
+       imgSizeY,
+       origin,
+       0.0,
+       0.0,
+       0.0,
     )
+
 
     // Voxel Grid
     shift := vector3.InitVector3(-2.0, 2.0, -6.0)
@@ -43,7 +56,8 @@ func main() {
 
     // Lights
     //light := light.InitLight(vector3.InitVector3(0.0, 5.0, 0.0), vector3.InitVector3(100.0 / 255.0, 100.0 / 255.0, 100.0 / 255.0))
-    light := light.InitLight(vector3.InitVector3(0.0, 6.0, 0.0), vector3.InitVector3(0.75, 0.75, 0.75))
+    //light := light.InitLight(vector3.InitVector3(0.0, 6.0, 0.0), vector3.InitVector3(0.7, 0.2, 0.2))
+    light := light.InitLight(vector3.InitVector3(0.0, 6.0, 0.0), vector3.InitVector3(0.4, 0.4, 0.4))
 
     // Scene
     s := scene.InitScene(voxelGrid, sphere, camera, light);
