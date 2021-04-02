@@ -2,7 +2,6 @@ package main
 
 import (
     "math"
-    "math/rand"
 
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/scene"
@@ -10,18 +9,17 @@ import (
     "volumetric-cloud/light"
     "volumetric-cloud/camera"
     "volumetric-cloud/vector3"
+    "volumetric-cloud/noise"
 )
 
 func main() {
-    rand.Seed(42)
-
     imgSizeX := 1200
     imgSizeY := 1000
 
     // Camera
     aspectRatio := float64(imgSizeX) / float64(imgSizeY)
     fieldOfView := math.Pi / 2
-    /*origin := vector3.InitVector3(0, 8, 5)
+/*    origin := vector3.InitVector3(0, 8, 5)
     camera := camera.InitCamera(
        aspectRatio,
        fieldOfView,
@@ -45,11 +43,23 @@ func main() {
        0.0,
     )
 
+    // Voxel Grid 1
+    shift := vector3.InitVector3(-4.0, -3.0, -15.0)
+    oppositeCorner := vector3.InitVector3(5.0, 1.0, -9.0)
+    var seed int64 = 42
+    perlinNoise := noise.InitPerlinNoise(1.0, 2.0, 1.0, 0.5, 5, seed)
+    voxelGrid := voxel_grid.InitVoxelGrid(0.1, shift, oppositeCorner, 0.05, perlinNoise)
 
-    // Voxel Grid
-    shift := vector3.InitVector3(-2.0, 2.0, -6.0)
-    oppositeCorner := vector3.InitVector3(5.0, 5.0, -3.0)
-    voxelGrid := voxel_grid.InitVoxelGrid(0.1, shift, oppositeCorner, 0.05)
+    // Voxel Grid 2
+    shift2 := vector3.InitVector3(-5.0, -3.0, -10.0)
+    oppositeCorner2 := vector3.InitVector3(4.0, 1.0, -6.5)
+    var seed2 int64 = 250
+    perlinNoise2 := noise.InitPerlinNoise(1.0, 2.0, 1.0, 0.5, 5, seed2)
+    voxelGrid2 := voxel_grid.InitVoxelGrid(0.1, shift2, oppositeCorner2, 0.05, perlinNoise2)
+    _ = voxelGrid2
+
+    voxelGrids := []voxel_grid.VoxelGrid{voxelGrid}
+
 
     // Spheres
     sphere := sphere.InitSphere(vector3.InitVector3(0, 0, -2), 1.0)
@@ -57,10 +67,11 @@ func main() {
     // Lights
     //light := light.InitLight(vector3.InitVector3(0.0, 5.0, 0.0), vector3.InitVector3(100.0 / 255.0, 100.0 / 255.0, 100.0 / 255.0))
     //light := light.InitLight(vector3.InitVector3(0.0, 6.0, 0.0), vector3.InitVector3(0.7, 0.2, 0.2))
-    light := light.InitLight(vector3.InitVector3(0.0, 6.0, 0.0), vector3.InitVector3(0.4, 0.4, 0.4))
+    light := light.InitLight(vector3.InitVector3(0.0, 6.0, 0.0), vector3.InitVector3(0.8, 0.8, 0.8))
+
 
     // Scene
-    s := scene.InitScene(voxelGrid, sphere, camera, light);
+    s := scene.InitScene(voxelGrids, sphere, camera, light);
 
     // Render
     image := s.Render(imgSizeY, imgSizeX, 3)

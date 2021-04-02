@@ -2,6 +2,7 @@ package noise
 
 import (
     "math"
+    "math/rand"
 
     "volumetric-cloud/interpolation"
 )
@@ -25,8 +26,10 @@ type PerlinNoise struct {
     N Noise
 }
 
-func InitPerlinNoise(freq, freqFactor, amplitude, amplitudeFactor float64, octaves int) PerlinNoise {
+func InitPerlinNoise(freq, freqFactor, amplitude, amplitudeFactor float64, octaves int, seed int64) PerlinNoise {
     // init permutation
+    rand.Seed(seed)
+
     permutationTable := InitPermutationTable(256)
     n := Noise{
         PermutationTable: permutationTable,

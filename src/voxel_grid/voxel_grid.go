@@ -9,6 +9,7 @@ import (
     "volumetric-cloud/background"
     "volumetric-cloud/noise"
     "volumetric-cloud/interpolation"
+    "volumetric-cloud/height_distribution"
 )
 
 /*
@@ -36,6 +37,9 @@ type VoxelGrid struct {
     NbVerticeZ int
     Step float64
 
+    // noise
+    Noise noise.PerlinNoise
+
     Shift vector3.Vector3
     OppositeCorner vector3.Vector3
     Voxels []Voxel
@@ -52,7 +56,8 @@ func InitVoxel(density, transparency float64, color vector3.Vector3) Voxel {
 func InitVoxelGrid(voxelSize float64,
                    shift vector3.Vector3,
                    oppositeCorner vector3.Vector3,
-                   step float64) VoxelGrid {
+                   step float64,
+                   noise noise.PerlinNoise) VoxelGrid {
 
     distX := math.Abs(shift.X - oppositeCorner.X)
     distY := math.Abs(shift.Y - oppositeCorner.Y)
@@ -71,6 +76,7 @@ func InitVoxelGrid(voxelSize float64,
         Shift: shift,
         OppositeCorner: oppositeCorner,
         Step: step,
+        Noise: noise,
     }
 
 
@@ -80,8 +86,6 @@ func InitVoxelGrid(voxelSize float64,
     center := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(nbVerticeX / 2.0), float64(nbVerticeY / 2.0), float64(nbVerticeZ / 2.0)))
     maxDist := vector3.SubVector3(shift, center).Length()
 
-    perlinNoise := noise.InitPerlinNoise(1.0, 2.0, 1.0, 0.5, 5)
-
     for z := 0; z < nbVerticeZ; z += 1 {
         for y := 0; y < nbVerticeY; y += 1 {
             for x := 0; x < nbVerticeX; x += 1 {
@@ -89,17 +93,16 @@ func InitVoxelGrid(voxelSize float64,
                 worldVec := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(x), float64(y), float64(z)))
                 // compute distance between (x, y, z) and center and make ratio with maxdistance which is distance from center to corner
                 dist := vector3.SubVector3(worldVec, center).Length()
-                //height := HeightDistribution(float64(y/2) /  (float64(nbVerticeY)), 10, 1)
+                height := height_distribution.HeightDistribution(float64(y) /  (float64(nbVerticeY)), 10, 0.6)
                 //height += GaussianTower(0.4, float64(x), float64(y), float64(z), []float64 { 0.1, 0.31, 0.4 },
                  //            []float64 { 0.4, 0.3, 0.6 })
 
 
-                //noiseValue := perlinNoise.GeneratePerlinNoise(worldVec.X, worldVec.Y, worldVec.Z)
-                noiseValue := perlinNoise.GeneratePerlinNoise(worldVec.X, worldVec.Y, worldVec.Z)
-                //noiseValue *= HeightDistribution(float64(y/2) /  (float64(nbVerticeY)), 20, 1)
+                noiseValue := voxelGrid.Noise.GeneratePerlinNoise(worldVec.X, worldVec.Y, worldVec.Z)
+                noiseValue *= height
 
                 dist = dist / maxDist
-                sharpness := 0.1
+                sharpness := 0.05
                 d := 2.0
                 noiseValue -= dist - 0.5
                 if noiseValue < 0 {
