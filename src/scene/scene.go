@@ -15,20 +15,23 @@ import (
 
 type Scene struct {
     // TODO change to many VoxelGrid
-    VoxelGrid voxel_grid.VoxelGrid
+    VoxelGrids []voxel_grid.VoxelGrid
     Sphere sphere.Sphere
     Camera camera.Camera
     Light light.Light
 }
 
-func InitScene(voxelGrid voxel_grid.VoxelGrid,
+func InitScene(voxelGrids []voxel_grid.VoxelGrid,
                sphere sphere.Sphere,
                camera camera.Camera,
                light light.Light) Scene {
     // compute light transmittance in the voxel grid
-    voxelGrid.ComputeInsideLightTransparency(light)
+    for idx, _ := range voxelGrids {
+        voxelGrids[idx].ComputeInsideLightTransparency(light)
+    }
+
     return Scene{
-        VoxelGrid: voxelGrid,
+        VoxelGrids: voxelGrids,
         Sphere: sphere,
         Camera: camera,
         Light: light,
@@ -59,8 +62,15 @@ func (s Scene) renderPixelNoGoroutine(image img.Img, i, j, nbRaysPerPixel int) {
         // need first column index (j) and then row index (i)
         r := s.Camera.CreateRay(float64(j) + rand.Float64(), float64(i) + rand.Float64())
 
-        // Check intersect with Voxel Grid
-        c, hasHit := s.VoxelGrid.ComputePixelColor(r, s.Light.Color)
+        // Check intersect with Voxel Grids
+        var c vector3.Vector3
+        var hasHit bool
+        for _, vGrid := range s.VoxelGrids {
+            c, hasHit = vGrid.ComputePixelColor(r, s.Light.Color)
+            if hasHit {
+                break
+            }
+        }
 
         // set pixel
         if hasHit {
