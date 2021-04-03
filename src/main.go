@@ -1,18 +1,21 @@
 package main
 
 import (
+    "volumetric-cloud/camera"
+    "volumetric-cloud/light"
     "math"
-
-    "volumetric-cloud/voxel_grid"
+    "volumetric-cloud/noise"
     "volumetric-cloud/scene"
     "volumetric-cloud/sphere"
-    "volumetric-cloud/light"
-    "volumetric-cloud/camera"
     "volumetric-cloud/vector3"
-    "volumetric-cloud/noise"
+    "volumetric-cloud/voxel_grid"
 )
 
 func main() {
+
+
+
+
     imgSizeX := 1200
     imgSizeY := 1000
 
@@ -43,20 +46,23 @@ func main() {
        0.0,
     )*/
 
+
     // Voxel Grid 1
     shift := vector3.InitVector3(-4.0, -3.0, -15.0)
     oppositeCorner := vector3.InitVector3(5.0, 1.0, -9.0)
-    var seed int64 = 4200
+    var seed int64 = 42
     perlinNoise := noise.InitPerlinNoise(1.0, 2.0, 1.0, 0.5, 5, seed)
-    voxelGrid := voxel_grid.InitVoxelGrid(0.2, shift, oppositeCorner, 0.15, perlinNoise)
+    voxelGrid := voxel_grid.InitVoxelGrid(0.2, shift, oppositeCorner, 0.05, perlinNoise,
+        []float64 {0.5, -1.0, -12},[]float64 {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}, uint64(seed))
     _ = voxelGrid
 
     // Voxel Grid 2
     shift2 := vector3.InitVector3(-5.0, -1.0, -20.0)
     oppositeCorner2 := vector3.InitVector3(7.0, 4.0, -16)
-    var seed2 int64 = 2
+    var seed2 int64 = 42
     perlinNoise2 := noise.InitPerlinNoise(1.0, 2.0, 1.0, 0.5, 5, seed2)
-    voxelGrid2 := voxel_grid.InitVoxelGrid(0.2, shift2, oppositeCorner2, 0.15, perlinNoise2)
+    voxelGrid2 := voxel_grid.InitVoxelGrid(0.2, shift2, oppositeCorner2, 0.05, perlinNoise2,
+        []float64 {1.0, 1.5, -18.0},[]float64 {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}, uint64(seed))
 
     // IMPORTANT
     //
@@ -85,4 +91,8 @@ func main() {
 
     // Save
     image.SavePPM("tmp.ppm")
+
+
+
+
 }
