@@ -11,3 +11,9 @@
 - Add multiple light sources (or different types of light sources)
 
 - Add goroutine (almost done)
+
+## Results
+
+![plot](cloud_7.ppm.ppm)
+
+![plot](tmp.ppm)
