@@ -2,7 +2,7 @@
 
 ## TODO
 
-- Manage multiple cloud
+- Manage multiple cloud ✓
 
 - Gaussian tower
 
@@ -10,7 +10,7 @@
 
 - Add multiple light sources (or different types of light sources)
 
-- Add goroutine (almost done)
+- Add goroutine ✓
 
 - Add perlin noise generated ground
 
