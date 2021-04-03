@@ -12,6 +12,10 @@
 
 - Add goroutine (almost done)
 
+- Add perlin noise generated ground
+
+- Create animation (multiple images with camera rotation)
+
 ## Results
 
 ![plot](cloud_7.png)
