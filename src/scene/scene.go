@@ -1,6 +1,8 @@
 package scene
 
 import (
+    "fmt"
+    "os"
     "volumetric-cloud/img"
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/camera"
@@ -46,7 +48,10 @@ func (s Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
     wg.Add(imgSizeY)
 
     for i := 0; i < imgSizeY; i += 1 {
-        go s.renderImageSizeY(image, i, imgSizeX, nbRaysPerPixel, &wg)
+//        if i != 568 {
+//            continue
+//        }
+        s.renderImageSizeY(image, i, imgSizeX, nbRaysPerPixel, nil)
 
         /*
         for j := 0; j < imgSizeX; j += 1 {
@@ -56,7 +61,7 @@ func (s Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
         */
 
     }
-    wg.Wait()
+//    wg.Wait()
     return image
 }
 
@@ -64,6 +69,9 @@ func (s Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
 
 func (s Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int, wg *sync.WaitGroup) {
     for j := 0; j < imgSizeX; j += 1 {
+//        if j != 482 {
+//            continue
+//        }
         color := vector3.InitVector3(0, 0, 0)
         for k := 0; k < nbRaysPerPixel; k += 1 {
             // create the ray
@@ -79,19 +87,26 @@ func (s Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int, 
             var hasOneHit bool = false
 
             // Check intersect with Voxel Grids
+            sum := 0
             for _, vGrid := range s.VoxelGrids {
                 accC, accT, hasHit = vGrid.ComputePixelColor(r, s.Light.Color)
                 if !hasHit {
                     continue
-                } else {
-                    hasOneHit = true
                 }
+
+                hasOneHit = true
 
                 // accumulate transparency
                 accTransparency *= accT
 
                 // accumulate color
                 accColor.AddVector3(accC)
+                sum += 1
+            }
+
+            if sum == 2 {
+                fmt.Printf("%v %v\n", i, j)
+                os.Exit(1)
             }
 
             // get background impact
@@ -118,7 +133,10 @@ func (s Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int, 
 
 
     }
-    wg.Done()
+
+    if wg != nil {
+        wg.Done()
+    }
 }
 
 /*

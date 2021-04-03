@@ -9,7 +9,7 @@ import (
     //"volumetric-cloud/background"
     "volumetric-cloud/noise"
     "volumetric-cloud/interpolation"
-    "volumetric-cloud/height_distribution"
+//    "volumetric-cloud/height_distribution"
 )
 
 /*
@@ -93,13 +93,13 @@ func InitVoxelGrid(voxelSize float64,
                 worldVec := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(x), float64(y), float64(z)))
                 // compute distance between (x, y, z) and center and make ratio with maxdistance which is distance from center to corner
                 dist := vector3.SubVector3(worldVec, center).Length()
-                height := height_distribution.HeightDistribution(float64(y) /  (float64(nbVerticeY)), 10, 0.6)
-                //height += GaussianTower(0.4, float64(x), float64(y), float64(z), []float64 { 0.1, 0.31, 0.4 },
-                 //            []float64 { 0.4, 0.3, 0.6 })
+                //height := height_distribution.HeightDistribution(float64(y) /  (float64(nbVerticeY)), 10, 0.6)
+//                height += height_distribution.GaussianTower(0.4, float64(x), float64(y), float64(z), []float64 { 0.1, 0.31, 0.4 },
+//                            []float64 { 0.4, 0.3, 0.6 })
 
 
                 noiseValue := voxelGrid.Noise.GeneratePerlinNoise(worldVec.X, worldVec.Y, worldVec.Z)
-                noiseValue *= height
+//                noiseValue *= height
 
                 dist = dist / maxDist
                 sharpness := 0.5
@@ -161,6 +161,9 @@ func (vGrid VoxelGrid) GetVoxelIndex(v vector3.Vector3) vector3.Vector3 {
 }
 
 func (vGrid VoxelGrid) GetDensity(i, j, k int) float64 {
+    if !vGrid.IsInsideVoxelGrid(vGrid.GetWorldPosition(vector3.InitVector3(float64(i), float64(j), float64(k)))) {
+        return 0.0
+    }
     return vGrid.Voxels[i + j * vGrid.NbVerticeX + k * vGrid.NbVerticeX * vGrid.NbVerticeY].Density
 }
 
@@ -256,7 +259,6 @@ func (vGrid *VoxelGrid) LinearInterpolateTransparency(x, y, z float64) float64 {
 
 func (vGrid VoxelGrid) IsInsideVoxelGrid(p vector3.Vector3) bool {
     pVoxel := vGrid.ShiftToVoxelCoordinates(p)
-
     if pVoxel.X < 0 || pVoxel.X > (vGrid.VoxelSize * float64(vGrid.NbVerticeX - 1)) ||
        pVoxel.Y < 0 || pVoxel.Y > (vGrid.VoxelSize * float64(vGrid.NbVerticeY - 1)) ||
        pVoxel.Z < 0 || pVoxel.Z > (vGrid.VoxelSize * float64(vGrid.NbVerticeZ - 1)) {
