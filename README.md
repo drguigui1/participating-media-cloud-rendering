@@ -14,6 +14,4 @@
 
 ## Results
 
-![plot](cloud_7.ppm.ppm)
-
-![plot](tmp.ppm)
+![plot](cloud_7.png)
