@@ -389,10 +389,10 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransparency(light light.Light) {
 
                 insideTransparency := 1.0
                 for _, p := range pts {
-                    indexGrid := voxelGrid.GetVoxelIndex(p) // get the proper position in the grid
+                    // indexGrid := voxelGrid.GetVoxelIndex(p) // get the proper position in the grid
 
-                    // TODO maybe interpolate density (make function 'GetDensityInterp')
-                    density := voxelGrid.GetDensity(int(indexGrid.X), int(indexGrid.Y), int(indexGrid.Z))
+                    // density := voxelGrid.GetDensity(int(indexGrid.X), int(indexGrid.Y), int(indexGrid.Z))
+                    density := voxelGrid.LinearInterpolateDensity(p.X, p.Y, p.Z)
                     insideTransparency *= math.Exp(-voxelGrid.Step * density)
                 }
 
