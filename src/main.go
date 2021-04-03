@@ -19,7 +19,7 @@ func main() {
     // Camera
     aspectRatio := float64(imgSizeX) / float64(imgSizeY)
     fieldOfView := math.Pi / 2
-    origin := vector3.InitVector3(-10, 6, -10)
+    origin := vector3.InitVector3(-12, 6, -13)
     camera := camera.InitCamera(
        aspectRatio,
        fieldOfView,
@@ -31,7 +31,7 @@ func main() {
        0.0,
     )
 
-    /*origin := vector3.InitVector3(0, 3, 5)
+/*    origin := vector3.InitVector3(0, 3, 5)
     camera := camera.InitCamera(
        aspectRatio,
        fieldOfView,
@@ -51,21 +51,20 @@ func main() {
     voxelGrid := voxel_grid.InitVoxelGrid(0.1, shift, oppositeCorner, 0.05, perlinNoise)
 
     // Voxel Grid 2
-    shift2 := vector3.InitVector3(-5.0, -3.0, -10.0)
-    oppositeCorner2 := vector3.InitVector3(4.0, 1.0, -6.5)
+    shift2 := vector3.InitVector3(-5.0, -1.0, -20.0)
+    oppositeCorner2 := vector3.InitVector3(2.0, 4.0, -15.5)
     var seed2 int64 = 250
     perlinNoise2 := noise.InitPerlinNoise(1.0, 2.0, 1.0, 0.5, 5, seed2)
     voxelGrid2 := voxel_grid.InitVoxelGrid(0.1, shift2, oppositeCorner2, 0.05, perlinNoise2)
-    _ = voxelGrid2
 
-    voxelGrids := []voxel_grid.VoxelGrid{voxelGrid}
+    voxelGrids := []voxel_grid.VoxelGrid{voxelGrid, voxelGrid2}
 
 
     // Spheres
     sphere := sphere.InitSphere(vector3.InitVector3(0, 0, -2), 1.0)
 
     // Lights
-    light := light.InitLight(vector3.InitVector3(0.0, 6.0, 0.0), vector3.InitVector3(0.7, 0.7, 0.7))
+    light := light.InitLight(vector3.InitVector3(0.0, 6.0, 0.0), vector3.InitVector3(0.6, 0.6, 0.6))
 
 
     // Scene

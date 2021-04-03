@@ -6,7 +6,7 @@ import (
     "volumetric-cloud/light"
     "volumetric-cloud/vector3"
     "volumetric-cloud/ray"
-    "volumetric-cloud/background"
+    //"volumetric-cloud/background"
     "volumetric-cloud/noise"
     "volumetric-cloud/interpolation"
     "volumetric-cloud/height_distribution"
@@ -102,7 +102,7 @@ func InitVoxelGrid(voxelSize float64,
                 noiseValue *= height
 
                 dist = dist / maxDist
-                sharpness := 0.05
+                sharpness := 0.5
                 d := 2.0
                 noiseValue -= dist - 0.5
                 if noiseValue < 0 {
@@ -404,10 +404,10 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransparency(light light.Light) {
 }
 
 // return the proper color
-func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3) (vector3.Vector3, bool) {
+func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3) (vector3.Vector3, float64, bool) {
     pts, hasHit := vGrid.RayMarch(ray)
     if !hasHit {
-        return vector3.Vector3{}, false
+        return vector3.Vector3{}, 0.0, false
     }
 
     var accTransparency float64 = 1.0;
@@ -431,7 +431,6 @@ func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3
 
         // get the color at specific position of the voxel
         //voxelColor := vGrid.GetColor(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
-        //voxelLight = vector3.HadamarProduct(voxelColor, lightColor)
 
         voxelLight = lightColor
         voxelLight.Mul(insideTransparency)
@@ -446,12 +445,12 @@ func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3
     }
 
     // compute background color
-    backgroundColor := background.RenderGradient(ray)
+    //backgroundColor := background.RenderGradient(ray)
 
     // background contribution
-    backgroundColor.Mul(accTransparency)
-    color.AddVector3(backgroundColor)
+    //backgroundColor.Mul(accTransparency)
+    //color.AddVector3(backgroundColor)
 
-    color.Clamp(0.0, 1.0)
-    return color, true
+    //color.Clamp(0.0, 1.0)
+    return color, accTransparency, true
 }
