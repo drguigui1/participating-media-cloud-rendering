@@ -59,27 +59,46 @@ func (s Scene) renderPixelNoGoroutine(image img.Img, i, j, nbRaysPerPixel int) {
     color := vector3.InitVector3(0, 0, 0)
     for k := 0; k < nbRaysPerPixel; k += 1 {
         // create the ray
-        // need first column index (j) and then row index (i)
         r := s.Camera.CreateRay(float64(j) + rand.Float64(), float64(i) + rand.Float64())
 
-        // Check intersect with Voxel Grids
-        var c vector3.Vector3
+        var accColor vector3.Vector3
+        var accC vector3.Vector3
+
+        var accTransparency float64 = 1.0
+        var accT float64
+
         var hasHit bool
+        var hasOneHit bool = false
+
+        // Check intersect with Voxel Grids
         for _, vGrid := range s.VoxelGrids {
-            c, hasHit = vGrid.ComputePixelColor(r, s.Light.Color)
-            if hasHit {
-                break
+            accC, accT, hasHit = vGrid.ComputePixelColor(r, s.Light.Color)
+            if !hasHit {
+                continue
+            } else {
+                hasOneHit = true
             }
+
+            // accumulate transparency
+            accTransparency *= accT
+
+            // accumulate color
+            accColor.AddVector3(accC)
         }
 
+        // get background impact
+        backgroundColor := background.RenderGradient(r)
+
         // set pixel
-        if hasHit {
+        if hasOneHit {
             // compute pizel color
-            color.AddVector3(vector3.InitVector3(c.X, c.Y, c.Z))
+            backgroundColorImpact := vector3.MulVector3Scalar(backgroundColor, accTransparency)
+            accColor.AddVector3(backgroundColorImpact)
+            accColor.Clamp(0.0, 1.0)
+            color.AddVector3(vector3.InitVector3(accColor.X, accColor.Y, accColor.Z))
         } else {
             // gradient case
-            colorG := background.RenderGradient(r)
-            color.AddVector3(colorG)
+            color.AddVector3(backgroundColor)
         }
     }
 
