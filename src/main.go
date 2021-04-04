@@ -22,7 +22,7 @@ func main() {
     // Camera
     aspectRatio := float64(imgSizeX) / float64(imgSizeY)
     fieldOfView := math.Pi / 2
-    origin := vector3.InitVector3(-12, 6, -13)
+/*    origin := vector3.InitVector3(-12, 6, -13)
     camera := camera.InitCamera(
        aspectRatio,
        fieldOfView,
@@ -32,19 +32,19 @@ func main() {
        -math.Pi / 8,
        -math.Pi / 2,
        0.0,
-    )
+    )*/
 
-/*    origin := vector3.InitVector3(0, 3, 5)
+    origin := vector3.InitVector3(0, 8, 5)
     camera := camera.InitCamera(
        aspectRatio,
        fieldOfView,
        imgSizeX,
        imgSizeY,
        origin,
+       -math.Pi / 16,
        0.0,
        0.0,
-       0.0,
-    )*/
+    )
 
 
     // Voxel Grid 1
@@ -53,7 +53,7 @@ func main() {
     var seed int64 = 42
     perlinNoise := noise.InitPerlinNoise(1.0, 2.0, 1.0, 0.5, 5, seed)
     voxelGrid := voxel_grid.InitVoxelGrid(0.2, shift, oppositeCorner, 0.05, perlinNoise,
-        []float64 {0.5, -1.0, -12},[]float64 {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}, uint64(seed))
+        []float64 {0.5, 2.0, 4.6},[]float64 {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}, uint64(seed))
     _ = voxelGrid
 
     // Voxel Grid 2
@@ -62,7 +62,7 @@ func main() {
     var seed2 int64 = 42
     perlinNoise2 := noise.InitPerlinNoise(1.0, 2.0, 1.0, 0.5, 5, seed2)
     voxelGrid2 := voxel_grid.InitVoxelGrid(0.2, shift2, oppositeCorner2, 0.05, perlinNoise2,
-        []float64 {1.0, 1.5, -18.0},[]float64 {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}, uint64(seed))
+        []float64 {0.0, 1.5, 1.0},[]float64 {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}, uint64(seed))
 
     // IMPORTANT
     //

@@ -1,8 +1,6 @@
 package scene
 
 import (
-    "fmt"
-    "os"
     "volumetric-cloud/img"
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/camera"
@@ -105,8 +103,6 @@ func (s Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int, 
             }
 
             if sum == 2 {
-                fmt.Printf("%v %v\n", i, j)
-                os.Exit(1)
             }
 
             // get background impact
@@ -114,6 +110,7 @@ func (s Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int, 
 
             // set pixel
             if hasOneHit {
+                accColor.Mul(1.6)
                 // compute pizel color
                 backgroundColorImpact := vector3.MulVector3Scalar(backgroundColor, accTransparency)
                 accColor.AddVector3(backgroundColorImpact)
