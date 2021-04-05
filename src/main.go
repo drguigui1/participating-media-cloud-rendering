@@ -81,7 +81,7 @@ func main() {
     sphere := sphere.InitSphere(vector3.InitVector3(0, 0, -2), 1.0)
 
     // Lights
-    light := light.InitLight(vector3.InitVector3(0.0, 6.0, 0.0), vector3.InitVector3(0.6, 0.6, 0.6))
+    light := light.InitLight(vector3.InitVector3(0.0, 6.0, 0.0), vector3.InitVector3(0.9, 0.9, 0.9))
 
     // Scene
     s := scene.InitScene(voxelGrids, sphere, camera, light);
