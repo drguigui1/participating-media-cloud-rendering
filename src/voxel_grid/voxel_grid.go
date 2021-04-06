@@ -2,11 +2,11 @@ package voxel_grid
 
 import (
     "math"
+    "sync"
 
     "volumetric-cloud/light"
     "volumetric-cloud/vector3"
     "volumetric-cloud/ray"
-    //"volumetric-cloud/background"
     "volumetric-cloud/noise"
     "volumetric-cloud/interpolation"
     "volumetric-cloud/height_distribution"
@@ -57,10 +57,7 @@ func InitVoxelGrid(voxelSize float64,
                    shift vector3.Vector3,
                    oppositeCorner vector3.Vector3,
                    step float64,
-                   noise noise.PerlinNoise,
-                   mu []float64,
-                   mat_cov []float64,
-                   seed uint64) VoxelGrid {
+                   noise noise.PerlinNoise) VoxelGrid {
 
     distX := math.Abs(shift.X - oppositeCorner.X)
     distY := math.Abs(shift.Y - oppositeCorner.Y)
@@ -96,17 +93,17 @@ func InitVoxelGrid(voxelSize float64,
                 worldVec := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(x), float64(y), float64(z)))
                 // compute distance between (x, y, z) and center and make ratio with maxdistance which is distance from center to corner
                 dist := vector3.SubVector3(worldVec, center).Length()
-                height := height_distribution.HeightDistribution(float64(y) /  (float64(nbVerticeY)), 20, 0.1)
+                height := height_distribution.HeightDistribution(float64(y) /  (float64(nbVerticeY)), 10, 0.2)
 
-                h, _ := GaussianPdf(mu, mat_cov, seed, vector3.InitVector3(float64(x), float64(y), float64(z)))
-                height += h
+                //h, _ := GaussianPdf(mu, mat_cov, seed, vector3.InitVector3(float64(x), float64(y), float64(z)))
+                //height += h
 
                 noiseValue := voxelGrid.Noise.GeneratePerlinNoise(worldVec.X, worldVec.Y, worldVec.Z)
                 noiseValue *= height
 
                 dist = dist / maxDist
-                sharpness := 0.1
-                d := 2.0
+                sharpness := 0.3
+                d := 4.0
                 dist -= 0.3
                 noiseValue -= dist
                 if noiseValue < 0 {
@@ -380,33 +377,42 @@ func (voxelGrid VoxelGrid) RayMarch(ray ray.Ray) ([]vector3.Vector3, bool) {
 }
 
 func (voxelGrid *VoxelGrid) ComputeInsideLightTransparency(light light.Light) {
+    wg := sync.WaitGroup{}
+    wg.Add(voxelGrid.NbVerticeX)
+
     for i := 0; i < voxelGrid.NbVerticeX; i += 1 {
-        for j := 0; j < voxelGrid.NbVerticeY; j += 1 {
-            for k := 0; k < voxelGrid.NbVerticeZ; k += 1 {
-                // get the position of the voxel point
-                pWorld := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(i), float64(j), float64(k)))
-                lDir := vector3.UnitVector(vector3.SubVector3(light.Position, pWorld))
+        go voxelGrid.ComputeInsideLightTransparencyYZ(light, i, &wg)
+    }
+    wg.Wait()
+}
 
-                // build the ray from pWorld to the light
-                ray := ray.InitRay(pWorld, lDir)
+func (voxelGrid *VoxelGrid) ComputeInsideLightTransparencyYZ(light light.Light, i int, wg *sync.WaitGroup) {
+    for j := 0; j < voxelGrid.NbVerticeY; j += 1 {
+        for k := 0; k < voxelGrid.NbVerticeZ; k += 1 {
+            // get the position of the voxel point
+            pWorld := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(i), float64(j), float64(k)))
+            lDir := vector3.UnitVector(vector3.SubVector3(light.Position, pWorld))
 
-                // launch the raymarching from this point to the light
-                pts, _ := voxelGrid.RayMarch(ray)
+            // build the ray from pWorld to the light
+            ray := ray.InitRay(pWorld, lDir)
 
-                insideTransparency := 1.0
-                for _, p := range pts {
-                    // indexGrid := voxelGrid.GetVoxelIndex(p) // get the proper position in the grid
+            // launch the raymarching from this point to the light
+            pts, _ := voxelGrid.RayMarch(ray)
 
-                    // density := voxelGrid.GetDensity(int(indexGrid.X), int(indexGrid.Y), int(indexGrid.Z))
-                    density := voxelGrid.LinearInterpolateDensity(p.X, p.Y, p.Z)
-                    insideTransparency *= math.Exp(-voxelGrid.Step * density)
-                }
+            insideTransparency := 1.0
+            for _, p := range pts {
+                // indexGrid := voxelGrid.GetVoxelIndex(p) // get the proper position in the grid
 
-                // set the transmittance in the voxel grid (position i,j,k)
-                voxelGrid.SetTransparency(i, j, k, insideTransparency)
+                // density := voxelGrid.GetDensity(int(indexGrid.X), int(indexGrid.Y), int(indexGrid.Z))
+                density := voxelGrid.LinearInterpolateDensity(p.X, p.Y, p.Z)
+                insideTransparency *= math.Exp(-voxelGrid.Step * density)
             }
+
+            // set the transmittance in the voxel grid (position i,j,k)
+            voxelGrid.SetTransparency(i, j, k, insideTransparency)
         }
     }
+    wg.Done()
 }
 
 // return the proper color
