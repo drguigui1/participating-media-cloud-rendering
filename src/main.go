@@ -8,7 +8,6 @@ import (
     "volumetric-cloud/light"
     "volumetric-cloud/noise"
     "volumetric-cloud/scene"
-    "volumetric-cloud/sphere"
     "volumetric-cloud/vector3"
     "volumetric-cloud/voxel_grid"
 )
@@ -86,15 +85,17 @@ func main() {
     fmt.Println("VOXEL")
     voxelGrids := []voxel_grid.VoxelGrid{voxelGrid, voxelGrid2, voxelGrid3, voxelGrid4}
 
-    // Spheres
-    sphere := sphere.InitSphere(vector3.InitVector3(0, 0, -2), 1.0)
-
     // Lights
-    light := light.InitLight(vector3.InitVector3(0.0, 200.0, -200.0), vector3.InitVector3(0.5, 0.5, 0.5))
+    light1 := light.InitLight(vector3.InitVector3(0.0, 200.0, 0.0), vector3.InitVector3(0.45, 0.45, 0.45))
+    //light2 := light.InitLight(vector3.InitVector3(-50.0, 150.0, -100.0), vector3.InitVector3(0.4, 0.4, 0.4))
+    //light3 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.3, 0.3, 0.3))
+    //light4 := light.InitLight(vector3.InitVector3(100.0, 100.0, 100.0), vector3.InitVector3(0.4, 0.4, 0.4))
+
+    lights := []light.Light{light1}
 
     // Scene
     fmt.Println("SCENE")
-    s := scene.InitScene(voxelGrids, sphere, camera, light);
+    s := scene.InitScene(voxelGrids, camera, lights)
 
     fmt.Println("RENDER")
     // Render

@@ -4,7 +4,6 @@ import (
     "volumetric-cloud/img"
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/camera"
-    "volumetric-cloud/sphere"
     "volumetric-cloud/light"
     "volumetric-cloud/background"
     "volumetric-cloud/vector3"
@@ -16,25 +15,22 @@ import (
 type Scene struct {
     // TODO change to many VoxelGrid
     VoxelGrids []voxel_grid.VoxelGrid
-    Sphere sphere.Sphere
     Camera camera.Camera
-    Light light.Light
+    Lights []light.Light
 }
 
 func InitScene(voxelGrids []voxel_grid.VoxelGrid,
-               sphere sphere.Sphere,
                camera camera.Camera,
-               light light.Light) Scene {
+               lights []light.Light) Scene {
     // compute light transmittance in the voxel grid
     for idx, _ := range voxelGrids {
-        voxelGrids[idx].ComputeInsideLightTransparency(light)
+        voxelGrids[idx].ComputeInsideLightTransparency(lights)
     }
 
     return Scene{
         VoxelGrids: voxelGrids,
-        Sphere: sphere,
         Camera: camera,
-        Light: light,
+        Lights: lights,
     }
 }
 
@@ -72,7 +68,8 @@ func (s Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int, 
             // Check intersect with Voxel Grids
             sum := 0
             for _, vGrid := range s.VoxelGrids {
-                accC, accT, hasHit = vGrid.ComputePixelColor(r, s.Light.Color)
+                // TODO change with mean of lights color
+                accC, accT, hasHit = vGrid.ComputePixelColor(r, s.Lights[0].Color)
                 if !hasHit {
                     continue
                 }
@@ -95,7 +92,7 @@ func (s Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int, 
 
             // set pixel
             if hasOneHit {
-                accColor.Mul(1.1)
+                accColor.Mul(1.3)
                 // compute pizel color
                 backgroundColorImpact := vector3.MulVector3Scalar(backgroundColor, accTransparency)
                 accColor.AddVector3(backgroundColorImpact)
