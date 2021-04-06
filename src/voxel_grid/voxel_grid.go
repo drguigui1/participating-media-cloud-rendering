@@ -102,8 +102,8 @@ func InitVoxelGrid(voxelSize float64,
                 noiseValue *= height
 
                 dist = dist / maxDist
-                sharpness := 0.3
-                d := 4.0
+                sharpness := 0.2
+                d := 2.0
                 dist -= 0.3
                 noiseValue -= dist
                 if noiseValue < 0 {
@@ -376,40 +376,46 @@ func (voxelGrid VoxelGrid) RayMarch(ray ray.Ray) ([]vector3.Vector3, bool) {
     return points, true
 }
 
-func (voxelGrid *VoxelGrid) ComputeInsideLightTransparency(light light.Light) {
+func (voxelGrid *VoxelGrid) ComputeInsideLightTransparency(lights []light.Light) {
     wg := sync.WaitGroup{}
     wg.Add(voxelGrid.NbVerticeX)
 
     for i := 0; i < voxelGrid.NbVerticeX; i += 1 {
-        go voxelGrid.ComputeInsideLightTransparencyYZ(light, i, &wg)
+        go voxelGrid.ComputeInsideLightTransparencyYZ(lights, i, &wg)
     }
     wg.Wait()
 }
 
-func (voxelGrid *VoxelGrid) ComputeInsideLightTransparencyYZ(light light.Light, i int, wg *sync.WaitGroup) {
+func (voxelGrid *VoxelGrid) ComputeInsideLightTransparencyYZ(lights []light.Light, i int, wg *sync.WaitGroup) {
     for j := 0; j < voxelGrid.NbVerticeY; j += 1 {
         for k := 0; k < voxelGrid.NbVerticeZ; k += 1 {
             // get the position of the voxel point
             pWorld := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(i), float64(j), float64(k)))
-            lDir := vector3.UnitVector(vector3.SubVector3(light.Position, pWorld))
 
-            // build the ray from pWorld to the light
-            ray := ray.InitRay(pWorld, lDir)
+            // iterate on all lights
+            insideTransparencySum := 0.0
+            for _, light := range lights {
+                lDir := vector3.UnitVector(vector3.SubVector3(light.Position, pWorld))
 
-            // launch the raymarching from this point to the light
-            pts, _ := voxelGrid.RayMarch(ray)
+                // build the ray from pWorld to the light
+                ray := ray.InitRay(pWorld, lDir)
 
-            insideTransparency := 1.0
-            for _, p := range pts {
-                // indexGrid := voxelGrid.GetVoxelIndex(p) // get the proper position in the grid
+                // launch the raymarching from this point to the light
+                pts, _ := voxelGrid.RayMarch(ray)
 
-                // density := voxelGrid.GetDensity(int(indexGrid.X), int(indexGrid.Y), int(indexGrid.Z))
-                density := voxelGrid.LinearInterpolateDensity(p.X, p.Y, p.Z)
-                insideTransparency *= math.Exp(-voxelGrid.Step * density)
+                insideTransparency := 1.0
+                for _, p := range pts {
+                    // indexGrid := voxelGrid.GetVoxelIndex(p) // get the proper position in the grid
+
+                    // density := voxelGrid.GetDensity(int(indexGrid.X), int(indexGrid.Y), int(indexGrid.Z))
+                    density := voxelGrid.LinearInterpolateDensity(p.X, p.Y, p.Z)
+                    insideTransparency *= math.Exp(-voxelGrid.Step * density)
+                }
+                insideTransparencySum += insideTransparency
             }
 
             // set the transmittance in the voxel grid (position i,j,k)
-            voxelGrid.SetTransparency(i, j, k, insideTransparency)
+            voxelGrid.SetTransparency(i, j, k, insideTransparencySum / float64(len(lights)))
         }
     }
     wg.Done()
