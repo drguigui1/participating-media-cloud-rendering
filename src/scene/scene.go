@@ -92,7 +92,7 @@ func (s Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int, 
 
             // set pixel
             if hasOneHit {
-                accColor.Mul(1.3)
+                accColor.Mul(2.2)
                 // compute pizel color
                 backgroundColorImpact := vector3.MulVector3Scalar(backgroundColor, accTransparency)
                 accColor.AddVector3(backgroundColorImpact)

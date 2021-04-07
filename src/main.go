@@ -10,6 +10,7 @@ import (
     "volumetric-cloud/scene"
     "volumetric-cloud/vector3"
     "volumetric-cloud/voxel_grid"
+    //"volumetric-cloud/random_clouds"
 )
 
 func main() {
@@ -19,17 +20,6 @@ func main() {
     // Camera
     aspectRatio := float64(imgSizeX) / float64(imgSizeY)
     fieldOfView := math.Pi / 2
-/*    origin := vector3.InitVector3(-12, 6, -13)
-    camera := camera.InitCamera(
-       aspectRatio,
-       fieldOfView,
-       imgSizeX,
-       imgSizeY,
-       origin,
-       -math.Pi / 8,
-       -math.Pi / 2,
-       0.0,
-    )*/
 
     origin := vector3.InitVector3(0, 15, 5)
     camera := camera.InitCamera(
@@ -43,6 +33,15 @@ func main() {
        0.0,
     )
 
+    //voxelGrids := random_clouds.GenerateRandomClouds(3)
+    shift := vector3.InitVector3(-31.0, 31.0, -148.0)
+    oppositeCorner := vector3.InitVector3(17.0, 38.0, -64.0)
+    var seed int64 = 42
+    perlinNoise := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.5, 3, seed)
+    voxelGrid := voxel_grid.InitVoxelGrid(0.4, shift, oppositeCorner, 0.15, perlinNoise)
+
+    voxelGrids := []voxel_grid.VoxelGrid{voxelGrid}
+/*
     // Voxel Grid 1
     shift := vector3.InitVector3(-20.0, 35.0, -90.0)
     oppositeCorner := vector3.InitVector3(20.0, 40.0, -60.0)
@@ -70,6 +69,7 @@ func main() {
     var seed4 int64 = 10
     perlinNoise4 := noise.InitPerlinNoise(0.3, 2.0, 1.0, 0.4, 3, seed4)
     voxelGrid4 := voxel_grid.InitVoxelGrid(0.2, shift4, oppositeCorner4, 0.13, perlinNoise4)
+*/
 
     // IMPORTANT
     //
@@ -83,15 +83,15 @@ func main() {
     // shift.Y < oppositeCorner.Y &&
     // shift.Z < oppositeCorner.Z
     fmt.Println("VOXEL")
-    voxelGrids := []voxel_grid.VoxelGrid{voxelGrid, voxelGrid2, voxelGrid3, voxelGrid4}
 
     // Lights
-    light1 := light.InitLight(vector3.InitVector3(0.0, 200.0, 0.0), vector3.InitVector3(0.45, 0.45, 0.45))
+    light1 := light.InitLight(vector3.InitVector3(0.0, 200.0, -200.0), vector3.InitVector3(0.27, 0.27, 0.27))
+    light2 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.15, 0.15, 0.15))
     //light2 := light.InitLight(vector3.InitVector3(-50.0, 150.0, -100.0), vector3.InitVector3(0.4, 0.4, 0.4))
     //light3 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.3, 0.3, 0.3))
     //light4 := light.InitLight(vector3.InitVector3(100.0, 100.0, 100.0), vector3.InitVector3(0.4, 0.4, 0.4))
 
-    lights := []light.Light{light1}
+    lights := []light.Light{light1, light2}
 
     // Scene
     fmt.Println("SCENE")
@@ -104,8 +104,4 @@ func main() {
     fmt.Println("SAVE")
     // Save
     image.SavePPM("tmp.ppm")
-
-
-
-
 }
