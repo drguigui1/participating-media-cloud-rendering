@@ -43,6 +43,11 @@ type VoxelGrid struct {
     Shift vector3.Vector3
     OppositeCorner vector3.Vector3
     Voxels []Voxel
+
+    // shape information
+    Sharpness float64 // bwt [0, 1]
+    DensityFactor float64
+    CloudCoverVal float64
 }
 
 func InitVoxel(density, transparency float64, color vector3.Vector3) Voxel {
@@ -57,7 +62,10 @@ func InitVoxelGrid(voxelSize float64,
                    shift vector3.Vector3,
                    oppositeCorner vector3.Vector3,
                    step float64,
-                   noise noise.PerlinNoise) VoxelGrid {
+                   noise noise.PerlinNoise,
+                   sharpness,
+                   cloudCoverVal,
+                   densityFactor float64) VoxelGrid {
 
     distX := math.Abs(shift.X - oppositeCorner.X)
     distY := math.Abs(shift.Y - oppositeCorner.Y)
@@ -77,8 +85,10 @@ func InitVoxelGrid(voxelSize float64,
         OppositeCorner: oppositeCorner,
         Step: step,
         Noise: noise,
+        Sharpness: sharpness,
+        CloudCoverVal: cloudCoverVal,
+        DensityFactor: densityFactor,
     }
-
 
     nbVertices := nbVerticeX * nbVerticeY * nbVerticeZ
     voxels := make([]Voxel, nbVertices)
@@ -89,33 +99,7 @@ func InitVoxelGrid(voxelSize float64,
     for z := 0; z < nbVerticeZ; z += 1 {
         for y := 0; y < nbVerticeY; y += 1 {
             for x := 0; x < nbVerticeX; x += 1 {
-                // put x,y,z in world coordinate
-                worldVec := voxelGrid.GetWorldPosition(vector3.InitVector3(float64(x), float64(y), float64(z)))
-                // compute distance between (x, y, z) and center and make ratio with maxdistance which is distance from center to corner
-                dist := vector3.SubVector3(worldVec, center).Length()
-                height := height_distribution.HeightDistribution(float64(y) /  (float64(nbVerticeY)), 10, 0.2)
-
-                //h, _ := GaussianPdf(mu, mat_cov, seed, vector3.InitVector3(float64(x), float64(y), float64(z)))
-                //height += h
-
-                noiseValue := voxelGrid.Noise.GeneratePerlinNoise(worldVec.X, worldVec.Y, worldVec.Z)
-                noiseValue *= height
-
-                dist = dist / maxDist
-                sharpness := 0.8
-                d := 2.0
-                dist -= 0.3
-                noiseValue -= dist
-                if noiseValue < 0 {
-                    noiseValue = 0
-                }
-                noiseValue *= d
-                density := 1.0 - math.Pow(sharpness, noiseValue)
-
-                if density < 0 {
-                    density = 0
-                }
-
+                density := voxelGrid.InitVoxelDensity(x, y, z, center, maxDist)
                 voxels[x + y * nbVerticeX + z * nbVerticeX * nbVerticeY] = InitVoxel(density, 0.0, vector3.InitVector3(100.0 / 255.0,
                     100.0 / 255.0,
                     100.0 / 255.0))
@@ -125,6 +109,35 @@ func InitVoxelGrid(voxelSize float64,
 
     voxelGrid.Voxels = voxels
     return voxelGrid
+}
+
+func (vGrid VoxelGrid) InitVoxelDensity(x, y, z int, center vector3.Vector3, maxDist float64) float64 {
+    // put x,y,z in world coordinate
+    worldVec := vGrid.GetWorldPosition(vector3.InitVector3(float64(x), float64(y), float64(z)))
+
+    // compute distance between (x, y, z) and center and make ratio with maxdistance which is distance from center to corner
+    dist := vector3.SubVector3(worldVec, center).Length()
+    height := height_distribution.HeightDistribution(float64(y) /  (float64(vGrid.NbVerticeY)), 10, 0.2)
+
+    noiseValue := vGrid.Noise.GeneratePerlinNoise(worldVec.X, worldVec.Y, worldVec.Z)
+    noiseValue *= height
+
+    dist = dist / maxDist
+    dist -= vGrid.CloudCoverVal
+    noiseValue -= dist
+
+    if noiseValue < 0 {
+        noiseValue = 0
+    }
+
+    noiseValue *= vGrid.DensityFactor
+    density := 1.0 - math.Pow(vGrid.Sharpness, noiseValue)
+
+    if density < 0 {
+        density = 0
+    }
+
+    return density
 }
 
 // Shift the voxel grid from its position to (0,0,0)

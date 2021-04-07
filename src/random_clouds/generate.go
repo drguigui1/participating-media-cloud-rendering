@@ -35,7 +35,7 @@ func GenerateRandomClouds(nbClouds int) []voxel_grid.VoxelGrid {
         shift := vector3.InitVector3(shiftX[0], shiftY[0], shiftZ[0])
         oppositeCorner := vector3.InitVector3(shiftX[1], shiftY[1], shiftZ[1])
 
-        voxelGrids[i] = voxel_grid.InitVoxelGrid(0.2, shift, oppositeCorner, 0.15, perlinNoise)
+        voxelGrids[i] = voxel_grid.InitVoxelGrid(0.2, shift, oppositeCorner, 0.15, perlinNoise, 0.8, 0.3, 2.0)
         fmt.Println("shift")
         fmt.Println(shift)
 
