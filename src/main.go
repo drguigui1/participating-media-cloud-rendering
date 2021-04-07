@@ -86,12 +86,12 @@ func main() {
     voxelGrids := []voxel_grid.VoxelGrid{voxelGrid, voxelGrid2, voxelGrid3, voxelGrid4}
 
     // Lights
-    light1 := light.InitLight(vector3.InitVector3(0.0, 200.0, 0.0), vector3.InitVector3(0.45, 0.45, 0.45))
-    //light2 := light.InitLight(vector3.InitVector3(-50.0, 150.0, -100.0), vector3.InitVector3(0.4, 0.4, 0.4))
+    light1 := light.InitLight(vector3.InitVector3(0.0, 200.0, 0.0), vector3.InitVector3(0.25, 0.25, 0.25))
+    light2 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.2, 0.2, 0.2))
     //light3 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.3, 0.3, 0.3))
     //light4 := light.InitLight(vector3.InitVector3(100.0, 100.0, 100.0), vector3.InitVector3(0.4, 0.4, 0.4))
 
-    lights := []light.Light{light1}
+    lights := []light.Light{light1, light2}
 
     // Scene
     fmt.Println("SCENE")
