@@ -34,13 +34,35 @@ func main() {
     )
 
     //voxelGrids := random_clouds.GenerateRandomClouds(3)
-    shift := vector3.InitVector3(-31.0, 31.0, -148.0)
-    oppositeCorner := vector3.InitVector3(17.0, 38.0, -64.0)
+    shift := vector3.InitVector3(-80.0, 31.0, -148.0)
+    oppositeCorner := vector3.InitVector3(-30.0, 38.0, -50.0)
     var seed int64 = 42
     perlinNoise := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.5, 3, seed)
-    voxelGrid := voxel_grid.InitVoxelGrid(0.4, shift, oppositeCorner, 0.15, perlinNoise)
+    voxelGrid := voxel_grid.InitVoxelGrid(
+        0.4,
+        shift,
+        oppositeCorner,
+        0.15,
+        perlinNoise,
+        0.8,
+        0.3,
+        2.0)
 
-    voxelGrids := []voxel_grid.VoxelGrid{voxelGrid}
+    shift2 := vector3.InitVector3(-10.0, 31.0, -55.0)
+    oppositeCorner2 := vector3.InitVector3(20.0, 38.0, -35.0)
+    var seed2 int64 = 100
+    perlinNoise2 := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.5, 3, seed2)
+    voxelGrid2 := voxel_grid.InitVoxelGrid(
+        0.4,
+        shift2,
+        oppositeCorner2,
+        0.15,
+        perlinNoise2,
+        0.3,
+        0.3,
+        1.5)
+
+    voxelGrids := []voxel_grid.VoxelGrid{voxelGrid, voxelGrid2}
 /*
     // Voxel Grid 1
     shift := vector3.InitVector3(-20.0, 35.0, -90.0)
@@ -86,7 +108,7 @@ func main() {
 
     // Lights
     light1 := light.InitLight(vector3.InitVector3(0.0, 200.0, -200.0), vector3.InitVector3(0.27, 0.27, 0.27))
-    light2 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.15, 0.15, 0.15))
+    light2 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.2, 0.2, 0.2))
     //light2 := light.InitLight(vector3.InitVector3(-50.0, 150.0, -100.0), vector3.InitVector3(0.4, 0.4, 0.4))
     //light3 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.3, 0.3, 0.3))
     //light4 := light.InitLight(vector3.InitVector3(100.0, 100.0, 100.0), vector3.InitVector3(0.4, 0.4, 0.4))
@@ -95,7 +117,7 @@ func main() {
 
     // Scene
     fmt.Println("SCENE")
-    s := scene.InitScene(voxelGrids, camera, lights)
+    s := scene.InitScene(voxelGrids, camera, lights, 1.85)
 
     fmt.Println("RENDER")
     // Render

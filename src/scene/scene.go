@@ -17,11 +17,13 @@ type Scene struct {
     VoxelGrids []voxel_grid.VoxelGrid
     Camera camera.Camera
     Lights []light.Light
+    RainyNess float64
 }
 
 func InitScene(voxelGrids []voxel_grid.VoxelGrid,
                camera camera.Camera,
-               lights []light.Light) Scene {
+               lights []light.Light,
+               rainyNess float64) Scene {
     // compute light transmittance in the voxel grid
     for idx, _ := range voxelGrids {
         voxelGrids[idx].ComputeInsideLightTransparency(lights)
@@ -31,6 +33,7 @@ func InitScene(voxelGrids []voxel_grid.VoxelGrid,
         VoxelGrids: voxelGrids,
         Camera: camera,
         Lights: lights,
+        RainyNess: rainyNess,
     }
 }
 
@@ -92,7 +95,7 @@ func (s Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int, 
 
             // set pixel
             if hasOneHit {
-                accColor.Mul(2.2)
+                accColor.Mul(s.RainyNess)
                 // compute pizel color
                 backgroundColorImpact := vector3.MulVector3Scalar(backgroundColor, accTransparency)
                 accColor.AddVector3(backgroundColorImpact)

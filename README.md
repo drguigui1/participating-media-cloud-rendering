@@ -2,13 +2,13 @@
 
 ## TODO
 
-- Refacto code / all the param
-
 - SIMD instruction
 
 - Add cool background sky / sun (sunset for example)
 
 - Create animation (multiple images with camera rotation)
+
+- Refacto code / all the param ✓
 
 - Manage multiple cloud ✓
 
@@ -20,4 +20,7 @@
 
 ## Results
 
-![plot](cloud_7.png)
+![plot](results/cloud_7.png)
+
+
+![plot](results/30_clouds.png)
