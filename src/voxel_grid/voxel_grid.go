@@ -102,7 +102,7 @@ func InitVoxelGrid(voxelSize float64,
                 noiseValue *= height
 
                 dist = dist / maxDist
-                sharpness := 0.2
+                sharpness := 0.8
                 d := 2.0
                 dist -= 0.3
                 noiseValue -= dist

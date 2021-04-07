@@ -3,6 +3,9 @@ package main
 import (
     "math"
     "fmt"
+    "math/rand"
+    "sort"
+    "time"
 
     "volumetric-cloud/camera"
     "volumetric-cloud/light"
@@ -42,6 +45,39 @@ func main() {
        0.0,
        0.0,
     )
+
+
+    minX := -100
+    maxX := 100
+    minY := 30
+    maxY := 40
+    minZ := -300
+    maxZ := -10
+    numberClouds := 10
+    voxelGrids := make([]voxel_grid.VoxelGrid, numberClouds)
+
+    for i := 0; i < numberClouds; i++ {
+        rand.Seed(time.Now().UnixNano())
+        shiftX := []float64 { float64(rand.Intn(maxX - minX) + minX), float64(rand.Intn(maxX - minX) + minX) }
+        shiftZ := []float64 { float64(rand.Intn(maxZ - minZ) + minZ), float64(rand.Intn(maxZ - minZ) + minZ) }
+        shiftY := []float64 { float64(rand.Intn(maxY - minY) + minY), float64(rand.Intn(maxY - minY) + minY) }
+        sort.Float64s(shiftX)
+        sort.Float64s(shiftZ)
+        perlinNoise := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.5, 3, int64(i))
+        shift := vector3.InitVector3(shiftX[0], shiftY[0], shiftZ[0])
+        oppositeCorner := vector3.InitVector3(shiftX[1], shiftY[1], shiftZ[1])
+
+        voxelGrids[i] = voxel_grid.InitVoxelGrid(0.2, shift, oppositeCorner, 0.12, perlinNoise)
+        fmt.Println("shift")
+        fmt.Println(shift)
+
+        fmt.Println("opposite")
+        fmt.Println(oppositeCorner)
+    }
+
+
+
+/*
 
     // Voxel Grid 1
     shift := vector3.InitVector3(-20.0, 35.0, -90.0)
@@ -83,10 +119,11 @@ func main() {
     // shift.Y < oppositeCorner.Y &&
     // shift.Z < oppositeCorner.Z
     fmt.Println("VOXEL")
-    voxelGrids := []voxel_grid.VoxelGrid{voxelGrid, voxelGrid2, voxelGrid3, voxelGrid4}
 
+
+ */
     // Lights
-    light1 := light.InitLight(vector3.InitVector3(0.0, 200.0, 0.0), vector3.InitVector3(0.45, 0.45, 0.45))
+    light1 := light.InitLight(vector3.InitVector3(0.0, 200.0, 0.0), vector3.InitVector3(0.2, 0.2, 0.2))
     //light2 := light.InitLight(vector3.InitVector3(-50.0, 150.0, -100.0), vector3.InitVector3(0.4, 0.4, 0.4))
     //light3 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.3, 0.3, 0.3))
     //light4 := light.InitLight(vector3.InitVector3(100.0, 100.0, 100.0), vector3.InitVector3(0.4, 0.4, 0.4))
