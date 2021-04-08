@@ -38,17 +38,23 @@ func InitScene(voxelGrids []voxel_grid.VoxelGrid,
 }
 
 func (s Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
-    image := img.InitImg(imgSizeY, imgSizeX)
+    image := img.InitImg(imgSizeX, imgSizeY)
 
     // create the wait group
     wg := sync.WaitGroup{}
     wg.Add(imgSizeY)
 
     for i := 0; i < imgSizeY; i += 1 {
-        go s.renderImageSizeY(image, i, imgSizeX, nbRaysPerPixel, &wg)
-
+        s.renderImageSizeY(image, i, imgSizeX, nbRaysPerPixel, nil)
     }
-    wg.Wait()
+
+    // i == 600
+    // j == 485
+
+    //for j := 480; j < 520; j += 1 {
+    //    image.SetPixel(600, j, 255, 0, 0)
+    //}
+    //wg.Wait()
     return image
 }
 
@@ -101,6 +107,7 @@ func (s Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int, 
                 accColor.AddVector3(backgroundColorImpact)
                 accColor.Clamp(0.0, 1.0)
                 color.AddVector3(vector3.InitVector3(accColor.X, accColor.Y, accColor.Z))
+                //color = vector3.InitVector3(0.0, 1.0, 0.0)
             } else {
                 // gradient case
                 color.AddVector3(backgroundColor)
@@ -111,9 +118,8 @@ func (s Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int, 
         color.Div(float64(nbRaysPerPixel))
 
         // Set the pixel color
-        image.SetPixel(i, j, byte(color.X * 255.0), byte(color.Y * 255.0), byte(color.Z * 255.0))
-
-
+        //image.SetPixel(i, j, byte(color.X * 255.0), byte(color.Y * 255.0), byte(color.Z * 255.0), byte(255.0))
+        image.SetPixel(j, i, uint8(color.X * 255.0), uint8(color.Y * 255.0), uint8(color.Z * 255.0), uint8(255))
     }
 
     if wg != nil {
