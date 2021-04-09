@@ -1,19 +1,20 @@
 package main
 
 import (
-    "math"
-    "fmt"
+ //   "math"
+ //   "fmt"
 
-    "volumetric-cloud/camera"
-    "volumetric-cloud/light"
-    "volumetric-cloud/noise"
-    "volumetric-cloud/scene"
-    "volumetric-cloud/vector3"
-    "volumetric-cloud/voxel_grid"
+    //"volumetric-cloud/camera"
+    //"volumetric-cloud/light"
+    //"volumetric-cloud/noise"
+    //"volumetric-cloud/scene"
+   // "volumetric-cloud/vector3"
+    //"volumetric-cloud/voxel_grid"
     //"volumetric-cloud/random_clouds"
+    "volumetric-cloud/cmd"
 )
 
-func main() {
+/*func main() {
     imgSizeX := 1200
     imgSizeY := 1000
 
@@ -96,7 +97,6 @@ func main() {
     _ = voxelGrid3
 
     voxelGrids := []voxel_grid.VoxelGrid{voxelGrid, voxelGrid2, voxelGrid4}
-/*
     // Voxel Grid 1
     shift := vector3.InitVector3(-20.0, 35.0, -90.0)
     oppositeCorner := vector3.InitVector3(20.0, 40.0, -60.0)
@@ -124,7 +124,6 @@ func main() {
     var seed4 int64 = 10
     perlinNoise4 := noise.InitPerlinNoise(0.3, 2.0, 1.0, 0.4, 3, seed4)
     voxelGrid4 := voxel_grid.InitVoxelGrid(0.2, shift4, oppositeCorner4, 0.13, perlinNoise4)
-*/
 
     // IMPORTANT
     //
@@ -140,7 +139,7 @@ func main() {
     fmt.Println("VOXEL")
 
     // Lights
-    light1 := light.InitLight(vector3.InitVector3(0.0, 200.0, -200.0), vector3.InitVector3(0.18, 0.18, 0.18))
+    light1 := light.InitLight(vector3.InitVector3(0.0, 200.0, -200.0), vector3.InitVector3(0.4, 0.4, 0.4))
     //light4 := light.InitLight(vector3.InitVector3(200.0, 200.0, 200.0), vector3.InitVector3(0.15, 0.15, 0.15))
     //light2 := light.InitLight(vector3.InitVector3(-10.0, 0.0, 10.0), vector3.InitVector3(0.15, 0.15, 0.15))
     //light3 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.2, 0.2, 0.2))
@@ -162,4 +161,8 @@ func main() {
     fmt.Println("SAVE")
     // Save
     image.SavePNG("tmp.png")
+}*/
+
+func main() {
+    cmd.Execute()
 }

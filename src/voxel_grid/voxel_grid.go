@@ -428,7 +428,7 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransparencyYZ(lights []light.Ligh
             }
 
             // set the transmittance in the voxel grid (position i,j,k)
-            voxelGrid.SetTransparency(i, j, k, insideTransparencySum / float64(len(lights)))
+            voxelGrid.SetTransparency(i, j, k, insideTransparencySum)
         }
     }
     wg.Done()
@@ -472,6 +472,11 @@ func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3
 
         //voxelLight.Mul(accTransparency * vGrid.Step)
         voxelLight.Mul((1 - beerlambert) / density)
+
+        //
+        //voxelLight.Mul(0.5)
+        //
+
         color.AddVector3(voxelLight)
     }
 
