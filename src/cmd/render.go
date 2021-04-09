@@ -75,12 +75,12 @@ var fullRenderCmd = &cobra.Command{
 
         // Lights
         light1 := light.InitLight(vector3.InitVector3(0.0, 200.0, -200.0), vector3.InitVector3(0.9, 0.9, 0.9))
-        light2 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.6, 0.6, 0.6))
+        light2 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.7, 0.7, 0.7))
         lights := []light.Light{light1, light2}
 
         // Scene
         fmt.Println("SCENE")
-        s := scene.InitScene(voxelGrids, camera, lights, 4.0)
+        s := scene.InitScene(voxelGrids, camera, lights, 1.0)
 
         fmt.Println("RENDER")
         // Render
