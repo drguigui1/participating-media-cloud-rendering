@@ -10,6 +10,8 @@ import (
     "volumetric-cloud/scene"
     "volumetric-cloud/vector3"
     "volumetric-cloud/voxel_grid"
+    "volumetric-cloud/record"
+
     //"volumetric-cloud/random_clouds"
 )
 
@@ -28,7 +30,7 @@ func main() {
        imgSizeX,
        imgSizeY,
        origin,
-       math.Pi / 8,
+       -math.Pi / 8,
        0.0,
        0.0,
     )
@@ -39,7 +41,7 @@ func main() {
     var seed int64 = 42
     perlinNoise := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.5, 3, seed)
     voxelGrid := voxel_grid.InitVoxelGrid(
-        0.4,
+        0.2,
         shift,
         oppositeCorner,
         0.15,
@@ -49,11 +51,11 @@ func main() {
         2.0)
 
     shift2 := vector3.InitVector3(-10.0, 31.0, -55.0)
-    oppositeCorner2 := vector3.InitVector3(20.0, 38.0, -35.0)
+    oppositeCorner2 := vector3.InitVector3(10.0, 38.0, -35.0)
     var seed2 int64 = 100
     perlinNoise2 := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.5, 3, seed2)
     voxelGrid2 := voxel_grid.InitVoxelGrid(
-        0.4,
+        0.2,
         shift2,
         oppositeCorner2,
         0.15,
@@ -115,10 +117,14 @@ func main() {
 
     lights := []light.Light{light1, light2}
 
+
+
     // Scene
     fmt.Println("SCENE")
     s := scene.InitScene(voxelGrids, camera, lights, 1.85)
+    record.ChangeCam(vector3.InitVector3(0.0, 35.0, 0.0), 70.0, imgSizeX, imgSizeY, 5, 1, s)
 
+/*
     fmt.Println("RENDER")
     // Render
     image := s.Render(imgSizeY, imgSizeX, 1)
@@ -126,4 +132,5 @@ func main() {
     fmt.Println("SAVE")
     // Save
     image.SavePPM("tmp.ppm")
+    */
 }
