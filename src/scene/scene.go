@@ -52,6 +52,12 @@ func InitScene(voxelGrids []voxel_grid.VoxelGrid,
     }
 }
 
+func MapColor(input_end, input_start, output_end, output_start float64, color float64) float64{
+    output_range := output_end - output_start
+    input_range := input_end - input_start
+    return (color - input_start) * output_range / input_range + output_start
+}
+
 func (s *Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
     image := img.InitImg(imgSizeX, imgSizeY)
 
@@ -77,19 +83,37 @@ func (s *Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
     // Remap cloud values
     fmt.Println(s.MinColor)
     fmt.Println(s.MaxColor)
+
+    maxCo := 0.7
+    minCo := 0.0
     for _, p := range s.Pixels {
-        colorX := (p.Intensity[0] - s.MinColor[0]) / (s.MaxColor[0] - s.MinColor[0])
+        /*colorX := (p.Intensity[0] - s.MinColor[0]) / (s.MaxColor[0] - s.MinColor[0])
         colorY := (p.Intensity[1] - s.MinColor[1]) / (s.MaxColor[1] - s.MinColor[1])
         colorZ := (p.Intensity[2] - s.MinColor[2]) / (s.MaxColor[2] - s.MinColor[2])
-        /*colorX := 0.7 + ((1.0 - 0.7) / (s.MaxColor[0] - s.MinColor[0])) * (p.Intensity[0] - s.MinColor[0])
-        colorY := 0.7 + ((1.0 - 0.7) / (s.MaxColor[1] - s.MinColor[1])) * (p.Intensity[1] - s.MinColor[1])
-        colorZ := 0.7 + ((1.0 - 0.7) / (s.MaxColor[2] - s.MinColor[2])) * (p.Intensity[2] - s.MinColor[2])*/
+         */
+
+
+/*
+        colorX := ((maxCo - minCo) / (s.MaxColor[0] - s.MinColor[0])) * (p.Intensity[0] - s.MinColor[0])
+        colorY := ((maxCo - minCo) / (s.MaxColor[1] - s.MinColor[1])) * (p.Intensity[1] - s.MinColor[1])
+        colorZ := ((maxCo - minCo) / (s.MaxColor[2] - s.MinColor[2])) * (p.Intensity[2] - s.MinColor[2])
+
+
+
+ */
+        //func MapColor(input_end, input_start, output_end, output_start float64, color float64) float64{
+
+
+        colorX := MapColor(s.MaxColor[0], s.MinColor[0], maxCo, minCo, p.Intensity[0])
+        colorY := MapColor(s.MaxColor[1], s.MinColor[1], maxCo, minCo, p.Intensity[1])
+        colorZ := MapColor(s.MaxColor[2], s.MinColor[2], maxCo, minCo, p.Intensity[2])
+
 
         color := vector3.InitVector3(colorX, colorY, colorZ)
         //p.BackgroundColorImpact.Sub(0.7)
         color.AddVector3(p.BackgroundColorImpact)
         color.Div(float64(nbRaysPerPixel))
-        color.Clamp(0.0, 1.0)
+       // color.Clamp(0.0, 1.0)
         image.SetPixel(p.J, p.I, uint8(color.X * 255.0), uint8(color.Y * 255.0), uint8(color.Z * 255.0), uint8(255))
     }
 
@@ -142,7 +166,7 @@ func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int,
             // set pixel
             if hasOneHit {
                 //accColor.Mul(s.RainyNess)
-                accColor.Mul(s.RainyNess)
+                //accColor.Mul(s.RainyNess)
                 // compute pizel color
                 backgroundColorImpact.AddVector3(vector3.MulVector3Scalar(backgroundColor, accTransparency))
                 //accColor.AddVector3(backgroundColorImpact)
