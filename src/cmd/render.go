@@ -3,6 +3,9 @@ package cmd
 import (
     "math"
     "fmt"
+    "strconv"
+
+    // "strconv"
 
     "github.com/spf13/cobra"
 
@@ -12,7 +15,7 @@ import (
     "volumetric-cloud/scene"
     "volumetric-cloud/vector3"
     "volumetric-cloud/voxel_grid"
-    //"volumetric-cloud/random_clouds"
+    "volumetric-cloud/random_clouds"
 )
 
 var renderCmd = &cobra.Command{
@@ -21,6 +24,62 @@ var renderCmd = &cobra.Command{
     Run: func(cmd *cobra.Command, args []string) {
     },
 }
+
+var randomRenderCmd = &cobra.Command{
+    Use: "randomRender",
+    Short: "Generate random clouds and render them",
+    Run: func(cmd *cobra.Command, args []string) {
+        imgSizeX := 1200
+        imgSizeY := 1000
+
+        // Camera
+        aspectRatio := float64(imgSizeX) / float64(imgSizeY)
+        fieldOfView := math.Pi / 2
+
+        origin := vector3.InitVector3(0, 15, 5)
+        camera := camera.InitCamera(
+            aspectRatio,
+            fieldOfView,
+            imgSizeX,
+            imgSizeY,
+            origin,
+            math.Pi/8,
+            0.0,
+            0.0,
+        )
+        min := []int {-50, 30, -100 }
+        max := []int { 50, 40, -10 }
+        numberClouds, _ := strconv.Atoi(args[0])
+        // nbClouds, voxelSize, step int, sharpness, cloudCoverVal, densityFactor float64,
+        //                        min, max []int)
+        voxelSize := 0.2
+        step := 0.15
+        sharpness := 0.6
+        cloudCoverVal := 0.3
+        densityFactor := 2.0
+        voxelGrids := random_clouds.GenerateRandomClouds(numberClouds, voxelSize, step,
+            sharpness, cloudCoverVal, densityFactor, min, max)
+        // Lights
+        light1 := light.InitLight(vector3.InitVector3(0.0, 200.0, -200.0), vector3.InitVector3(0.9, 0.9, 0.9))
+        light2 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.7, 0.7, 0.7))
+        lights := []light.Light{light1, light2}
+
+        // Scene
+        fmt.Println("SCENE")
+        s := scene.InitScene(voxelGrids, camera, lights, 1.0)
+
+        fmt.Println("RENDER")
+        // Render
+        image := s.Render(imgSizeY, imgSizeX, 1)
+
+        fmt.Println("SAVE")
+        // Save
+        image.SavePNG("tmp.png")
+
+    },
+}
+
+
 
 var fullRenderCmd = &cobra.Command{
     Use: "fullrender",
@@ -106,6 +165,7 @@ var loadRenderCmd = &cobra.Command{
 
 func init() {
     renderCmd.AddCommand(fullRenderCmd)
+    renderCmd.AddCommand(randomRenderCmd)
     renderCmd.AddCommand(loadRenderCmd)
 
     cmd.AddCommand(renderCmd)

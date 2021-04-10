@@ -11,13 +11,15 @@ import (
     "volumetric-cloud/vector3"
 )
 
-func GenerateRandomClouds(nbClouds int) []voxel_grid.VoxelGrid {
-    minX := -100
-    maxX := 100
-    minY := 30
-    maxY := 40
-    minZ := -300
-    maxZ := -10
+
+func GenerateRandomClouds(nbClouds int, step, voxelSize, sharpness, cloudCoverVal, densityFactor float64,
+                        min, max []int) []voxel_grid.VoxelGrid {
+    minX := min[0]
+    maxX := max[0]
+    minY := min[1]
+    maxY := max[1]
+    minZ := min[2]
+    maxZ := max[2]
     voxelGrids := make([]voxel_grid.VoxelGrid, nbClouds)
 
     for i := 0; i < nbClouds; i++ {
@@ -35,7 +37,8 @@ func GenerateRandomClouds(nbClouds int) []voxel_grid.VoxelGrid {
         shift := vector3.InitVector3(shiftX[0], shiftY[0], shiftZ[0])
         oppositeCorner := vector3.InitVector3(shiftX[1], shiftY[1], shiftZ[1])
 
-        voxelGrids[i] = voxel_grid.InitVoxelGrid(0.2, shift, oppositeCorner, 0.15, perlinNoise, 0.8, 0.3, 2.0)
+        voxelGrids[i] = voxel_grid.InitVoxelGrid(voxelSize, shift, oppositeCorner, step,
+            perlinNoise, sharpness, cloudCoverVal, densityFactor)
         fmt.Println("shift")
         fmt.Println(shift)
 
