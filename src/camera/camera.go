@@ -89,6 +89,7 @@ func (c Camera) CreateRay(i, j float64) ray.Ray {
 
     // apply rotation to the ray
     // simulate the camera to be anywhere
+
     rayDir = vector3.MultMatVec3(c.RotationX, rayDir)
     rayDir = vector3.MultMatVec3(c.RotationY, rayDir)
     rayDir = vector3.MultMatVec3(c.RotationZ, rayDir)

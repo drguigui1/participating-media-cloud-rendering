@@ -17,14 +17,23 @@ func ChangeCam(center vector3.Vector3, radius float64,
 	imgSizeX, imgSizeY, picNumber, nbRaysPerPixel int, s scene.Scene){
 	// x = rcos(teta)
 	// y = rsin(teta)
+
+	s.Camera.Origin.X = 0.0
+	s.Camera.Origin.Y = 0.0
+	s.Camera.Origin.Z = 0.0
+	s.Camera.RotationX, s.Camera.RotationY, s.Camera.RotationZ =
+		camera.InitRota(0.0, 0.0, 0.0)
 	for i := 0; i < picNumber + 1; i+=1 {
 
-		s.Camera.Origin.X = (radius * math.Sin(float64(i) * 2 * math.Pi)) / float64(picNumber) + center.X
+		teta := (float64(i) * 2 * math.Pi) / float64(picNumber)
+		//teta += 2.0 * math.Pi / float64(picNumber)
+		s.Camera.Origin.X = -radius * math.Sin(teta) + center.X
 		s.Camera.Origin.Y = center.Y
-		s.Camera.Origin.Z = (radius * math.Cos(float64(i) * 2 * math.Pi)) / float64(picNumber) + center.Z
+		s.Camera.Origin.Z = radius * math.Cos(teta) + center.Z
 
-		s.Camera.RotationX, s.Camera.RotationX, s.Camera.RotationZ =
-					camera.InitRota(0.0, (-float64(i) * 2 * math.Pi) / float64(picNumber), 0.0)
+		s.Camera.RotationX, s.Camera.RotationY, s.Camera.RotationZ =
+					camera.InitRota(0.0, - teta, 0.0)
+
 
 		//camera.InitRota(0.0, 0.0, 0.0)
 		//s.Camera.RotationX, s.Camera.RotationX, s.Camera.RotationZ =

@@ -50,8 +50,9 @@ func main() {
         0.3,
         2.0)
 
+
     shift2 := vector3.InitVector3(-10.0, 31.0, -55.0)
-    oppositeCorner2 := vector3.InitVector3(10.0, 38.0, -35.0)
+    oppositeCorner2 := vector3.InitVector3(25.0, 38.0, -35.0)
     var seed2 int64 = 100
     perlinNoise2 := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.5, 3, seed2)
     voxelGrid2 := voxel_grid.InitVoxelGrid(
@@ -110,19 +111,20 @@ func main() {
 
     // Lights
     light1 := light.InitLight(vector3.InitVector3(0.0, 200.0, -200.0), vector3.InitVector3(0.27, 0.27, 0.27))
-    light2 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.2, 0.2, 0.2))
     //light2 := light.InitLight(vector3.InitVector3(-50.0, 150.0, -100.0), vector3.InitVector3(0.4, 0.4, 0.4))
     //light3 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.3, 0.3, 0.3))
     //light4 := light.InitLight(vector3.InitVector3(100.0, 100.0, 100.0), vector3.InitVector3(0.4, 0.4, 0.4))
 
-    lights := []light.Light{light1, light2}
+    lights := []light.Light{light1}
+
 
 
 
     // Scene
     fmt.Println("SCENE")
     s := scene.InitScene(voxelGrids, camera, lights, 1.85)
-    record.ChangeCam(vector3.InitVector3(0.0, 35.0, 0.0), 70.0, imgSizeX, imgSizeY, 5, 1, s)
+    record.ChangeCam(vector3.InitVector3(-55.0, 35.0, -99.0), 70.0, imgSizeX, imgSizeY, 20, 1, s)
+
 
 /*
     fmt.Println("RENDER")
