@@ -26,7 +26,7 @@ type Scene struct {
     Camera camera.Camera
     Lights []light.Light
 
-    RainyNess float64
+    RainyNess float64 // close to 0 will make a whiter cloud
     MinColor []float64 // rgb (size 3/4)
     MaxColor []float64 // rgb
     Pixels []Pixel
@@ -81,9 +81,6 @@ func (s *Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
         colorX := (p.Intensity[0] - s.MinColor[0]) / (s.MaxColor[0] - s.MinColor[0])
         colorY := (p.Intensity[1] - s.MinColor[1]) / (s.MaxColor[1] - s.MinColor[1])
         colorZ := (p.Intensity[2] - s.MinColor[2]) / (s.MaxColor[2] - s.MinColor[2])
-        /*colorX := 0.7 + ((1.0 - 0.7) / (s.MaxColor[0] - s.MinColor[0])) * (p.Intensity[0] - s.MinColor[0])
-        colorY := 0.7 + ((1.0 - 0.7) / (s.MaxColor[1] - s.MinColor[1])) * (p.Intensity[1] - s.MinColor[1])
-        colorZ := 0.7 + ((1.0 - 0.7) / (s.MaxColor[2] - s.MinColor[2])) * (p.Intensity[2] - s.MinColor[2])*/
 
         color := vector3.InitVector3(colorX, colorY, colorZ)
         //p.BackgroundColorImpact.Sub(0.7)
@@ -120,8 +117,7 @@ func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int,
             hasOneHit := false
 
             for _, vGrid := range s.VoxelGrids {
-                // TODO change with mean of lights color
-                accC, accT, hasHit = vGrid.ComputePixelColor(r, s.Lights[0].Color)
+                accC, accT, hasHit = vGrid.ComputePixelColor(r, s.Lights[0].Color, s.RainyNess)
                 if !hasHit {
                     continue
                 }

@@ -11,25 +11,36 @@ import (
     "volumetric-cloud/vector3"
 )
 
-func GenerateRandomClouds(nbClouds int) []voxel_grid.VoxelGrid {
-    minX := -100
-    maxX := 100
-    minY := 30
-    maxY := 40
-    minZ := -300
-    maxZ := -10
-    voxelGrids := make([]voxel_grid.VoxelGrid, nbClouds)
+var (
+    minX = -100
+    maxX = 100
+    minY = 30
+    maxY = 40
+    minZ = -300
+    maxZ = -10
+)
+
+func GenerateInRange(min, max int, minRange int) []float64 {
+    vals := []float64 { float64(rand.Intn(maxX - minX) + minX), float64(rand.Intn(maxX - minX) + minX) }
+    sort.Float64s(vals)
+
+    for (vals[1] - vals[0]) < float64(minRange) {
+        vals = []float64 { float64(rand.Intn(maxX - minX) + minX), float64(rand.Intn(maxX - minX) + minX) }
+        sort.Float64s(vals)
+    }
+
+    return vals
+}
+
+func GenerateRandomClouds(nbClouds int, minRange int) []voxel_grid.VoxelGrid {
+   voxelGrids := make([]voxel_grid.VoxelGrid, nbClouds)
 
     for i := 0; i < nbClouds; i++ {
         rand.Seed(time.Now().UnixNano())
 
-        shiftX := []float64 { float64(rand.Intn(maxX - minX) + minX), float64(rand.Intn(maxX - minX) + minX) }
-        shiftZ := []float64 { float64(rand.Intn(maxZ - minZ) + minZ), float64(rand.Intn(maxZ - minZ) + minZ) }
-        shiftY := []float64 { float64(rand.Intn(maxY - minY) + minY), float64(rand.Intn(maxY - minY) + minY) }
-
-        sort.Float64s(shiftX)
-        sort.Float64s(shiftZ)
-        sort.Float64s(shiftY)
+        shiftX := GenerateInRange(minX, maxX, minRange)
+        shiftY := GenerateInRange(minY, maxY, minRange)
+        shiftZ := GenerateInRange(minZ, maxZ, minRange)
 
         perlinNoise := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.5, 3, int64(i))
         shift := vector3.InitVector3(shiftX[0], shiftY[0], shiftZ[0])
