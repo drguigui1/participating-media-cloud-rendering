@@ -74,3 +74,8 @@ func GradDotProduct(hashRes int, x, y, z float64) float64 {
 func Fade(t float64) float64 {
     return 6 * math.Pow(t, 5.0) - 15 * math.Pow(t, 4.0) + 10 * math.Pow(t, 3.0)
 }
+
+// Get fractional part of the input
+func Fract(t float64) float64 {
+    return t - math.Floor(t)
+}

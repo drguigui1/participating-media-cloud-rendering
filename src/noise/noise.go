@@ -5,6 +5,7 @@ import (
     "math/rand"
 
     "volumetric-cloud/interpolation"
+    "volumetric-cloud/vector3"
 )
 
 type Noise struct {
@@ -26,6 +27,16 @@ type PerlinNoise struct {
     N Noise
 }
 
+type WorleyNoise struct {
+    N Noise
+    Seed int64
+
+    // Random worley coefficient
+    Coef1 int
+    Coef2 int
+    Coef3 int
+}
+
 func InitPerlinNoise(freq, freqFactor, amplitude, amplitudeFactor float64, octaves int, seed int64) PerlinNoise {
     // init permutation
     rand.Seed(seed)
@@ -43,6 +54,62 @@ func InitPerlinNoise(freq, freqFactor, amplitude, amplitudeFactor float64, octav
     return PerlinNoise{
         N: n,
     }
+}
+
+func InitWorleyNoise(freq, freqFactor, amplitude, amplitudeFactor float64, octaves int, seed int64) WorleyNoise {
+    rand.Seed(seed)
+    n := Noise{
+        PermutationTable: []int{},
+        Freq: freq,
+        FreqFactor: freqFactor,
+        Amplitude: amplitude,
+        AmplitudeFactor: amplitudeFactor,
+        Octaves: octaves,
+    }
+
+    return WorleyNoise{
+        N: n,
+        Seed: seed,
+        Coef1: rand.Intn(2000),
+        Coef2: rand.Intn(2000),
+        Coef3: rand.Intn(2000),
+    }
+}
+
+func (w WorleyNoise) RandomNoise(x, y, z float64) float64 {
+    resX := Fract(math.Sin(x) * float64(w.Coef1))
+    resXY := Fract(math.Sin(y + resX) * float64(w.Coef2))
+    resXYZ := Fract(math.Sin(z + resXY) * float64(w.Coef3))
+    return resXYZ
+}
+
+func (w WorleyNoise) EvalWorleyNoise(x, y, z float64) float64 {
+    d := math.MaxFloat64
+
+    fx := math.Floor(x)
+    fy := math.Floor(y)
+    fz := math.Floor(z)
+
+    for i := -1; i < 2; i += 1 {
+        for j := -1; j < 2; j += 1 {
+            for k := -1; k < 2; k += 1 {
+                // TODO
+                cornerX := fx + float64(i)
+                cornerY := fy + float64(j)
+                cornerZ := fz + float64(k)
+                noiseVal := w.RandomNoise(cornerX, cornerY, cornerZ)
+
+                genP := vector3.InitVector3(cornerX + noiseVal, cornerY + noiseVal, cornerZ + noiseVal)
+
+                // compute distance between genP and p = (x,y,z)
+                resD := vector3.SubVector3(genP, vector3.InitVector3(x, y, z)).Length()
+                d = math.Min(resD, d)
+            }
+        }
+    }
+
+    // Reverse Worley noise
+    return 1.0 - d
 }
 
 func (p PerlinNoise) EvalPerlinNoise(x, y, z float64) float64 {
@@ -115,6 +182,21 @@ func (p PerlinNoise) EvalPerlinNoise(x, y, z float64) float64 {
     // z axis
     return interpolation.CosineInterpolate(interpY1, interpY2, w)*/
 
+}
+
+func (w WorleyNoise) FbmWorley(x, y, z float64) float64 {
+    var res float64 = 0;
+    amplitude := w.N.Amplitude
+    freq := w.N.Freq
+
+    for i := 0; i < w.N.Octaves; i += 1 {
+        res += w.EvalWorleyNoise(x * freq, y * freq, z * freq) * amplitude
+
+        amplitude *= w.N.AmplitudeFactor
+        freq *= w.N.FreqFactor
+    }
+
+    return res
 }
 
 func (p PerlinNoise) GeneratePerlinNoise(x, y, z float64) float64 {
