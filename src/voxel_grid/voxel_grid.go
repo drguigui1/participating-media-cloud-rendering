@@ -460,42 +460,26 @@ func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3
     for _, p := range pts {
         var voxelLight vector3.Vector3
 
-        // get the index in the voxelGrid of the points 'p'
-        //vGridCoord := vGrid.GetVoxelIndex(p)
-        //density := vGrid.GetDensity(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
         density := vGrid.LinearInterpolateDensity(p.X, p.Y, p.Z)
 
         if density < 0.001 {
             continue
         }
 
-        // get transparency / transmittance
-        //insideTransparency := vGrid.GetTransparency(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
         insideTransparency := vGrid.LinearInterpolateTransparency(p.X, p.Y, p.Z)
-
-        // get the color at specific position of the voxel
-        //voxelColor := vGrid.GetColor(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
 
         voxelLight = lightColor
         voxelLight.Mul(insideTransparency)
         voxelLight.Mul(density)
 
-        beerlambert := math.Exp(- 0.4 * rainyNess * vGrid.Step * density)
+        beerlambert := math.Exp(- rainyNess * vGrid.Step * density)
         accTransparency *= beerlambert
 
-        //voxelLight.Mul(accTransparency * vGrid.Step)
-        voxelLight.Mul((1 - beerlambert) * 1.5)
+        voxelLight.Mul(accTransparency * vGrid.Step)
+        voxelLight.Mul((1 - beerlambert))
 
         color.AddVector3(voxelLight)
     }
 
-    // compute background color
-    //backgroundColor := background.RenderGradient(ray)
-
-    // background contribution
-    //backgroundColor.Mul(accTransparency)
-    //color.AddVector3(backgroundColor)
-
-    //color.Clamp(0.0, 1.0)
     return color, accTransparency, true
 }

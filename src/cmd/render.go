@@ -99,7 +99,7 @@ var fullRenderCmd = &cobra.Command{
 
         // Scene
         fmt.Println("SCENE")
-        s := scene.InitScene(voxelGrids, camera, lights, 1.0)
+        s := scene.InitScene(voxelGrids, camera, lights, 0.4)
 
         fmt.Println("RENDER")
         // Render
