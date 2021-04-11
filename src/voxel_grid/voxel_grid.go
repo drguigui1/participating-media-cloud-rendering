@@ -38,7 +38,12 @@ type VoxelGrid struct {
     Step float64
 
     // noise
-    Noise noise.PerlinNoise
+    PerlinNoise noise.PerlinNoise
+    WorleyNoise noise.WorleyNoise
+
+    // Sum of both must be 1.0
+    PerlinWeight float64
+    WorleyWeight float64
 
     Shift vector3.Vector3
     OppositeCorner vector3.Vector3
@@ -62,7 +67,10 @@ func InitVoxelGrid(voxelSize float64,
                    shift vector3.Vector3,
                    oppositeCorner vector3.Vector3,
                    step float64,
-                   noise noise.PerlinNoise,
+                   perlinNoise noise.PerlinNoise, 
+                   worleyNoise noise.WorleyNoise,
+                   perlinWeight,
+                   worleyWeight,
                    sharpness,
                    cloudCoverVal,
                    densityFactor float64) VoxelGrid {
@@ -84,7 +92,10 @@ func InitVoxelGrid(voxelSize float64,
         Shift: shift,
         OppositeCorner: oppositeCorner,
         Step: step,
-        Noise: noise,
+        WorleyNoise: worleyNoise,
+        PerlinNoise: perlinNoise,
+        PerlinWeight: perlinWeight,
+        WorleyWeight: worleyWeight,
         Sharpness: sharpness,
         CloudCoverVal: cloudCoverVal,
         DensityFactor: densityFactor,
@@ -119,7 +130,9 @@ func (vGrid VoxelGrid) InitVoxelDensity(x, y, z int, center vector3.Vector3, max
     dist := vector3.SubVector3(worldVec, center).Length()
     height := height_distribution.HeightDistribution(float64(y) /  (float64(vGrid.NbVerticeY)), 10, 0.2)
 
-    noiseValue := vGrid.Noise.GeneratePerlinNoise(worldVec.X, worldVec.Y, worldVec.Z)
+    noiseValuePerlin := vGrid.PerlinNoise.GeneratePerlinNoise(worldVec.X, worldVec.Y, worldVec.Z)
+    noiseValueWorley := vGrid.WorleyNoise.FbmWorley(worldVec.X, worldVec.Y, worldVec.Z)
+    noiseValue := noiseValuePerlin * vGrid.PerlinWeight + noiseValueWorley * vGrid.WorleyWeight
     noiseValue *= height
 
     dist = dist / maxDist
@@ -435,7 +448,7 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransparencyYZ(lights []light.Ligh
 }
 
 // return the proper color
-func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3) (vector3.Vector3, float64, bool) {
+func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3, rainyNess float64) (vector3.Vector3, float64, bool) {
     pts, hasHit := vGrid.RayMarch(ray)
     if !hasHit {
         return vector3.Vector3{}, 0.0, false
@@ -447,46 +460,26 @@ func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3
     for _, p := range pts {
         var voxelLight vector3.Vector3
 
-        // get the index in the voxelGrid of the points 'p'
-        //vGridCoord := vGrid.GetVoxelIndex(p)
-        //density := vGrid.GetDensity(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
         density := vGrid.LinearInterpolateDensity(p.X, p.Y, p.Z)
 
         if density < 0.001 {
             continue
         }
 
-        // get transparency / transmittance
-        //insideTransparency := vGrid.GetTransparency(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
         insideTransparency := vGrid.LinearInterpolateTransparency(p.X, p.Y, p.Z)
-
-        // get the color at specific position of the voxel
-        //voxelColor := vGrid.GetColor(int(vGridCoord.X), int(vGridCoord.Y), int(vGridCoord.Z))
 
         voxelLight = lightColor
         voxelLight.Mul(insideTransparency)
         voxelLight.Mul(density)
 
-        beerlambert := math.Exp(- 0.5 * vGrid.Step * density)
+        beerlambert := math.Exp(- rainyNess * vGrid.Step * density)
         accTransparency *= beerlambert
 
-        //voxelLight.Mul(accTransparency * vGrid.Step)
+        voxelLight.Mul(accTransparency * vGrid.Step)
         voxelLight.Mul((1 - beerlambert))
-
-        //
-        //voxelLight.Mul(0.5)
-        //
 
         color.AddVector3(voxelLight)
     }
 
-    // compute background color
-    //backgroundColor := background.RenderGradient(ray)
-
-    // background contribution
-    //backgroundColor.Mul(accTransparency)
-    //color.AddVector3(backgroundColor)
-
-    //color.Clamp(0.0, 1.0)
     return color, accTransparency, true
 }
