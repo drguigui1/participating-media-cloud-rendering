@@ -13,6 +13,7 @@ import (
     "volumetric-cloud/vector3"
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/random_clouds"
+    "volumetric-cloud/animations"
 )
 
 var fullRenderCmd = &cobra.Command{
@@ -40,7 +41,7 @@ var fullRenderCmd = &cobra.Command{
 
         // Voxel Grid 1
         // Image 'perlin-worley-3.png'
-        /*shift := vector3.InitVector3(-20.0, 35.0, -50.0)
+        shift := vector3.InitVector3(-20.0, 35.0, -50.0)
         oppositeCorner := vector3.InitVector3(20.0, 40.0, -20.0)
         var seed2 int64 = 4
         worleyNoise2 := noise.InitWorleyNoise(0.4, 1.5, 0.7, 0.5, 3, seed2)
@@ -48,7 +49,6 @@ var fullRenderCmd = &cobra.Command{
         worleyWeight := 0.1
         perlinWeight := 0.6
         voxelGrid2 := voxel_grid.InitVoxelGrid(0.5, shift, oppositeCorner, 0.13, perlinNoise2, worleyNoise2, perlinWeight, worleyWeight, 0.3, 0.6, 1.5)
-        */
 
         // Voxel Grid 2
         // Image 'perlin-worley-2.png'
@@ -74,7 +74,7 @@ var fullRenderCmd = &cobra.Command{
         */
 
         // Voxel Grid 4
-        shift4 := vector3.InitVector3(-40.0, 30.0, -90.0)
+/*        shift4 := vector3.InitVector3(-40.0, 30.0, -90.0)
         oppositeCorner4 := vector3.InitVector3(-10.0, 40.0, -60.0)
 
         var seed4 int64 = 301
@@ -83,7 +83,7 @@ var fullRenderCmd = &cobra.Command{
         worleyWeight := 0.1
         perlinWeight := 0.9
         voxelGrid3 := voxel_grid.InitVoxelGrid(0.5, shift4, oppositeCorner4, 0.13, perlinNoise3, worleyNoise3, perlinWeight, worleyWeight, 0.6, 0.6, 1.5)
-
+*/
 /*
         // Voxel Grid 5
         shift5 := vector3.InitVector3(-20.0, 48.0, -70.0)
@@ -93,7 +93,7 @@ var fullRenderCmd = &cobra.Command{
         voxelGrid5 := voxel_grid.InitVoxelGrid(0.5, shift5, oppositeCorner5, 0.13, perlinNoise5, 0.6, 0.6, 1.8)
 */
    //     voxelGrids := []voxel_grid.VoxelGrid{voxelGrid, voxelGrid2, voxelGrid3, voxelGrid4, voxelGrid5}
-        voxelGrids := []voxel_grid.VoxelGrid{voxelGrid3}
+        voxelGrids := []voxel_grid.VoxelGrid{voxelGrid2}
 
         // IMPORTANT
         //
@@ -117,13 +117,21 @@ var fullRenderCmd = &cobra.Command{
         fmt.Println("SCENE")
         s := scene.InitScene(voxelGrids, camera, lights, 0.4)
 
-        fmt.Println("RENDER")
-        // Render
-        image := s.Render(imgSizeY, imgSizeX, 1)
+        fmt.Println("ANIM")
 
-        fmt.Println("SAVE")
+        animations.AnimRotation(vector3.InitVector3(-25.0, 35.0, -75.0),
+                     70.0,
+                     imgSizeX,
+                     imgSizeY,
+                     100,
+                     1,
+                     s)
+        // Render
+        //image := s.Render(imgSizeY, imgSizeX, 1)
+
+        //fmt.Println("SAVE")
         // Save
-        image.SavePNG("tmp.png")
+        //image.SavePNG("tmp.png")
 
     },
 }

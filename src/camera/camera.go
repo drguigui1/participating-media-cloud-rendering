@@ -20,19 +20,10 @@ type Camera struct {
     RotationZ []float64 // size 9 (3x3)
 }
 
-func InitCamera(aspectRatio,
-                fieldOfView float64,
-                imgWidth,
-                imgHeight int,
-                origin vector3.Vector3,
-                thetaX,
-                thetaY,
-                thetaZ float64) Camera {
-
+func InitRota(thetaX, thetaY, thetaZ float64) (rotaX, rotaY, rotaZ []float64){
     rotationX := make([]float64, 9)
     rotationY := make([]float64, 9)
     rotationZ := make([]float64, 9)
-
     // init rotation matrix
     matXtmp := []float64{
         1.0, 0.0, 0.0,
@@ -57,6 +48,18 @@ func InitCamera(aspectRatio,
         rotationY[idx] = matYtmp[idx]
         rotationZ[idx] = matZtmp[idx]
     }
+    return rotationX, rotationY, rotationZ
+}
+
+func InitCamera(aspectRatio,
+                fieldOfView float64,
+                imgWidth,
+                imgHeight int,
+                origin vector3.Vector3,
+                thetaX,
+                thetaY,
+                thetaZ float64) Camera {
+    rotationX, rotationY, rotationZ := InitRota(thetaX, thetaY, thetaZ)
 
     return Camera{
         AspectRatio: aspectRatio,
@@ -68,7 +71,7 @@ func InitCamera(aspectRatio,
         RotationY: rotationY,
         RotationZ: rotationZ,
     }
-}
+} 
 
 func (c Camera) CreateRay(i, j float64) ray.Ray {
     // position on the point in the 3D world

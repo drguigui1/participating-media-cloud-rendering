@@ -83,7 +83,6 @@ func (s *Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
         colorZ := (p.Intensity[2] - s.MinColor[2]) / (s.MaxColor[2] - s.MinColor[2])
 
         color := vector3.InitVector3(colorX, colorY, colorZ)
-        //p.BackgroundColorImpact.Sub(0.7)
         color.AddVector3(p.BackgroundColorImpact)
         color.Div(float64(nbRaysPerPixel))
         color.Clamp(0.0, 1.0)
