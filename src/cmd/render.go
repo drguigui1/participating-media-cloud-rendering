@@ -27,7 +27,7 @@ var fullRenderCmd = &cobra.Command{
         aspectRatio := float64(imgSizeX) / float64(imgSizeY)
         fieldOfView := math.Pi / 2
 
-        origin := vector3.InitVector3(-30.0, 15, 5)
+        origin := vector3.InitVector3(0.0, 15, 5)
         camera := camera.InitCamera(
            aspectRatio,
            fieldOfView,
@@ -35,9 +35,18 @@ var fullRenderCmd = &cobra.Command{
            imgSizeY,
            origin,
            math.Pi / 8,
-           -math.Pi / 8,
+           0.0,
            0.0,
         )
+
+        shift := vector3.InitVector3(-20.0, 25.0, -90.0)
+        oppositeCorner := vector3.InitVector3(20.0, 30.0, -50.0)
+        var seed2 int64 = 2
+        worleyNoise2 := noise.InitWorleyNoise(0.4, 2.0, 0.5, 0.5, 3, seed2)
+        perlinNoise2 := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.8, 3, seed2)
+        worleyWeight := 0.2
+        perlinWeight := 0.6
+        voxelGrid2 := voxel_grid.InitVoxelGrid(0.5, shift, oppositeCorner, 0.13, perlinNoise2, worleyNoise2, perlinWeight, worleyWeight, 0.3, 0.6, 1.5)
 
         // Voxel Grid 1
         // Image 'perlin-worley-4.png'
