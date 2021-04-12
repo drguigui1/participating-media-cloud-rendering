@@ -14,6 +14,8 @@ import (
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/random_clouds"
     "volumetric-cloud/animations"
+    "volumetric-cloud/ray"
+
 )
 
 var fullRenderCmd = &cobra.Command{
@@ -27,18 +29,19 @@ var fullRenderCmd = &cobra.Command{
         aspectRatio := float64(imgSizeX) / float64(imgSizeY)
         fieldOfView := math.Pi / 2
 
-        origin := vector3.InitVector3(-30, 15, 5)
+        origin := vector3.InitVector3(-5.0, 0.0, 0.0)
         camera := camera.InitCamera(
            aspectRatio,
            fieldOfView,
            imgSizeX,
            imgSizeY,
            origin,
+           math.Pi / 4,
            math.Pi / 8,
-           0.0,
            0.0,
         )
 
+        /*
         // Voxel Grid 1
         // Image 'perlin-worley-3.png'
         shift := vector3.InitVector3(-20.0, 35.0, -50.0)
@@ -50,16 +53,18 @@ var fullRenderCmd = &cobra.Command{
         perlinWeight := 0.6
         voxelGrid2 := voxel_grid.InitVoxelGrid(0.5, shift, oppositeCorner, 0.13, perlinNoise2, worleyNoise2, perlinWeight, worleyWeight, 0.3, 0.6, 1.5)
 
+
+         */
         // Voxel Grid 2
         // Image 'perlin-worley-2.png'
-        /*shift2 := vector3.InitVector3(-50, 35.0, -60.0)
+        shift2 := vector3.InitVector3(-50, 35.0, -60.0)
         oppositeCorner2 := vector3.InitVector3(-25.0, 40.0, -30.0)
         var seed2 int64 = 21
         worleyNoise2 := noise.InitWorleyNoise(0.4, 2.0, 0.5, 0.5, 3, seed2)
         perlinNoise2 := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.8, 3, seed2)
         worleyWeight := 0.5
         perlinWeight := 0.5
-        voxelGrid2 := voxel_grid.InitVoxelGrid(0.5, shift2, oppositeCorner2, 0.13, perlinNoise2, worleyNoise2, perlinWeight, worleyWeight, 0.6, 0.6, 1.5)*/
+        voxelGrid2 := voxel_grid.InitVoxelGrid(0.5, shift2, oppositeCorner2, 0.13, perlinNoise2, worleyNoise2, perlinWeight, worleyWeight, 0.6, 0.6, 1.5)
 
         // Voxel Grid 3
         // Image 'perlin-worley-1.png'
@@ -119,14 +124,23 @@ var fullRenderCmd = &cobra.Command{
 
         fmt.Println("ANIM")
 
+
+
+/*
         animations.AnimRotation(vector3.InitVector3(-25.0, 35.0, -75.0),
                      70.0,
                      imgSizeX,
                      imgSizeY,
-                     100,
+                     10,
                      1,
                      s)
+*/
+
         // Render
+        direct := vector3.InitVector3(-1.0, 0.0, 0.0)
+        r := ray.InitRay(s.Camera.Origin, direct)
+
+        animations.AnimTranslate(r, 10, imgSizeX, imgSizeY, 1, 5.0,  &s, &camera)
         //image := s.Render(imgSizeY, imgSizeX, 1)
 
         //fmt.Println("SAVE")

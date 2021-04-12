@@ -60,9 +60,6 @@ func (s *Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
     wg.Add(imgSizeY)
 
     for i := 0; i < imgSizeY; i += 1 {
-        if i == 620 {
-            //fmt.Println("BREAK")
-        }
         s.renderImageSizeY(image, i, imgSizeX, nbRaysPerPixel, nil)
     }
 
@@ -95,7 +92,9 @@ func (s *Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
 func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int, wg *sync.WaitGroup) {
     for j := 0; j < imgSizeX; j += 1 {
         color := vector3.InitVector3(0, 0, 0)
-        if j == 300 {
+        if j == imgSizeX / 2 {
+            image.SetPixel(j, i, uint8(1.0 * 255.0), uint8(0.0 * 255.0), uint8(0.0 * 255.0), uint8(255))
+            continue
             //fmt.Println("BREAK")
         }
 
