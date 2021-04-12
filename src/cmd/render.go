@@ -13,7 +13,7 @@ import (
     "volumetric-cloud/vector3"
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/random_clouds"
-    "volumetric-cloud/animations"
+//    "volumetric-cloud/animations"
 )
 
 var fullRenderCmd = &cobra.Command{
@@ -27,7 +27,7 @@ var fullRenderCmd = &cobra.Command{
         aspectRatio := float64(imgSizeX) / float64(imgSizeY)
         fieldOfView := math.Pi / 2
 
-        origin := vector3.InitVector3(-30, 15, 5)
+        origin := vector3.InitVector3(-30.0, 15, 5)
         camera := camera.InitCamera(
            aspectRatio,
            fieldOfView,
@@ -35,20 +35,20 @@ var fullRenderCmd = &cobra.Command{
            imgSizeY,
            origin,
            math.Pi / 8,
-           0.0,
+           -math.Pi / 8,
            0.0,
         )
 
         // Voxel Grid 1
-        // Image 'perlin-worley-3.png'
-        shift := vector3.InitVector3(-20.0, 35.0, -50.0)
-        oppositeCorner := vector3.InitVector3(20.0, 40.0, -20.0)
-        var seed2 int64 = 4
-        worleyNoise2 := noise.InitWorleyNoise(0.4, 1.5, 0.7, 0.5, 3, seed2)
-        perlinNoise2 := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.5, 3, seed2)
-        worleyWeight := 0.1
+        // Image 'perlin-worley-4.png'
+        /*shift := vector3.InitVector3(-20.0, 25.0, -100.0)
+        oppositeCorner := vector3.InitVector3(20.0, 30.0, -50.0)
+        var seed2 int64 = 21
+        worleyNoise2 := noise.InitWorleyNoise(0.4, 2.0, 0.5, 0.5, 3, seed2)
+        perlinNoise2 := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.8, 3, seed2)
+        worleyWeight := 0.4
         perlinWeight := 0.6
-        voxelGrid2 := voxel_grid.InitVoxelGrid(0.5, shift, oppositeCorner, 0.13, perlinNoise2, worleyNoise2, perlinWeight, worleyWeight, 0.3, 0.6, 1.5)
+        voxelGrid2 := voxel_grid.InitVoxelGrid(0.5, shift, oppositeCorner, 0.13, perlinNoise2, worleyNoise2, perlinWeight, worleyWeight, 0.6, 0.6, 1.5)*/
 
         // Voxel Grid 2
         // Image 'perlin-worley-2.png'
@@ -59,7 +59,8 @@ var fullRenderCmd = &cobra.Command{
         perlinNoise2 := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.8, 3, seed2)
         worleyWeight := 0.5
         perlinWeight := 0.5
-        voxelGrid2 := voxel_grid.InitVoxelGrid(0.5, shift2, oppositeCorner2, 0.13, perlinNoise2, worleyNoise2, perlinWeight, worleyWeight, 0.6, 0.6, 1.5)*/
+        voxelGrid2 := voxel_grid.InitVoxelGrid(0.5, shift2, oppositeCorner2, 0.13, perlinNoise2, worleyNoise2, perlinWeight, worleyWeight, 0.6, 0.6, 1.5)
+        */
 
         // Voxel Grid 3
         // Image 'perlin-worley-1.png'
@@ -115,23 +116,23 @@ var fullRenderCmd = &cobra.Command{
 
         // Scene
         fmt.Println("SCENE")
-        s := scene.InitScene(voxelGrids, camera, lights, 0.4)
+        s := scene.InitScene(voxelGrids, camera, lights, 0.3)
 
-        fmt.Println("ANIM")
+        fmt.Println("RENDER")
 
-        animations.AnimRotation(vector3.InitVector3(-25.0, 35.0, -75.0),
+        /*animations.AnimRotation(vector3.InitVector3(-25.0, 35.0, -75.0),
                      70.0,
                      imgSizeX,
                      imgSizeY,
-                     100,
+                     20,
                      1,
-                     s)
+                     s)*/
         // Render
-        //image := s.Render(imgSizeY, imgSizeX, 1)
+        image := s.Render(imgSizeY, imgSizeX, 1)
 
         //fmt.Println("SAVE")
         // Save
-        //image.SavePNG("tmp.png")
+        image.SavePNG("tmp.png")
 
     },
 }
@@ -180,8 +181,6 @@ var randomRenderCmd = &cobra.Command{
         fmt.Println("SAVE")
         // Save
         image.SavePNG("tmp.png")
-
-
     },
 }
 
