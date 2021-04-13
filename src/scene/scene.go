@@ -93,8 +93,15 @@ func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX int, wg *sync.WaitGr
         // create the ray
         r := s.Camera.CreateRay(float64(j) + rand.Float64(), float64(i) + rand.Float64())
 
+        // TODO compute light color using Rayleigh and Mie
+        // TODO check ground intersection
+        t, _, hasHit := s.Atmosphere.Ground.Hit(r)
+        if !hasHit {
+            t = -1.0
+        }
+
         // Render cloud
-        accColor, backgroundColorImpact, hasOneHit := s.renderClouds(r, 0.0)
+        accColor, backgroundColorImpact, hasOneHit := s.render(r, t)
 
         if hasOneHit {
             // Build min / max / tuple slice (i, j, Intensity)
@@ -122,11 +129,7 @@ func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX int, wg *sync.WaitGr
     }
 }
 
-//func (s *Scene) renderGround(ray ray.Ray) (vector3.Vector3, bool) {
-//    return 
-//}
-
-func (s *Scene) renderClouds(ray ray.Ray, tGround float64) (vector3.Vector3, vector3.Vector3, bool) {
+func (s *Scene) render(ray ray.Ray, tGround float64) (vector3.Vector3, vector3.Vector3, bool) {
     accColor := vector3.InitVector3(0, 0, 0)
     backgroundColorImpact := vector3.InitVector3(0, 0, 0)
 
@@ -134,10 +137,16 @@ func (s *Scene) renderClouds(ray ray.Ray, tGround float64) (vector3.Vector3, vec
     hasOneHit := false
 
     for _, vGrid := range s.VoxelGrids {
-        accC, accT, hasHit := vGrid.ComputePixelColor(ray, s.Lights[0].Color, s.RainyNess)
-        if !hasHit {
+        tVGrid, hasHitVoxel, _ := vGrid.Hit(ray)
+        if !hasHitVoxel {
             continue
         }
+
+        if tGround > 0 && tVGrid > tGround {
+            continue
+        }
+
+        accC, accT, _ := vGrid.ComputePixelColor(ray, s.Lights[0].Color, s.RainyNess, tGround)
 
         hasOneHit = true
 
@@ -150,7 +159,15 @@ func (s *Scene) renderClouds(ray ray.Ray, tGround float64) (vector3.Vector3, vec
 
     // get background impact
     backgroundColor := background.RenderGradient(ray)
-    // TODO maybe ground color as background
+    if tGround > 0 {
+        p := ray.RayAt(tGround)
+        backgroundColor = s.Atmosphere.Ground.ComputeDiffuseGroundColor(
+            s.Lights,
+            s.Atmosphere.GroundColor,
+            p,
+            s.Atmosphere.GroundAlbedo,
+        )
+    }
 
     // set pixel
     if hasOneHit {

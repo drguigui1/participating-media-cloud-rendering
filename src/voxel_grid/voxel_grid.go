@@ -448,7 +448,7 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransparencyYZ(lights []light.Ligh
 }
 
 // return the proper color
-func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3, rainyNess float64) (vector3.Vector3, float64, bool) {
+func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3, rainyNess, tGround float64) (vector3.Vector3, float64, bool) {
     pts, hasHit := vGrid.RayMarch(ray)
     if !hasHit {
         return vector3.Vector3{}, 0.0, false
