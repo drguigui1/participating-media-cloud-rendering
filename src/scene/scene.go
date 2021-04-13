@@ -7,10 +7,12 @@ import (
     "volumetric-cloud/light"
     "volumetric-cloud/background"
     "volumetric-cloud/vector3"
+    "volumetric-cloud/atmosphere"
+    "volumetric-cloud/ray"
 
-    "math/rand"
     "sync"
     "fmt"
+    "math"
 )
 
 type Pixel struct {
@@ -25,6 +27,7 @@ type Scene struct {
     VoxelGrids []voxel_grid.VoxelGrid
     Camera camera.Camera
     Lights []light.Light
+    Atmosphere atmosphere.Atmosphere
 
     RainyNess float64 // close to 0 will make a whiter cloud
     MinColor []float64 // rgb (size 3/4)
@@ -35,6 +38,7 @@ type Scene struct {
 func InitScene(voxelGrids []voxel_grid.VoxelGrid,
                camera camera.Camera,
                lights []light.Light,
+               atmosphere atmosphere.Atmosphere,
                rainyNess float64) Scene {
     // compute light transmittance in the voxel grid
     for idx, _ := range voxelGrids {
@@ -46,13 +50,14 @@ func InitScene(voxelGrids []voxel_grid.VoxelGrid,
         Camera: camera,
         Lights: lights,
         RainyNess: rainyNess,
+        Atmosphere: atmosphere,
         MinColor: []float64{0.0, 0.0, 0.0},
         MaxColor: []float64{0.0, 0.0, 0.0},
         Pixels: make([]Pixel, 0),
     }
 }
 
-func (s *Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
+func (s *Scene) Render(imgSizeY, imgSizeX int) img.Img {
     image := img.InitImg(imgSizeX, imgSizeY)
 
     // create the wait group
@@ -60,15 +65,9 @@ func (s *Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
     wg.Add(imgSizeY)
 
     for i := 0; i < imgSizeY; i += 1 {
-        s.renderImageSizeY(image, i, imgSizeX, nbRaysPerPixel, nil)
+        s.renderImageSizeY(image, i, imgSizeX, nil)
     }
 
-    // i == 620
-    // j == 300
-
-    //for j := 300; j < 700; j += 1 {
-    //    image.SetPixel(j, 620, 255, 0, 0, 255)
-    //}
     //wg.Wait()
 
     // Remap cloud values
@@ -81,7 +80,6 @@ func (s *Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
 
         color := vector3.InitVector3(colorX, colorY, colorZ)
         color.AddVector3(p.BackgroundColorImpact)
-        color.Div(float64(nbRaysPerPixel))
         color.Clamp(0.0, 1.0)
         image.SetPixel(p.J, p.I, uint8(color.X * 255.0), uint8(color.Y * 255.0), uint8(color.Z * 255.0), uint8(255))
     }
@@ -89,91 +87,30 @@ func (s *Scene) Render(imgSizeY, imgSizeX, nbRaysPerPixel int) img.Img {
     return image
 }
 
-func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int, wg *sync.WaitGroup) {
+func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX int, wg *sync.WaitGroup) {
     for j := 0; j < imgSizeX; j += 1 {
-        color := vector3.InitVector3(0, 0, 0)
-        if j == imgSizeX / 2 {
-            image.SetPixel(j, i, uint8(1.0 * 255.0), uint8(0.0 * 255.0), uint8(0.0 * 255.0), uint8(255))
-            continue
-            //fmt.Println("BREAK")
+        // create the ray
+        r := s.Camera.CreateRay(float64(j), float64(i))
+
+        // TODO compute light color using Rayleigh and Mie
+        // TODO check ground intersection
+        t, _, hasHit := s.Atmosphere.Ground.Hit(r)
+        if !hasHit {
+            t = -1.0
         }
 
-        var hasOneRayHit bool = false
-        accColor := vector3.InitVector3(0, 0, 0)
-        backgroundColorImpact := vector3.InitVector3(0, 0, 0)
+        // Render cloud
+        accColor, backgroundColorImpact, hasOneHit := s.render(r, t)
 
-        for k := 0; k < nbRaysPerPixel; k += 1 {
-            // create the ray
-            r := s.Camera.CreateRay(float64(j) + rand.Float64(), float64(i) + rand.Float64())
-
-            var accC vector3.Vector3
-
-            var accTransparency float64 = 1.0
-            var accT float64
-
-            var hasHit bool
-            hasOneHit := false
-
-            for _, vGrid := range s.VoxelGrids {
-                accC, accT, hasHit = vGrid.ComputePixelColor(r, s.Lights[0].Color, s.RainyNess)
-                if !hasHit {
-                    continue
-                }
-
-                hasOneHit = true
-                hasOneRayHit = true
-
-                // accumulate transparency
-                accTransparency *= accT
-
-                // accumulate color
-                accColor.AddVector3(accC)
-            }
-
-            // get background impact
-            backgroundColor := background.RenderGradient(r)
-
-            // set pixel
-            if hasOneHit {
-                //accColor.Mul(s.RainyNess)
-                accColor.Mul(s.RainyNess)
-                // compute pizel color
-                backgroundColorImpact.AddVector3(vector3.MulVector3Scalar(backgroundColor, accTransparency))
-                //accColor.AddVector3(backgroundColorImpact)
-                // accColor.Clamp(0.0, 1.0)
-                //color.AddVector3(vector3.InitVector3(accColor.X, accColor.Y, accColor.Z))
-                //color = vector3.InitVector3(0.0, 1.0, 0.0)
-            } else {
-                // gradient case
-                color.AddVector3(backgroundColor)
-            }
-        }
-
-        // divide color vector by nbRaysPerPixel
-        color.Div(float64(nbRaysPerPixel))
-
-        if hasOneRayHit {
+        if hasOneHit {
             // Build min / max / tuple slice (i, j, Intensity)
-            //if hasOneHit {
-            if accColor.X < s.MinColor[0] {
-                s.MinColor[0] = accColor.X
-            }
-            if accColor.Y < s.MinColor[1] {
-                s.MinColor[1] = accColor.Y
-            }
-            if accColor.Z < s.MinColor[2] {
-                s.MinColor[2] = accColor.Z
-            }
+            s.MinColor[0] = math.Min(accColor.X, s.MinColor[0])
+            s.MinColor[1] = math.Min(accColor.Y, s.MinColor[1])
+            s.MinColor[2] = math.Min(accColor.Z, s.MinColor[2])
 
-            if accColor.X > s.MaxColor[0] {
-                s.MaxColor[0] = accColor.X
-            }
-            if accColor.Y > s.MaxColor[1] {
-                s.MaxColor[1] = accColor.Y
-            }
-            if accColor.Z > s.MaxColor[2] {
-                s.MaxColor[2] = accColor.Z
-            }
+            s.MaxColor[0] = math.Max(accColor.X, s.MaxColor[0])
+            s.MaxColor[1] = math.Max(accColor.Y, s.MaxColor[1])
+            s.MaxColor[2] = math.Max(accColor.Z, s.MaxColor[2])
 
             s.Pixels = append(s.Pixels, Pixel{
                 I: i,
@@ -182,11 +119,61 @@ func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX, nbRaysPerPixel int,
                 BackgroundColorImpact: backgroundColorImpact,
             })
         } else {
-            image.SetPixel(j, i, uint8(color.X * 255.0), uint8(color.Y * 255.0), uint8(color.Z * 255.0), uint8(255))
+            image.SetPixel(j, i, uint8(accColor.X * 255.0), uint8(accColor.Y * 255.0), uint8(accColor.Z * 255.0), uint8(255))
         }
     }
 
     if wg != nil {
         wg.Done()
     }
+}
+
+func (s *Scene) render(ray ray.Ray, tGround float64) (vector3.Vector3, vector3.Vector3, bool) {
+    accColor := vector3.InitVector3(0, 0, 0)
+    backgroundColorImpact := vector3.InitVector3(0, 0, 0)
+
+    var accTransparency float64 = 1.0
+    hasOneHit := false
+
+    for _, vGrid := range s.VoxelGrids {
+        tVGrid, hasHitVoxel, _ := vGrid.Hit(ray)
+        if !hasHitVoxel {
+            continue
+        }
+
+        if tGround > 0 && tVGrid > tGround {
+            continue
+        }
+
+        accC, accT, _ := vGrid.ComputePixelColor(ray, s.Lights[0].Color, s.RainyNess, tGround)
+
+        hasOneHit = true
+
+        // accumulate transparency
+        accTransparency *= accT
+
+        // accumulate color
+        accColor.AddVector3(accC)
+    }
+
+    // get background impact
+    backgroundColor := background.RenderGradient(ray)
+    if tGround > 0 {
+        p := ray.RayAt(tGround)
+        backgroundColor = s.Atmosphere.Ground.ComputeDiffuseGroundColor(
+            s.Lights,
+            s.Atmosphere.GroundColor,
+            p,
+            s.Atmosphere.GroundAlbedo,
+        )
+    }
+
+    // set pixel
+    if hasOneHit {
+        accColor.Mul(s.RainyNess)
+        backgroundColorImpact.AddVector3(vector3.MulVector3Scalar(backgroundColor, accTransparency))
+        return accColor, backgroundColorImpact, hasOneHit
+    }
+
+    return backgroundColor, vector3.Vector3{}, hasOneHit
 }
