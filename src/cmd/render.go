@@ -41,7 +41,7 @@ var fullRenderCmd = &cobra.Command{
            0.0,
         )
 
-        /*
+
         // Voxel Grid 1
         // Image 'perlin-worley-3.png'
         shift := vector3.InitVector3(-20.0, 35.0, -50.0)
@@ -54,7 +54,8 @@ var fullRenderCmd = &cobra.Command{
         voxelGrid2 := voxel_grid.InitVoxelGrid(0.5, shift, oppositeCorner, 0.13, perlinNoise2, worleyNoise2, perlinWeight, worleyWeight, 0.3, 0.6, 1.5)
 
 
-         */
+
+        /*
         // Voxel Grid 2
         // Image 'perlin-worley-2.png'
         shift2 := vector3.InitVector3(-50, 35.0, -60.0)
@@ -66,6 +67,8 @@ var fullRenderCmd = &cobra.Command{
         perlinWeight := 0.5
         voxelGrid2 := voxel_grid.InitVoxelGrid(0.5, shift2, oppositeCorner2, 0.13, perlinNoise2, worleyNoise2, perlinWeight, worleyWeight, 0.6, 0.6, 1.5)
 
+
+         */
         // Voxel Grid 3
         // Image 'perlin-worley-1.png'
         /*shift3 := vector3.InitVector3(15.0, 30.0, -80.0)
@@ -98,7 +101,6 @@ var fullRenderCmd = &cobra.Command{
         voxelGrid5 := voxel_grid.InitVoxelGrid(0.5, shift5, oppositeCorner5, 0.13, perlinNoise5, 0.6, 0.6, 1.8)
 */
    //     voxelGrids := []voxel_grid.VoxelGrid{voxelGrid, voxelGrid2, voxelGrid3, voxelGrid4, voxelGrid5}
-        voxelGrids := []voxel_grid.VoxelGrid{voxelGrid2}
 
         // IMPORTANT
         //
@@ -111,6 +113,8 @@ var fullRenderCmd = &cobra.Command{
         // shift.X < oppositeCorner.X &&
         // shift.Y < oppositeCorner.Y &&
         // shift.Z < oppositeCorner.Z
+        voxelGrids := []voxel_grid.VoxelGrid{voxelGrid2}
+
         fmt.Println("VOXEL")
 
         // Lights
@@ -126,21 +130,25 @@ var fullRenderCmd = &cobra.Command{
 
 
 
-/*
+        /*
         animations.AnimRotation(vector3.InitVector3(-25.0, 35.0, -75.0),
                      70.0,
                      imgSizeX,
                      imgSizeY,
-                     10,
+                     50,
                      1,
                      s)
-*/
+        */
 
         // Render
-        direct := vector3.InitVector3(-1.0, 0.0, 0.0)
+
+        direct := vector3.InitVector3(0.0, 1.0, 0.0)
         r := ray.InitRay(s.Camera.Origin, direct)
 
-        animations.AnimTranslate(r, 10, imgSizeX, imgSizeY, 1, 5.0,  &s, &camera)
+        // animTranslate(ray, picNumber, imgX, imY, nbRpp, step, scene, cam)
+        animations.AnimTranslate(r, 100, imgSizeX, imgSizeY, 1, 2,  s, camera)
+
+
         //image := s.Render(imgSizeY, imgSizeX, 1)
 
         //fmt.Println("SAVE")
