@@ -13,6 +13,8 @@ import (
     "volumetric-cloud/vector3"
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/random_clouds"
+    "volumetric-cloud/atmosphere"
+    "volumetric-cloud/sphere"
 //    "volumetric-cloud/animations"
 )
 
@@ -27,14 +29,14 @@ var fullRenderCmd = &cobra.Command{
         aspectRatio := float64(imgSizeX) / float64(imgSizeY)
         fieldOfView := math.Pi / 2
 
-        origin := vector3.InitVector3(0.0, 15, 5)
+        origin := vector3.InitVector3(0.0, 0.0, 5)
         camera := camera.InitCamera(
            aspectRatio,
            fieldOfView,
            imgSizeX,
            imgSizeY,
            origin,
-           math.Pi / 8,
+           0.0,
            0.0,
            0.0,
         )
@@ -123,9 +125,19 @@ var fullRenderCmd = &cobra.Command{
         light2 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.7, 0.7, 0.7))
         lights := []light.Light{light1, light2}
 
+        // Atmosphere
+        ground := sphere.InitSphere(vector3.InitVector3(0.0, 0.0, 0.0), 2.0)
+        groundColor := vector3.InitVector3(91.0 / 255.0, 113 / 255.0, 182.0 / 255.0)
+        albedo := 0.9
+        atmosphere := atmosphere.Atmosphere{
+            Ground: ground,
+            GroundColor: groundColor,
+            GroundAlbedo: albedo,
+        }
+
         // Scene
         fmt.Println("SCENE")
-        s := scene.InitScene(voxelGrids, camera, lights, 0.3)
+        s := scene.InitScene(voxelGrids, camera, lights, atmosphere, 0.3)
 
         fmt.Println("RENDER")
 
@@ -137,7 +149,7 @@ var fullRenderCmd = &cobra.Command{
                      1,
                      s)*/
         // Render
-        image := s.Render(imgSizeY, imgSizeX, 1)
+        image := s.Render(imgSizeY, imgSizeX)
 
         //fmt.Println("SAVE")
         // Save
@@ -181,11 +193,11 @@ var randomRenderCmd = &cobra.Command{
 
         // Scene
         fmt.Println("SCENE")
-        s := scene.InitScene(voxelGrids, camera, lights, 1.0)
+        s := scene.InitScene(voxelGrids, camera, lights, atmosphere.Atmosphere{}, 1.0)
 
         fmt.Println("RENDER")
         // Render
-        image := s.Render(imgSizeY, imgSizeX, 1)
+        image := s.Render(imgSizeY, imgSizeX)
 
         fmt.Println("SAVE")
         // Save

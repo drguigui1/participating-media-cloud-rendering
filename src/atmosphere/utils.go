@@ -5,7 +5,7 @@ import (
 )
 
 func RayleighPhase(mu float64) float64 {
-    return (3.0 / (16 * math.Pi)) (1 + mu * mu)
+    return (3.0 / (16 * math.Pi)) * (1 + mu * mu)
 }
 
 // g: control the anisotropy of the medium

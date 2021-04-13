@@ -5,6 +5,7 @@ import (
 
     "volumetric-cloud/vector3"
     "volumetric-cloud/ray"
+    "volumetric-cloud/light"
 )
 
 type Sphere struct {
@@ -55,4 +56,19 @@ func (s Sphere) Hit(ray ray.Ray) (float64, vector3.Vector3, bool) {
     normal := vector3.UnitVector(vector3.SubVector3(p, s.Center))
 
     return root, normal, true
+}
+
+func (s Sphere) ComputeDiffuseGroundColor(lights []light.Light, groundColor, p vector3.Vector3, albedo float64) vector3.Vector3 {
+    diffuseIntensity := vector3.InitVector3(0.0, 0.0, 0.0)
+    for _, light := range lights {
+        lightIntensity := light.Color
+
+        lightDir := vector3.UnitVector(vector3.SubVector3(light.Position, p))
+        normal := vector3.UnitVector(vector3.SubVector3(p, s.Center))
+        lightImp := vector3.MulVector3Scalar(lightIntensity, math.Max(0.0, vector3.DotProduct(lightDir, normal)))
+        diffuseIntensity.AddVector3(lightImp)
+    }
+    res := vector3.HadamarProduct(diffuseIntensity, groundColor)
+    res.Mul(albedo)
+    return res
 }
