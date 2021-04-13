@@ -10,7 +10,6 @@ import (
     "volumetric-cloud/atmosphere"
     "volumetric-cloud/ray"
 
-    "math/rand"
     "sync"
     "fmt"
     "math"
@@ -91,7 +90,7 @@ func (s *Scene) Render(imgSizeY, imgSizeX int) img.Img {
 func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX int, wg *sync.WaitGroup) {
     for j := 0; j < imgSizeX; j += 1 {
         // create the ray
-        r := s.Camera.CreateRay(float64(j) + rand.Float64(), float64(i) + rand.Float64())
+        r := s.Camera.CreateRay(float64(j), float64(i))
 
         // TODO compute light color using Rayleigh and Mie
         // TODO check ground intersection
