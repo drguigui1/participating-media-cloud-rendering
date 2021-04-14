@@ -21,13 +21,12 @@ type Atmosphere struct {
     NbStepLight float64
 
     // scale height values
-    HR float64
-    HM float64
+    ScaleHeightR float64
+    ScaleHeightM float64
 
+    // G different from -1 or 1
     G float64
 
-    // Beta coef for Rayleigh and Mie
-    // Can be computed and not harcoded
     BetaRayleigh vector3.Vector3
     BetaMie vector3.Vector3
 }
@@ -35,17 +34,16 @@ type Atmosphere struct {
 func InitAtmosphere(ground sphere.Sphere,
                     groundColor vector3.Vector3,
                     sunImpact vector3.Vector3,
+                    betaRayleigh vector3.Vector3,
+                    betaMie vector3.Vector3,
                     groundAlbedo,
                     atmosphereRadius float64,
                     sun light.Light,
                     nbStep,
-                    nbStepLight float64) Atmosphere {
-    HR := 7994.0
-    HM := 1200.0
-    g := 0.76
-    betaRayleigh := vector3.InitVector3(0.0000058, 0.0000135, 0.0000331)
-    vMie := 0.0000010
-    betaMie := vector3.InitVector3(vMie, vMie, vMie)
+                    nbStepLight float64,
+                    scaleHeightR float64,
+                    scaleHeightM float64 ) Atmosphere {
+
 
     return Atmosphere{
         Ground: ground,
@@ -56,9 +54,9 @@ func InitAtmosphere(ground sphere.Sphere,
         Sun: sun,
         NbStep: nbStep,
         NbStepLight: nbStepLight,
-        HR: HR,
-        HM: HM,
-        G: g,
+        ScaleHeightR: scaleHeightR,
+        ScaleHeightM: scaleHeightM,
+        G: 0.8,
         BetaRayleigh: betaRayleigh,
         BetaMie: betaMie,
     }
@@ -81,7 +79,7 @@ func (a Atmosphere) ComputeRayleighMie(r ray.Ray) vector3.Vector3 {
     return res
 }
 
-//func (a Atmosphere) 
+//func (a Atmosphere)
 
 func (a Atmosphere) RayMarch(r ray.Ray, tmin, tmax float64) vector3.Vector3 {
     stepLength := (tmax - tmin) / a.NbStep
@@ -99,8 +97,8 @@ func (a Atmosphere) RayMarch(r ray.Ray, tmin, tmax float64) vector3.Vector3 {
         currHeight := a.GetCurrentHeight(p)
 
         // Approximate integral at the current step
-        currRayleighApprox := math.Exp(-currHeight / a.HR) * stepLength
-        currMieApprox := math.Exp(-currHeight / a.HM) * stepLength
+        currRayleighApprox := math.Exp(-currHeight / a.ScaleHeightR) * stepLength
+        currMieApprox := math.Exp(-currHeight / a.ScaleHeightM) * stepLength
 
         rayleighOD += currRayleighApprox
         mieOD += currMieApprox
@@ -123,13 +121,12 @@ func (a Atmosphere) RayMarch(r ray.Ray, tmin, tmax float64) vector3.Vector3 {
     theta := vector3.DotProduct(r.Direction, a.GetSunDir(a.ViewerPoint))
 
     // Phase functions
-    rayleighPhase := RayleighPhase(theta)
-    miePhase := MiePhase(theta, a.G)
+    rayleighPhase := PhaseFonction(theta, 0.0)
+    miePhase := PhaseFonction(theta, a.G)
 
     // Sum of Rayleigh and Mie and mult by the sun intensity
     skyColorRayleigh := vector3.HadamarProduct(intRayleigh, a.BetaRayleigh)
     skyColorRayleigh.Mul(rayleighPhase)
-    //skyColorRayleigh.Mul(50.0)
     skyColorMie := vector3.HadamarProduct(intMie, a.BetaMie)
     skyColorMie.Mul(miePhase)
     return vector3.HadamarProduct(vector3.AddVector3(skyColorRayleigh, skyColorMie), a.Sun.Color)
@@ -156,8 +153,8 @@ func (a Atmosphere) RayMarchSunContribution(
             return intRayleigh, intMie
         }
 
-        rayleighODL += math.Exp(-currHeight / a.HR) * stepLength
-        mieODL += math.Exp(-currHeight / a.HM) * stepLength
+        rayleighODL += math.Exp(-currHeight / a.ScaleHeightR) * stepLength
+        mieODL += math.Exp(-currHeight / a.ScaleHeightM) * stepLength
 
         t += stepLength
     }
