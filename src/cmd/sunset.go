@@ -91,15 +91,17 @@ var sunset1 = &cobra.Command{
 		fmt.Println("VOXEL")
 
 		// Lights
-		light1 := light.InitLight(vector3.InitVector3(10.0, 10.0, 10.0), vector3.InitVector3(0.6, 0.6, 0.6))
-		//light2 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.7, 0.7, 0.7))
-		lights := []light.Light{light1}
+		light1 := light.InitLight(vector3.InitVector3(10.0, 10.0, 10.0), vector3.InitVector3(0.7, 0.7, 0.7))
+		light2 := light.InitLight(vector3.InitVector3(0.0, 600000.0, -600000.0), vector3.InitVector3(0.7, 0.7, 0.7))
+		lights := []light.Light{light1, light2}
 
 		sun := light.InitLight(vector3.InitVector3(0.0, 30, -1000.0), vector3.InitVector3(20.0, 10.0, 10.0))
 
 		// Atmosphere
+		//ground := sphere.InitSphere(vector3.InitVector3(0.0, -6360005, 0.0), 6360000)
 		ground := sphere.InitSphere(vector3.InitVector3(0.0, -6360005, 0.0), 6360000)
-		groundColor := vector3.InitVector3(182 / 255.0, 152 / 255.0, 91 / 255.0)
+
+		groundColor := vector3.InitVector3(32 / 255.0, 117 / 255.0, 133 / 255.0)
 		albedo := 0.9
 		atmosphere := atmosphere.InitAtmosphere(
 			ground,
