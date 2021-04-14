@@ -395,7 +395,6 @@ func (voxelGrid VoxelGrid) RayMarch(ray ray.Ray) ([]vector3.Vector3, bool) {
 
     for voxelGrid.IsInsideVoxelGrid(o) {
         points = append(points, o)
-        // TODO: add random value to step
         o = vector3.AddVector3(o, vector3.MulVector3Scalar(ray.Direction, voxelGrid.Step))
     }
 
@@ -431,9 +430,6 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransparencyYZ(lights []light.Ligh
 
                 insideTransparency := 1.0
                 for _, p := range pts {
-                    // indexGrid := voxelGrid.GetVoxelIndex(p) // get the proper position in the grid
-
-                    // density := voxelGrid.GetDensity(int(indexGrid.X), int(indexGrid.Y), int(indexGrid.Z))
                     density := voxelGrid.LinearInterpolateDensity(p.X, p.Y, p.Z)
                     insideTransparency *= math.Exp(-voxelGrid.Step * density)
                 }
@@ -448,10 +444,10 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransparencyYZ(lights []light.Ligh
 }
 
 // return the proper color
-func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3, rainyNess, tGround float64) (vector3.Vector3, float64, bool) {
+func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3, rainyNess, tGround float64) (vector3.Vector3, float64, bool, vector3.Vector3) {
     pts, hasHit := vGrid.RayMarch(ray)
     if !hasHit {
-        return vector3.Vector3{}, 0.0, false
+        return vector3.Vector3{}, 0.0, false, vector3.Vector3{}
     }
 
     var accTransparency float64 = 1.0;
@@ -481,5 +477,5 @@ func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3
         color.AddVector3(voxelLight)
     }
 
-    return color, accTransparency, true
+    return color, accTransparency, true, pts[len(pts) - 1]
 }

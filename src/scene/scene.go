@@ -5,7 +5,7 @@ import (
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/camera"
     "volumetric-cloud/light"
-    "volumetric-cloud/background"
+    //"volumetric-cloud/background"
     "volumetric-cloud/vector3"
     "volumetric-cloud/atmosphere"
     "volumetric-cloud/ray"
@@ -93,13 +93,13 @@ func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX int, wg *sync.WaitGr
         r := s.Camera.CreateRay(float64(j), float64(i))
 
         // TODO compute light color using Rayleigh and Mie
-        // TODO check ground intersection
+
         t, _, hasHit := s.Atmosphere.Ground.Hit(r)
         if !hasHit {
             t = -1.0
         }
 
-        // Render cloud
+        // Render
         accColor, backgroundColorImpact, hasOneHit := s.render(r, t)
 
         if hasOneHit {
@@ -128,15 +128,16 @@ func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX int, wg *sync.WaitGr
     }
 }
 
-func (s *Scene) render(ray ray.Ray, tGround float64) (vector3.Vector3, vector3.Vector3, bool) {
+func (s *Scene) render(r ray.Ray, tGround float64) (vector3.Vector3, vector3.Vector3, bool) {
     accColor := vector3.InitVector3(0, 0, 0)
     backgroundColorImpact := vector3.InitVector3(0, 0, 0)
 
     var accTransparency float64 = 1.0
     hasOneHit := false
+    lastPts := vector3.InitVector3(r.Origin.X, r.Origin.Y, r.Origin.Z)
 
     for _, vGrid := range s.VoxelGrids {
-        tVGrid, hasHitVoxel, _ := vGrid.Hit(ray)
+        tVGrid, hasHitVoxel, _ := vGrid.Hit(r)
         if !hasHitVoxel {
             continue
         }
@@ -145,7 +146,10 @@ func (s *Scene) render(ray ray.Ray, tGround float64) (vector3.Vector3, vector3.V
             continue
         }
 
-        accC, accT, _ := vGrid.ComputePixelColor(ray, s.Lights[0].Color, s.RainyNess, tGround)
+
+        var accC vector3.Vector3
+        var accT float64
+        accC, accT, _, lastPts = vGrid.ComputePixelColor(r, s.Lights[0].Color, s.RainyNess, tGround)
 
         hasOneHit = true
 
@@ -157,9 +161,14 @@ func (s *Scene) render(ray ray.Ray, tGround float64) (vector3.Vector3, vector3.V
     }
 
     // get background impact
-    backgroundColor := background.RenderGradient(ray)
+    //backgroundColor := background.RenderGradient(ray)
+    var backgroundColor vector3.Vector3
+
+    // Call Rayleigh and Mie to compute the background color
+    backgroundColor = s.Atmosphere.ComputeRayleighMie(r)
+
     if tGround > 0 {
-        p := ray.RayAt(tGround)
+        p := r.RayAt(tGround)
         backgroundColor = s.Atmosphere.Ground.ComputeDiffuseGroundColor(
             s.Lights,
             s.Atmosphere.GroundColor,
@@ -171,6 +180,7 @@ func (s *Scene) render(ray ray.Ray, tGround float64) (vector3.Vector3, vector3.V
     // set pixel
     if hasOneHit {
         accColor.Mul(s.RainyNess)
+        backgroundColor = s.Atmosphere.ComputeRayleighMie(ray.InitRay(lastPts, r.Direction))
         backgroundColorImpact.AddVector3(vector3.MulVector3Scalar(backgroundColor, accTransparency))
         return accColor, backgroundColorImpact, hasOneHit
     }

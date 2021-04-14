@@ -10,4 +10,4 @@ fi
 
 cd src/ && go mod init volumetric-cloud
 
-dlv debug
+dlv debug -- fullrender
