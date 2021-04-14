@@ -5,7 +5,7 @@ import (
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/camera"
     "volumetric-cloud/light"
-    //"volumetric-cloud/background"
+//    "volumetric-cloud/background"
     "volumetric-cloud/vector3"
     "volumetric-cloud/atmosphere"
     "volumetric-cloud/ray"
@@ -161,7 +161,7 @@ func (s *Scene) render(r ray.Ray, tGround float64) (vector3.Vector3, vector3.Vec
     }
 
     // get background impact
-    //backgroundColor := background.RenderGradient(ray)
+    //backgroundColor := background.RenderGradient(r)
     var backgroundColor vector3.Vector3
 
     // Call Rayleigh and Mie to compute the background color

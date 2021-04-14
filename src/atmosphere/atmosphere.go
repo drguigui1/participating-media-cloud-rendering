@@ -122,7 +122,7 @@ func (a Atmosphere) RayMarch(r ray.Ray, tmin, tmax float64) vector3.Vector3 {
     // Sum of Rayleigh and Mie and mult by the sun intensity
     skyColorRayleigh := vector3.HadamarProduct(intRayleigh, a.BetaRayleigh)
     skyColorRayleigh.Mul(rayleighPhase)
-    skyColorRayleigh.Mul(20.0)
+    //skyColorRayleigh.Mul(20.0)
     skyColorMie := vector3.HadamarProduct(intMie, a.BetaMie)
     skyColorMie.Mul(miePhase)
     return vector3.HadamarProduct(vector3.AddVector3(skyColorRayleigh, skyColorMie), a.Sun.Color)

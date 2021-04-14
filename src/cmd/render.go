@@ -73,7 +73,7 @@ var fullRenderCmd = &cobra.Command{
         lights := []light.Light{light1}
 
         // Atmosphere
-        ground := sphere.InitSphere(vector3.InitVector3(0.0, -6350000, 0.0), 6350000)
+        ground := sphere.InitSphere(vector3.InitVector3(0.0, -6350005, 0.0), 6350000)
         groundColor := vector3.InitVector3(91.0 / 255.0, 113 / 255.0, 182.0 / 255.0)
         albedo := 0.9
         atmosphere := atmosphere.InitAtmosphere(
