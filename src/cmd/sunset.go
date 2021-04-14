@@ -103,9 +103,12 @@ var sunset1 = &cobra.Command{
 
 		groundColor := vector3.InitVector3(32 / 255.0, 117 / 255.0, 133 / 255.0)
 		albedo := 0.9
+
+		sunImpact := vector3.InitVector3(241.0 / 255.0, 161.0 / 255.0, 109.0 / 255.0)
 		atmosphere := atmosphere.InitAtmosphere(
 			ground,
 			groundColor,
+			sunImpact,
 			albedo,
 			6380000,
 			sun,

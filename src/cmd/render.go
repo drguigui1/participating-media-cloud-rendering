@@ -101,10 +101,12 @@ var fullRenderCmd = &cobra.Command{
         // Atmosphere
         ground := sphere.InitSphere(vector3.InitVector3(0.0, -6360005, 0.0), 6360000)
         groundColor := vector3.InitVector3(182 / 255.0, 152 / 255.0, 91 / 255.0)
+        sunImpact := vector3.InitVector3(1.0, 1.0, 1.0)
         albedo := 0.9
         atmosphere := atmosphere.InitAtmosphere(
             ground,
             groundColor,
+            sunImpact,
             albedo,
             6380000,
             sun,

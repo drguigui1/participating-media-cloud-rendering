@@ -79,9 +79,7 @@ func (s *Scene) Render(imgSizeY, imgSizeX int) img.Img {
         colorZ := (p.Intensity[2] - s.MinColor[2]) / (s.MaxColor[2] - s.MinColor[2])
 
         color := vector3.InitVector3(colorX, colorY, colorZ)
-        color.X *= 241.0 / 255.0
-        color.Y *= 161.0 / 255.0
-        color.Z *= 109.0 / 255.0
+        color = vector3.HadamarProduct(s.Atmosphere.SunImpact, color)
         color.AddVector3(p.BackgroundColorImpact)
         color.Clamp(0.0, 1.0)
         image.SetPixel(p.J, p.I, uint8(color.X * 255.0), uint8(color.Y * 255.0), uint8(color.Z * 255.0), uint8(255))

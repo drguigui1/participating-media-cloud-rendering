@@ -12,6 +12,7 @@ import (
 type Atmosphere struct {
     Ground sphere.Sphere
     GroundColor vector3.Vector3
+    SunImpact vector3.Vector3
     GroundAlbedo float64
     AtmosphereRadius float64 // must be higher than Ground.Radius
     Sun light.Light
@@ -33,6 +34,7 @@ type Atmosphere struct {
 
 func InitAtmosphere(ground sphere.Sphere,
                     groundColor vector3.Vector3,
+                    sunImpact vector3.Vector3,
                     groundAlbedo,
                     atmosphereRadius float64,
                     sun light.Light,
@@ -48,6 +50,7 @@ func InitAtmosphere(ground sphere.Sphere,
     return Atmosphere{
         Ground: ground,
         GroundColor: groundColor,
+        SunImpact : sunImpact,
         GroundAlbedo: groundAlbedo,
         AtmosphereRadius: atmosphereRadius,
         Sun: sun,
