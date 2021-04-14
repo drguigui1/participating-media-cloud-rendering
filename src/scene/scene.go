@@ -135,7 +135,6 @@ func (s *Scene) render(r ray.Ray, tGround float64) (vector3.Vector3, vector3.Vec
 
     var accTransparency float64 = 1.0
     hasOneHit := false
-    lastPts := vector3.InitVector3(r.Origin.X, r.Origin.Y, r.Origin.Z)
 
     for _, vGrid := range s.VoxelGrids {
         tVGrid, hasHitVoxel, _ := vGrid.Hit(r)
@@ -150,7 +149,7 @@ func (s *Scene) render(r ray.Ray, tGround float64) (vector3.Vector3, vector3.Vec
 
         var accC vector3.Vector3
         var accT float64
-        accC, accT, _, lastPts = vGrid.ComputePixelColor(r, s.Lights[0].Color, s.RainyNess, tGround)
+        accC, accT, _ = vGrid.ComputePixelColor(r, s.Lights[0].Color, s.RainyNess, tGround)
 
         hasOneHit = true
 
@@ -181,9 +180,7 @@ func (s *Scene) render(r ray.Ray, tGround float64) (vector3.Vector3, vector3.Vec
     // set pixel
     if hasOneHit {
         accColor.Mul(s.RainyNess)
-        backgroundColor = s.Atmosphere.ComputeRayleighMie(ray.InitRay(lastPts, r.Direction))
-        //_ = lastPts
-        //backgroundColor = s.Atmosphere.ComputeRayleighMie(r)
+        backgroundColor = s.Atmosphere.ComputeRayleighMie(r)
         backgroundColorImpact.AddVector3(vector3.MulVector3Scalar(backgroundColor, accTransparency))
         return accColor, backgroundColorImpact, hasOneHit
     }
