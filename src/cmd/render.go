@@ -37,19 +37,42 @@ var fullRenderCmd = &cobra.Command{
            imgSizeX,
            imgSizeY,
            origin,
-           0.0,
+           math.Pi / 10,
            0.0,
            0.0,
         )
 
-        shift := vector3.InitVector3(-20.0, 25.0, -90.0)
-        oppositeCorner := vector3.InitVector3(20.0, 30.0, -50.0)
-        var seed2 int64 = 2
-        worleyNoise2 := noise.InitWorleyNoise(0.4, 2.0, 0.5, 0.5, 3, seed2)
-        perlinNoise2 := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.8, 3, seed2)
+        // voxelgrid1
+        shift := vector3.InitVector3(-20.0, 35.0, -90.0)
+        oppositeCorner := vector3.InitVector3(20.0, 40.0, -50.0)
+        var seed1 int64 = 2
+        worleyNoise1 := noise.InitWorleyNoise(0.4, 2.0, 0.5, 0.5, 3, seed1)
+        perlinNoise1 := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.8, 3, seed1)
         worleyWeight := 0.2
         perlinWeight := 0.6
-        voxelGrid2 := voxel_grid.InitVoxelGrid(0.5, shift, oppositeCorner, 0.13, perlinNoise2, worleyNoise2, perlinWeight, worleyWeight, 0.3, 0.6, 1.5)
+        voxelGrid1 := voxel_grid.InitVoxelGrid(0.5, shift, oppositeCorner, 0.13, perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 0.3, 0.6, 1.0)
+
+        //voxelgrid2
+        shift2 := vector3.InitVector3(-90.0, 45.0, -200.0)
+        oppositeCorner2 := vector3.InitVector3(-60.0, 50.0, -120.0)
+        var seed2 int64 = 4
+        worleyNoise2 := noise.InitWorleyNoise(0.4, 1.5, 0.7, 0.5, 3, seed2)
+        perlinNoise2 := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.5, 3, seed2)
+        worleyWeight2 := 0.2
+        perlinWeight2 := 0.6
+        voxelGrid2 := voxel_grid.InitVoxelGrid(0.5, shift2, oppositeCorner2, 0.13, perlinNoise2, worleyNoise2, perlinWeight2, worleyWeight2, 0.3, 0.3, 1.0)
+
+        //voxelgrid3
+        shift3 := vector3.InitVector3(100, 50.0, -150.0)
+        oppositeCorner3 := vector3.InitVector3(150, 55.0, -110.0)
+        var seed3 int64 = 6
+        worleyNoise3 := noise.InitWorleyNoise(0.4, 1.5, 0.7, 0.5, 3, seed3)
+        perlinNoise3 := noise.InitPerlinNoise(0.2, 2.0, 1.0, 0.5, 3, seed3)
+        worleyWeight3 := 0.2
+        perlinWeight3 := 0.6
+        voxelGrid3 := voxel_grid.InitVoxelGrid(0.5, shift3, oppositeCorner3, 0.13, perlinNoise3, worleyNoise3, perlinWeight3, worleyWeight3, 0.3, 0.4, 1.0)
+
+
 
         // IMPORTANT
         //
@@ -62,8 +85,10 @@ var fullRenderCmd = &cobra.Command{
         // shift.X < oppositeCorner.X &&
         // shift.Y < oppositeCorner.Y &&
         // shift.Z < oppositeCorner.Z
-        voxelGrids := []voxel_grid.VoxelGrid{voxelGrid2}
-
+        voxelGrids := []voxel_grid.VoxelGrid{voxelGrid1, voxelGrid2, voxelGrid3}
+        _ = voxelGrid1
+        _ = voxelGrid2
+        _ = voxelGrid3
         fmt.Println("VOXEL")
 
         // Lights
