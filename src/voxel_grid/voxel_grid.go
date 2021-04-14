@@ -1,6 +1,7 @@
 package voxel_grid
 
 import (
+    "fmt"
     "math"
     "sync"
 
@@ -136,8 +137,8 @@ func (vGrid VoxelGrid) InitVoxelDensity(x, y, z int, center vector3.Vector3, max
     noiseValue *= height
 
     dist = dist / maxDist
-    dist -= vGrid.CloudCoverVal
-    noiseValue -= dist
+    noiseValue -= dist - 0.3
+
 
     if noiseValue < 0 {
         noiseValue = 0
@@ -407,6 +408,7 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransparency(lights []light.Light)
     wg.Add(voxelGrid.NbVerticeX)
 
     for i := 0; i < voxelGrid.NbVerticeX; i += 1 {
+        fmt.Println(i)
         go voxelGrid.ComputeInsideLightTransparencyYZ(lights, i, &wg)
     }
     wg.Wait()

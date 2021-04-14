@@ -8,6 +8,8 @@ import (
     "volumetric-cloud/ray"
     "volumetric-cloud/vector3"
     "volumetric-cloud/scene"
+    "volumetric-cloud/img"
+
 )
 
 func AnimRotation(center vector3.Vector3, radius float64,
@@ -51,6 +53,17 @@ func AnimTranslate(ray ray.Ray, picNumber, imgSizeX, imgSizeY int,
     }
 }
 
+func LookCenter(point vector3.Vector3, s scene.Scene, imgSizeX, imgSizeY int) img.Img {
+
+    teta := math.Atan((point.X - s.Camera.Origin.X) / (point.Z - s.Camera.Origin.Z))
+    phi := math.Atan((point.Y - s.Camera.Origin.Y) / (point.Z - s.Camera.Origin.Z))
+
+    //teta += 2.0 * math.Pi / float64(picNumber)
+    s.Camera.RotationX, s.Camera.RotationY, s.Camera.RotationZ =
+        camera.InitRota(phi, teta, 0.0)
+
+    return s.Render(imgSizeX, imgSizeY)
+}
 
 
 

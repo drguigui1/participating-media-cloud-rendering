@@ -25,6 +25,7 @@ type ValueNoise struct {
 
 type PerlinNoise struct {
     N Noise
+    Seed int64
 }
 
 type WorleyNoise struct {
@@ -35,6 +36,16 @@ type WorleyNoise struct {
     Coef1 int
     Coef2 int
     Coef3 int
+}
+
+func (p *PerlinNoise) SetSeed(seed int64){
+    rand.Seed(seed)
+    p.Seed = seed
+}
+
+func (w *WorleyNoise) SetSeed(seed int64){
+    rand.Seed(seed)
+    w.Seed = seed
 }
 
 func InitPerlinNoise(freq, freqFactor, amplitude, amplitudeFactor float64, octaves int, seed int64) PerlinNoise {
@@ -53,6 +64,7 @@ func InitPerlinNoise(freq, freqFactor, amplitude, amplitudeFactor float64, octav
 
     return PerlinNoise{
         N: n,
+        Seed: seed,
     }
 }
 

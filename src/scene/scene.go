@@ -11,7 +11,6 @@ import (
     "volumetric-cloud/ray"
 
     "sync"
-    "fmt"
     "math"
 )
 
@@ -71,8 +70,8 @@ func (s *Scene) Render(imgSizeY, imgSizeX int) img.Img {
     //wg.Wait()
 
     // Remap cloud values
-    fmt.Println(s.MinColor)
-    fmt.Println(s.MaxColor)
+
+
     for _, p := range s.Pixels {
         colorX := (p.Intensity[0] - s.MinColor[0]) / (s.MaxColor[0] - s.MinColor[0])
         colorY := (p.Intensity[1] - s.MinColor[1]) / (s.MaxColor[1] - s.MinColor[1])
