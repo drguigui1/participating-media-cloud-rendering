@@ -465,6 +465,7 @@ func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3
         insideTransparency := vGrid.LinearInterpolateTransparency(p.X, p.Y, p.Z)
 
         voxelLight = lightColor
+
         voxelLight.Mul(insideTransparency)
         voxelLight.Mul(density)
 

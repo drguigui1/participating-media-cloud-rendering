@@ -30,7 +30,7 @@ var fullRenderCmd = &cobra.Command{
         aspectRatio := float64(imgSizeX) / float64(imgSizeY)
         fieldOfView := math.Pi / 2
 
-        origin := vector3.InitVector3(0.0, 0.0, 5)
+        origin := vector3.InitVector3(0.0, 0.0, 5.0)
         camera := camera.InitCamera(
            aspectRatio,
            fieldOfView,
@@ -62,28 +62,29 @@ var fullRenderCmd = &cobra.Command{
         // shift.X < oppositeCorner.X &&
         // shift.Y < oppositeCorner.Y &&
         // shift.Z < oppositeCorner.Z
-        voxelGrids := []voxel_grid.VoxelGrid{}
-        _ = voxelGrid2
+        voxelGrids := []voxel_grid.VoxelGrid{voxelGrid2}
 
         fmt.Println("VOXEL")
 
         // Lights
-        light1 := light.InitLight(vector3.InitVector3(0.0, 200.0, -500.0), vector3.InitVector3(1.0, 1.0, 1.0))
+        light1 := light.InitLight(vector3.InitVector3(10.0, 10.0, 10.0), vector3.InitVector3(0.6, 0.6, 0.6))
         //light2 := light.InitLight(vector3.InitVector3(0.0, 0.0, 0.0), vector3.InitVector3(0.7, 0.7, 0.7))
         lights := []light.Light{light1}
 
+        sun := light.InitLight(vector3.InitVector3(0.0, 30, -1000.0), vector3.InitVector3(20.0, 10.0, 10.0))
+
         // Atmosphere
-        ground := sphere.InitSphere(vector3.InitVector3(0.0, -6350005, 0.0), 6350000)
-        groundColor := vector3.InitVector3(91.0 / 255.0, 113 / 255.0, 182.0 / 255.0)
+        ground := sphere.InitSphere(vector3.InitVector3(0.0, -6360005, 0.0), 6360000)
+        groundColor := vector3.InitVector3(182 / 255.0, 152 / 255.0, 91 / 255.0)
         albedo := 0.9
         atmosphere := atmosphere.InitAtmosphere(
             ground,
             groundColor,
             albedo,
-            6420000,
-            light1,
-            5,
-            5,
+            6380000,
+            sun,
+            8,
+            8,
         )
 
         // Scene

@@ -41,8 +41,8 @@ func InitAtmosphere(ground sphere.Sphere,
     HR := 7994.0
     HM := 1200.0
     g := 0.76
-    betaRayleigh := vector3.InitVector3(0.0000038, 0.0000135, 0.0000331)
-    vMie := 0.000021
+    betaRayleigh := vector3.InitVector3(0.0000058, 0.0000135, 0.0000331)
+    vMie := 0.0000010
     betaMie := vector3.InitVector3(vMie, vMie, vMie)
 
     return Atmosphere{
@@ -73,8 +73,12 @@ func (a Atmosphere) ComputeRayleighMie(r ray.Ray) vector3.Vector3 {
     }
 
     // ray marching from 0 to t
-    return a.RayMarch(r, 0.0, t)
+    res := a.RayMarch(r, 0.0, t)
+    res.Clamp(0.0, 1.0)
+    return res
 }
+
+//func (a Atmosphere) 
 
 func (a Atmosphere) RayMarch(r ray.Ray, tmin, tmax float64) vector3.Vector3 {
     stepLength := (tmax - tmin) / a.NbStep
@@ -122,7 +126,7 @@ func (a Atmosphere) RayMarch(r ray.Ray, tmin, tmax float64) vector3.Vector3 {
     // Sum of Rayleigh and Mie and mult by the sun intensity
     skyColorRayleigh := vector3.HadamarProduct(intRayleigh, a.BetaRayleigh)
     skyColorRayleigh.Mul(rayleighPhase)
-    //skyColorRayleigh.Mul(20.0)
+    //skyColorRayleigh.Mul(50.0)
     skyColorMie := vector3.HadamarProduct(intMie, a.BetaMie)
     skyColorMie.Mul(miePhase)
     return vector3.HadamarProduct(vector3.AddVector3(skyColorRayleigh, skyColorMie), a.Sun.Color)
@@ -177,8 +181,4 @@ func (a Atmosphere) GetCurrentHeight(p vector3.Vector3) float64 {
 
 func (a Atmosphere) GetSunDir(p vector3.Vector3) vector3.Vector3 {
     return vector3.UnitVector(vector3.SubVector3(a.Sun.Position, p))
-}
-
-func (a Atmosphere) GetSunHeight() float64 {
-    return vector3.SubVector3(a.Sun.Position, a.Ground.Center).Length() - a.Ground.Radius
 }

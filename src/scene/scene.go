@@ -79,6 +79,9 @@ func (s *Scene) Render(imgSizeY, imgSizeX int) img.Img {
         colorZ := (p.Intensity[2] - s.MinColor[2]) / (s.MaxColor[2] - s.MinColor[2])
 
         color := vector3.InitVector3(colorX, colorY, colorZ)
+        color.X *= 241.0 / 255.0
+        color.Y *= 161.0 / 255.0
+        color.Z *= 109.0 / 255.0
         color.AddVector3(p.BackgroundColorImpact)
         color.Clamp(0.0, 1.0)
         image.SetPixel(p.J, p.I, uint8(color.X * 255.0), uint8(color.Y * 255.0), uint8(color.Z * 255.0), uint8(255))
@@ -91,8 +94,6 @@ func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX int, wg *sync.WaitGr
     for j := 0; j < imgSizeX; j += 1 {
         // create the ray
         r := s.Camera.CreateRay(float64(j), float64(i))
-
-        // TODO compute light color using Rayleigh and Mie
 
         t, _, hasHit := s.Atmosphere.Ground.Hit(r)
         if !hasHit {
@@ -181,6 +182,8 @@ func (s *Scene) render(r ray.Ray, tGround float64) (vector3.Vector3, vector3.Vec
     if hasOneHit {
         accColor.Mul(s.RainyNess)
         backgroundColor = s.Atmosphere.ComputeRayleighMie(ray.InitRay(lastPts, r.Direction))
+        //_ = lastPts
+        //backgroundColor = s.Atmosphere.ComputeRayleighMie(r)
         backgroundColorImpact.AddVector3(vector3.MulVector3Scalar(backgroundColor, accTransparency))
         return accColor, backgroundColorImpact, hasOneHit
     }

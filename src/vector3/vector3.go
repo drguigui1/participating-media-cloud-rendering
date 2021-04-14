@@ -51,6 +51,12 @@ func (v *Vector3) Neg() {
     v.Z = -v.Z
 }
 
+func (v *Vector3) OneMinus() {
+    v.X = 1 - v.X
+    v.Y = 1 - v.Y
+    v.Z = 1 - v.Z
+}
+
 func (v *Vector3) Mul(val float64) {
     v.X *= val
     v.Y *= val
