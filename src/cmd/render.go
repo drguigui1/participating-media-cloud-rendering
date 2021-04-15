@@ -210,7 +210,7 @@ var animateRenderCmd = &cobra.Command{
         r := ray.InitRay(s.Camera.Origin, direct)
 
         // animTranslate(ray, picNumber, imgX, imY, nbRpp, step, scene, cam)
-        animations.AnimTranslate(r, 100, imgSizeX, imgSizeY, 0.5,  s, camera)
+        animations.AnimTranslate(r, 100, imgSizeX, imgSizeY, 0.5,  &s)
     },
 }
 
