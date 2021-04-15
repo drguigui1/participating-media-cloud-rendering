@@ -115,7 +115,7 @@ var sunset1 = &cobra.Command{
 		// shift.X < oppositeCorner.X &&
 		// shift.Y < oppositeCorner.Y &&
 		// shift.Z < oppositeCorner.Z
-		voxelGrids := []voxel_grid.VoxelGrid{voxelGrid1, voxelGrid2, voxelGrid3, voxelGrid4, voxelGrid5, voxelGrid6}
+		voxelGrids := []voxel_grid.VoxelGrid{voxelGrid1, voxelGrid2, voxelGrid3, voxelGrid4, voxelGrid5}
 		_ = voxelGrid1
 		_ = voxelGrid2
 		_ = voxelGrid3
