@@ -2,21 +2,26 @@
 
 ## TODO
 
+
+
+- 
+
 - SIMD instruction
 
-- Add cool background sky / sun (sunset for example)
+- Noises (Perlin noise and Worley noise) for generating cloud densities ✓ 
 
-- Create animation (multiple images with camera rotation)
+- Atmospheric Scattering (Rayleigh and Mie) ✓ 
 
-- Refacto code / all the param ✓
+- Create animation (camera translation and camera rotation) ✓
 
-- Manage multiple cloud ✓
+- Manage multiple cloud (cloud superposition) ✓
 
-- Gaussian tower (maybe useless) ✓
+- HeightMap (cloud height) ✓
+  
+- Multiple light sources ✓
 
-- Add multiple light sources (or different types of light sources) ✓
+- Parallelization using goroutine ✓
 
-- Add goroutine ✓
 
 ## Results
 
@@ -26,8 +31,6 @@
 
 ![plot](results/cloud_7.png)
 
-
 ![plot](results/30_clouds.png)
-
 
 ![plot](results/cloud_13.png)
