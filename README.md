@@ -27,8 +27,4 @@
 
 ![plot](results/sunset1-5clouds.png)
 
-![plot](results/cloud_7.png)
-
 ![plot](results/30_clouds.png)
-
-![plot](results/cloud_13.png)
