@@ -25,7 +25,7 @@
 
 ![Alt Text](results/backward-anim-one-cloud.gif)
 
-![plot](results/results/sunset1-5clouds.png)
+![plot](results/sunset1-5clouds.png)
 
 ![plot](results/cloud_7.png)
 
