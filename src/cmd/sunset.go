@@ -274,20 +274,6 @@ var sunsetanim = &cobra.Command{
 		voxelGrid8 := voxel_grid.InitVoxelGrid(0.5, shift8, oppositeCorner8, 0.13, perlinNoise8, worleyNoise8, perlinWeight8, worleyWeight8, 0.4, 0.4, 1.8)
 
 
-		/*
-			//voxelgrid6 marche pas encore
-			shift6 := vector3.InitVector3(-130, 130.0, -1000.0)
-			oppositeCorner6 := vector3.InitVector3(130, 200.0, -985.0)
-			var seed6 int64 = 14
-			worleyNoise6 := noise.InitWorleyNoise(0.5, 1.5, 0.7, 0.5, 3, seed6)
-			perlinNoise6 := noise.InitPerlinNoise(0.1, 2.0, 1.0, 0.5, 3, seed6)
-			worleyWeight6 := 0.3
-			perlinWeight6 := 0.5
-			voxelGrid6 := voxel_grid.InitVoxelGrid(0.5, shift6, oppositeCorner6, 0.13, perlinNoise6, worleyNoise6, perlinWeight6, worleyWeight6, 0.3, 0.6, 1.0)
-
-
-		*/
-
 
 		// IMPORTANT
 		//
