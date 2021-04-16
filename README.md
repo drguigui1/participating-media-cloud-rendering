@@ -1,12 +1,7 @@
 # projet-isim
 
-## TODO
+## FEATURES
 
-
-
-- 
-
-- SIMD instruction
 
 - Noises (Perlin noise and Worley noise) for generating cloud densities ✓ 
 
@@ -17,17 +12,20 @@
 - Manage multiple cloud (cloud superposition) ✓
 
 - HeightMap (cloud height) ✓
-  
+
 - Multiple light sources ✓
 
 - Parallelization using goroutine ✓
 
+- SIMD instruction
 
 ## Results
 
+![plot](results/daylight1.png)
+
 ![Alt Text](results/backward-anim-one-cloud.gif)
 
-![plot](results/cloud-sunset-1.png)
+![plot](results/results/sunset1-5clouds.png)
 
 ![plot](results/cloud_7.png)
 
