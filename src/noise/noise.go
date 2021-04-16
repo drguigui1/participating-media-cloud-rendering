@@ -93,7 +93,6 @@ func (w WorleyNoise) EvalWorleyNoise(x, y, z float64) float64 {
     for i := -1; i < 2; i += 1 {
         for j := -1; j < 2; j += 1 {
             for k := -1; k < 2; k += 1 {
-                // TODO
                 cornerX := fx + float64(i)
                 cornerY := fy + float64(j)
                 cornerZ := fz + float64(k)

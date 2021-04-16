@@ -23,7 +23,6 @@ type Pixel struct {
 }
 
 type Scene struct {
-    // TODO change to many VoxelGrid
     VoxelGrids []voxel_grid.VoxelGrid
     Camera camera.Camera
     Lights []light.Light
