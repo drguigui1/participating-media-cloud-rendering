@@ -115,7 +115,6 @@ var sunset1 = &cobra.Command{
         sun := light.InitLight(vector3.InitVector3(0.0, 30, -1000.0), vector3.InitVector3(20.0, 10.0, 10.0))
 
         // Atmosphere
-        //ground := sphere.InitSphere(vector3.InitVector3(0.0, -6360005, 0.0), 6360000)
         ground := sphere.InitSphere(vector3.InitVector3(0.0, -6360005, 0.0), 6360000)
 
         groundColor := vector3.InitVector3(32 / 255.0, 117 / 255.0, 133 / 255.0)
