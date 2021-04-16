@@ -79,8 +79,6 @@ func (a Atmosphere) ComputeRayleighMie(r ray.Ray) vector3.Vector3 {
     return res
 }
 
-//func (a Atmosphere)
-
 func (a Atmosphere) RayMarch(r ray.Ray, tmin, tmax float64) vector3.Vector3 {
     stepLength := (tmax - tmin) / a.NbStep
 

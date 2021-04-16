@@ -152,7 +152,7 @@ func (p PerlinNoise) EvalPerlinNoise(x, y, z float64) float64 {
     dot7 := GradDotProduct(p7, xf - 1, yf, zf - 1)
     dot8 := GradDotProduct(p8, xf - 1, yf - 1, zf - 1)
 
-    // Linear interpolation
+    // Linear interpolation (can also use cosine interpolate)
 
     // x axis interpolation
     interpP1P5 := interpolation.Lerp(dot1, dot5, u)
@@ -166,21 +166,6 @@ func (p PerlinNoise) EvalPerlinNoise(x, y, z float64) float64 {
 
     // z axis
     return interpolation.Lerp(interpY1, interpY2, w)
-
-    // Cosinus interpolate
-    // x axis interpolation
-    /*interpP1P5 := interpolation.CosineInterpolate(dot1, dot5, u)
-    interpP2P6 := interpolation.CosineInterpolate(dot2, dot6, u)
-    interpP3P7 := interpolation.CosineInterpolate(dot3, dot7, u)
-    interpP4P8 := interpolation.CosineInterpolate(dot4, dot8, u)
-
-    // y axis interpolation
-    interpY1 := interpolation.CosineInterpolate(interpP1P5, interpP2P6, v)
-    interpY2 := interpolation.CosineInterpolate(interpP3P7, interpP4P8, v)
-
-    // z axis
-    return interpolation.CosineInterpolate(interpY1, interpY2, w)*/
-
 }
 
 func (w WorleyNoise) FbmWorley(x, y, z float64) float64 {

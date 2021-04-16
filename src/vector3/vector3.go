@@ -64,7 +64,6 @@ func (v *Vector3) Mul(val float64) {
 }
 
 func (v *Vector3) Div(val float64) {
-    // TODO (Check if val == 0)
     v.X /= val
     v.Y /= val
     v.Z /= val

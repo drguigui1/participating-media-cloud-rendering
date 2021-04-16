@@ -12,7 +12,6 @@ import (
     "volumetric-cloud/scene"
     "volumetric-cloud/vector3"
     "volumetric-cloud/voxel_grid"
-    //"volumetric-cloud/random_clouds"
     "volumetric-cloud/atmosphere"
     "volumetric-cloud/sphere"
     "volumetric-cloud/animations"
@@ -72,8 +71,6 @@ var fullRenderCmd = &cobra.Command{
         perlinWeight3 := 0.6
         voxelGrid3 := voxel_grid.InitVoxelGrid(0.5, shift3, oppositeCorner3, 0.13, perlinNoise3, worleyNoise3, perlinWeight3, worleyWeight3, 0.3, 0.4, 1.0)
 
-
-
         // IMPORTANT
         //
         // First condition:
@@ -86,9 +83,6 @@ var fullRenderCmd = &cobra.Command{
         // shift.Y < oppositeCorner.Y &&
         // shift.Z < oppositeCorner.Z
         voxelGrids := []voxel_grid.VoxelGrid{voxelGrid1, voxelGrid2, voxelGrid3}
-        _ = voxelGrid1
-        _ = voxelGrid2
-        _ = voxelGrid3
         fmt.Println("VOXEL")
 
         // Lights

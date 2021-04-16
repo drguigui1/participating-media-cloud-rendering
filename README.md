@@ -168,3 +168,13 @@ Animation of the sunset:
 `./volumetric-cloud sunsetanim`
 
 `./generate_video.sh 24`
+
+
+### Tests
+
+`./tests.sh`
+
+
+### View result (force aliasing)
+
+`./view_img.sh <image-name>`

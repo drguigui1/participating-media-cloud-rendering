@@ -6,13 +6,22 @@ import (
     "math"
 
     "volumetric-cloud/vector3"
+    "volumetric-cloud/noise"
     "volumetric-cloud/ray"
 )
 
 func TestInitVoxelGrid1(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     voxelGrid := InitVoxelGrid(1.0,
                   vector3.InitVector3(0.0, 0.0, -1.0),
-                  vector3.InitVector3(5.0, 4.0, -4.0), 0.0)
+                  vector3.InitVector3(5.0, 4.0, -4.0),
+                  0.0,
+                  perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     refNbVerticesX := 6
     refNbVerticesY := 5
@@ -38,9 +47,16 @@ func TestInitVoxelGrid1(t *testing.T) {
 }
 
 func TestInitVoxelGrid2(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     voxelGrid := InitVoxelGrid(1.0,
                   vector3.InitVector3(0.0, 0.0, -1.0),
-                  vector3.InitVector3(-5.0, 4.0, -4.0), 0.0)
+                  vector3.InitVector3(-5.0, 4.0, -4.0), 0.0,
+                  perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     refNbVerticesX := 6
     refNbVerticesY := 5
@@ -68,10 +84,17 @@ func TestInitVoxelGrid2(t *testing.T) {
 
 
 func TestIsInsideVoxelGrid1(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     shift := vector3.InitVector3(0.0, 0.0, 0.0)
     oppositeCorner := vector3.InitVector3(3.0, 3.0, 3.0)
 
-    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner, 0.0)
+    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner, 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     p1 := vector3.InitVector3(0.5, 0.5, 0.5)
     p2 := vector3.InitVector3(0.6, 0.5, 0.5)
@@ -94,10 +117,17 @@ func TestIsInsideVoxelGrid1(t *testing.T) {
 }
 
 func TestIsInsideVoxelGrid2(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     shift := vector3.InitVector3(1.0, 1.0, 1.0)
     oppositeCorner := vector3.InitVector3(3.0, 3.0, 3.0)
 
-    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner, 0.0)
+    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner, 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     p1 := vector3.InitVector3(0.5, 0.5, 0.5)
     p2 := vector3.InitVector3(0.6, 0.5, 2.5)
@@ -124,13 +154,20 @@ func TestIsInsideVoxelGrid2(t *testing.T) {
 }
 
 func TestHit1(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     o := vector3.InitVector3(0.5, 0.5, 0.0)
     d := vector3.InitVector3(0.0, 0.0, -1.0)
     ray := ray.InitRay(o, d)
 
     shift := vector3.InitVector3(0.0, 0.0, -2.0)
     oppositePoint := vector3.InitVector3(1.0, 1.0, -4.0)
-    voxelGrid := InitVoxelGrid(0.5, shift, oppositePoint, 0.0)
+    voxelGrid := InitVoxelGrid(0.5, shift, oppositePoint, 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     res, hasHit, _ := voxelGrid.Hit(ray)
 
@@ -142,13 +179,20 @@ func TestHit1(t *testing.T) {
 }
 
 func TestHit2(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     o := vector3.InitVector3(3.0, 0.5, -2.5)
     d := vector3.InitVector3(-1.0, 0.0, 0.0)
     ray := ray.InitRay(o, d)
 
     shift := vector3.InitVector3(0.0, 0.0, -2.0)
     oppositePoint := vector3.InitVector3(1.0, 1.0, -4.0)
-    voxelGrid := InitVoxelGrid(0.5, shift, oppositePoint, 0.0)
+    voxelGrid := InitVoxelGrid(0.5, shift, oppositePoint, 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     res, hasHit, _ := voxelGrid.Hit(ray)
 
@@ -160,10 +204,17 @@ func TestHit2(t *testing.T) {
 }
 
 func TestIsInsideVoxelGrid3(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     shift := vector3.InitVector3(0.0, 0.0, -4.0)
     oppositeCorner := vector3.InitVector3(5.0, 4.0, -1.0)
 
-    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner, 0.0)
+    newVoxelGrid := InitVoxelGrid(0.5, shift, oppositeCorner, 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     p1 := vector3.InitVector3(2.5, 2.0, 0.0)
     res := newVoxelGrid.IsInsideVoxelGrid(p1)
@@ -175,10 +226,17 @@ func TestIsInsideVoxelGrid3(t *testing.T) {
 }
 
 func TestRayMarchVoxelGrid(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
                                vector3.InitVector3(5.0, 4.0, -1.0),
-                               0.5)
+                               0.5,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
 
     origin := vector3.InitVector3(2.5, 2.0, 0.0)
@@ -186,7 +244,6 @@ func TestRayMarchVoxelGrid(t *testing.T) {
     ray := ray.InitRay(origin, dir)
 
     points, hasHit := voxelGrid.RayMarch(ray)
-    //fmt.Println(points)
     if !hasHit {
         t.Errorf("Error 'TestRayMarchVoxelGrid '")
         t.Errorf("res: %v\n", hasHit)
@@ -214,10 +271,17 @@ func TestRayMarchVoxelGrid(t *testing.T) {
 }
 
 func TestGetWorldPosition1(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     res := voxelGrid.GetWorldPosition(vector3.InitVector3(0, 0, 0))
 
@@ -229,10 +293,17 @@ func TestGetWorldPosition1(t *testing.T) {
 }
 
 func TestGetWorldPosition2(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     res := voxelGrid.GetWorldPosition(vector3.InitVector3(0, 0, 1))
     ref := vector3.InitVector3(voxelGrid.Shift.X, voxelGrid.Shift.Y, voxelGrid.Shift.Z + voxelGrid.VoxelSize)
@@ -245,10 +316,17 @@ func TestGetWorldPosition2(t *testing.T) {
 }
 
 func TestGetWorldPosition3(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     res := voxelGrid.GetWorldPosition(vector3.InitVector3(3, 2, 1))
     ref := vector3.InitVector3(voxelGrid.Shift.X + 3 * voxelGrid.VoxelSize,
@@ -263,10 +341,17 @@ func TestGetWorldPosition3(t *testing.T) {
 }
 
 func TestGetVoxelIndex1(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     res := voxelGrid.GetVoxelIndex(vector3.InitVector3(0.0, 0.0, -4.0))
     ref := vector3.InitVector3(0, 0, 0)
@@ -279,10 +364,17 @@ func TestGetVoxelIndex1(t *testing.T) {
 }
 
 func TestGetVoxelIndex2(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     res := voxelGrid.GetVoxelIndex(vector3.InitVector3(1.0, 1.0, -3.0))
     ref := vector3.InitVector3(1, 1, 1)
@@ -295,10 +387,17 @@ func TestGetVoxelIndex2(t *testing.T) {
 }
 
 func TestGetVoxelIndex3(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     res := voxelGrid.GetVoxelIndex(vector3.InitVector3(0.0, 1.0, -2.0))
     ref := vector3.InitVector3(0, 1, 2)
@@ -311,10 +410,17 @@ func TestGetVoxelIndex3(t *testing.T) {
 }
 
 func TestGetVoxelIndex4(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     res := voxelGrid.GetVoxelIndex(vector3.InitVector3(5.0, 4.0, -1.0))
     ref := vector3.InitVector3(5, 4, 3)
@@ -327,10 +433,17 @@ func TestGetVoxelIndex4(t *testing.T) {
 }
 
 func TestGetDensity1(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
     voxelGrid.Voxels[0].Density = 0.2
     ref := 0.2
     res := voxelGrid.GetDensity(0,0,0)
@@ -343,10 +456,17 @@ func TestGetDensity1(t *testing.T) {
 }
 
 func TestGetDensity2(t *testing.T) {
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
     // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
     voxelGrid.Voxels[7].Density = 0.2
     ref := 0.2
     res := voxelGrid.GetDensity(1,1,0)
@@ -359,10 +479,17 @@ func TestGetDensity2(t *testing.T) {
 }
 
 func TestSetTransmitivity1(t *testing.T) {
-     // init the voxel grid for the test
+    var seed1 int64 = 0
+    worleyNoise1 := noise.InitWorleyNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    perlinNoise1 := noise.InitPerlinNoise(0.0, 0.0, 0.0, 0.0, 1, seed1)
+    worleyWeight := 0.0
+    perlinWeight := 0.0
+
+    // init the voxel grid for the test
     voxelGrid := InitVoxelGrid(1.0,
                                vector3.InitVector3(0.0, 0.0, -4.0),
-                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0)
+                               vector3.InitVector3(5.0, 4.0, -1.0), 0.0,
+                            perlinNoise1, worleyNoise1, perlinWeight, worleyWeight, 1.0, 1.0, 1.0)
 
     ref := 0.5
     voxelGrid.SetTransparency(0, 0, 1, ref)

@@ -122,7 +122,3 @@ func TestMultMatVec3(t *testing.T) {
         t.Errorf("ref: %v\n", ref)
     }
 }
-
-
-
-

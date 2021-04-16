@@ -51,9 +51,3 @@ func AnimTranslate(ray ray.Ray, picNumber, imgSizeX, imgSizeY int,
         fmt.Println("---- img " + strconv.Itoa(i) + "---- done")
     }
 }
-
-
-
-
-
-

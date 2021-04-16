@@ -5,12 +5,10 @@ import (
     "volumetric-cloud/voxel_grid"
     "volumetric-cloud/camera"
     "volumetric-cloud/light"
-//    "volumetric-cloud/background"
     "volumetric-cloud/vector3"
     "volumetric-cloud/atmosphere"
     "volumetric-cloud/ray"
 
-    "sync"
     "fmt"
     "math"
 )
@@ -29,7 +27,7 @@ type Scene struct {
     Atmosphere atmosphere.Atmosphere
 
     RainyNess float64 // close to 0 will make a whiter cloud
-    MinColor []float64 // rgb (size 3/4)
+    MinColor []float64 // rgb
     MaxColor []float64 // rgb
     Pixels []Pixel
 }
@@ -59,15 +57,9 @@ func InitScene(voxelGrids []voxel_grid.VoxelGrid,
 func (s *Scene) Render(imgSizeY, imgSizeX int) img.Img {
     image := img.InitImg(imgSizeX, imgSizeY)
 
-    // create the wait group
-    wg := sync.WaitGroup{}
-    wg.Add(imgSizeY)
-
     for i := 0; i < imgSizeY; i += 1 {
-        s.renderImageSizeY(image, i, imgSizeX, nil)
+        s.renderImageSizeY(image, i, imgSizeX)
     }
-
-    //wg.Wait()
 
     // Remap cloud values
     fmt.Println(s.MinColor)
@@ -87,7 +79,7 @@ func (s *Scene) Render(imgSizeY, imgSizeX int) img.Img {
     return image
 }
 
-func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX int, wg *sync.WaitGroup) {
+func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX int) {
     for j := 0; j < imgSizeX; j += 1 {
         // create the ray
         r := s.Camera.CreateRay(float64(j), float64(i))
@@ -119,10 +111,6 @@ func (s *Scene) renderImageSizeY(image img.Img, i, imgSizeX int, wg *sync.WaitGr
         } else {
             image.SetPixel(j, i, uint8(accColor.X * 255.0), uint8(accColor.Y * 255.0), uint8(accColor.Z * 255.0), uint8(255))
         }
-    }
-
-    if wg != nil {
-        wg.Done()
     }
 }
 
@@ -158,7 +146,6 @@ func (s *Scene) render(r ray.Ray, tGround float64) (vector3.Vector3, vector3.Vec
     }
 
     // get background impact
-    //backgroundColor := background.RenderGradient(r)
     var backgroundColor vector3.Vector3
 
     // Call Rayleigh and Mie to compute the background color
