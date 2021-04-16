@@ -109,7 +109,7 @@ func (w WorleyNoise) EvalWorleyNoise(x, y, z float64) float64 {
     }
 
     // Reverse Worley noise
-    return 1.0 - d
+    return 1.0 - d / 1.7
 }
 
 func (p PerlinNoise) EvalPerlinNoise(x, y, z float64) float64 {

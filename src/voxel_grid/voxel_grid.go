@@ -395,7 +395,6 @@ func (voxelGrid VoxelGrid) RayMarch(ray ray.Ray) ([]vector3.Vector3, bool) {
 
     for voxelGrid.IsInsideVoxelGrid(o) {
         points = append(points, o)
-        // TODO: add random value to step
         o = vector3.AddVector3(o, vector3.MulVector3Scalar(ray.Direction, voxelGrid.Step))
     }
 
@@ -431,9 +430,6 @@ func (voxelGrid *VoxelGrid) ComputeInsideLightTransparencyYZ(lights []light.Ligh
 
                 insideTransparency := 1.0
                 for _, p := range pts {
-                    // indexGrid := voxelGrid.GetVoxelIndex(p) // get the proper position in the grid
-
-                    // density := voxelGrid.GetDensity(int(indexGrid.X), int(indexGrid.Y), int(indexGrid.Z))
                     density := voxelGrid.LinearInterpolateDensity(p.X, p.Y, p.Z)
                     insideTransparency *= math.Exp(-voxelGrid.Step * density)
                 }
@@ -469,6 +465,7 @@ func (vGrid VoxelGrid) ComputePixelColor(ray ray.Ray, lightColor vector3.Vector3
         insideTransparency := vGrid.LinearInterpolateTransparency(p.X, p.Y, p.Z)
 
         voxelLight = lightColor
+
         voxelLight.Mul(insideTransparency)
         voxelLight.Mul(density)
 

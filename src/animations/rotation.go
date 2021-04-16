@@ -28,7 +28,7 @@ func AnimRotation(center vector3.Vector3, radius float64,
         s.Camera.RotationX, s.Camera.RotationY, s.Camera.RotationZ =
                     camera.InitRota(0.0, - teta, 0.0)
 
-        image := s.Render(imgSizeX, imgSizeY)
+        image := s.Render(imgSizeY, imgSizeX)
         image.SavePNG("videos/video_img" + strconv.Itoa(i) + ".png")
         s.Pixels = s.Pixels[:0]
         fmt.Println("---- img" + strconv.Itoa(i) + "---- done")
@@ -36,15 +36,16 @@ func AnimRotation(center vector3.Vector3, radius float64,
 }
 
 func AnimTranslate(ray ray.Ray, picNumber, imgSizeX, imgSizeY int,
-    step float64, s scene.Scene, cam camera.Camera){
+    step float64, s *scene.Scene){
 
     for i:=0; i < picNumber; i++ {
+        fmt.Println(s.Camera.Origin)
         newPos := ray.RayAt(step * float64(i))
         s.Camera.Origin.X = newPos.X
         s.Camera.Origin.Y = newPos.Y
         s.Camera.Origin.Z = newPos.Z
 
-        image := s.Render(imgSizeX, imgSizeY)
+        image := s.Render(imgSizeY, imgSizeX)
         image.SavePNG("videos/video_img" + strconv.Itoa(i) + ".png")
         s.Pixels = s.Pixels[:0]
         fmt.Println("---- img " + strconv.Itoa(i) + "---- done")
