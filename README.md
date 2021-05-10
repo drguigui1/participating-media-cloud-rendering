@@ -25,6 +25,10 @@ Atmosphere scattering (Rayleigh / Mie)
 
 ## Results
 
+![Alt Text](results/rotationsunsetfinal.gif)
+
+![Alt Text](results/sunsettranslatefinal.gif)
+
 ![plot](results/daylight1.png)
 
 ![Alt Text](results/backward-anim-one-cloud.gif)
