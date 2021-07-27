@@ -6,6 +6,7 @@ Atmosphere scattering (Rayleigh / Mie)
 
 ## FEATURES
 
+- RayTracing / RayMarching (light accumulation in clouds) ✓
 
 - Noises (Perlin noise and Worley noise) for generating cloud densities ✓ 
 
